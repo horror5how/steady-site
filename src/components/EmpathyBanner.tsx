@@ -12,7 +12,18 @@ export default function EmpathyBanner() {
               <div className="orb-ring" />
               <div className="orb-ring orb-ring-2" />
               <div className="orb-ring orb-ring-3" />
-              <div className="orb-fem absolute inset-[12%]" />
+              <div className="absolute inset-[10%] overflow-hidden rounded-full shadow-[0_0_80px_20px_rgba(247,207,186,0.5),0_30px_80px_-20px_rgba(63,79,66,0.35)]">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-hidden
+                  className="h-full w-full scale-[1.35] object-cover"
+                >
+                  <source src="/orb-loop.mp4" type="video/mp4" />
+                </video>
+              </div>
               <span className="glass absolute -bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold text-ink">
                 <span className="wave text-sage" aria-hidden>
                   <i /><i /><i /><i /><i />
@@ -61,7 +72,7 @@ export default function EmpathyBanner() {
               </video>
             </div>
             <p className="mt-4 text-center text-[13.5px] text-ink-soft">
-              Sound on. 35 seconds. That&rsquo;s the whole story.
+              Sound on. 40 seconds. That&rsquo;s the whole story.
             </p>
           </div>
         </Reveal>
