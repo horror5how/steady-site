@@ -33,7 +33,7 @@ export default function Nav() {
       >
         <span>Free to start. Your first conversation takes ten minutes. 🌱</span>
         <a
-          href="https://steady-erp-voice.vercel.app"
+          href="https://steady-erp-voice-fresh.vercel.app"
           className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 font-medium text-white transition hover:bg-white/25"
         >
           Say hello <ArrowRight className="h-3 w-3" />
@@ -103,13 +103,13 @@ export default function Nav() {
 
           <div className="flex items-center gap-5 text-[15px]">
             <a
-              href="https://steady-erp-voice.vercel.app"
+              href="/login"
               className="hidden text-ink/80 transition hover:text-ink sm:inline"
             >
               Log in
             </a>
             <a
-              href="https://steady-erp-voice.vercel.app"
+              href="https://steady-erp-voice-fresh.vercel.app"
               className="btn-dark inline-flex items-center rounded-full px-4 py-2 text-[14px] font-semibold"
             >
               Start free

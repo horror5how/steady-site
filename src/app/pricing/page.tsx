@@ -146,7 +146,7 @@ export default function Pricing() {
                       ))}
                     </ul>
                     <a
-                      href="https://steady-erp-voice.vercel.app"
+                      href="https://steady-erp-voice-fresh.vercel.app"
                       className={`mt-8 inline-flex items-center justify-center px-5 py-3 text-[15px] font-semibold ${
                         t.highlight ? "btn-light" : "btn-dark"
                       }`}

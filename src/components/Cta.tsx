@@ -17,7 +17,7 @@ export default function Cta() {
               </p>
               <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <a
-                  href="https://steady-erp-voice.vercel.app"
+                  href="https://steady-erp-voice-fresh.vercel.app"
                   className="btn-light inline-flex items-center gap-2 px-6 py-3.5 text-[15px] font-semibold"
                 >
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-sage/15">
