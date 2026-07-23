@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/hero-probe", "schedule": "*/30 * * * *" }
+  ]
+}

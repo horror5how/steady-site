@@ -1,25 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #2f3a33;
-  --color-ink-soft: #64705f;
-  --color-cream: #eef0f3;
-  --color-cream-2: #e6e9ed;
-  --color-line: #dfe3e8;
-  --color-sage: #3e7a5e;
-  --color-sage-soft: #cfe3d6;
-  --color-peach: #f7cfa6;
-  --color-peach-deep: #dd8f58;
-  --color-sun: #f9e3b7;
-  --color-forest: #23312a;
+  /* calm palette — research-grounded: soft charcoal (no hard black),
+     warm near-white canvas, muted eucalyptus-sage + dusty blue, low contrast */
+  --color-ink: #37403b;
+  --color-ink-soft: #737d75;
+  --color-cream: #f5f7f5;
+  --color-cream-2: #eceff0;
+  --color-line: #e2e7e4;
+  --color-sage: #6f9384;
+  --color-sage-soft: #d6e2da;
+  --color-haze: #a7bccb;
+  --color-haze-soft: #dbe6ec;
+  --color-peach: #ecd7ca;
+  --color-peach-deep: #cba98d;
+  --color-sun: #ecdfc7;
+  --color-forest: #2b3a33;
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", sans-serif;
 }
 
 :root {
-  --background: #fffcf5;
-  --foreground: #2f3a33;
+  --background: #f5f7f5;
+  --foreground: #37403b;
 }
 
 * {
@@ -32,7 +36,14 @@ html {
 }
 
 body {
-  background: #fffcf5;
+  /* soft, breathing calm — warm near-white with a whisper of sage + dusty blue.
+     Muted, low-contrast, no hard edges — meant to settle the eye on arrival. */
+  background:
+    radial-gradient(115% 80% at 82% 2%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(90% 70% at 12% 6%, rgba(167, 188, 203, 0.22) 0%, rgba(167, 188, 203, 0) 55%),
+    radial-gradient(95% 80% at 88% 96%, rgba(111, 147, 132, 0.16) 0%, rgba(111, 147, 132, 0) 58%),
+    linear-gradient(165deg, #f7f8f6 0%, #f1f4f1 55%, #eceff0 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   letter-spacing: -0.011em;
@@ -40,29 +51,30 @@ body {
 
 /* ---------- Brand gradients (bright + warm) ---------- */
 .hero-grad {
-  background-color: #fffcf5;
+  background-color: #f4f6f4;
   background-image:
-    radial-gradient(90% 70% at 82% 20%, rgba(247, 207, 166, 0.55) 0%, rgba(247, 207, 166, 0) 60%),
-    radial-gradient(80% 60% at 8% 78%, rgba(207, 227, 214, 0.65) 0%, rgba(207, 227, 214, 0) 55%),
-    linear-gradient(165deg, #fffdf8 0%, #fdf6e8 55%, #fbf1de 100%);
+    radial-gradient(90% 70% at 82% 18%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(78% 62% at 10% 82%, rgba(167, 188, 203, 0.28) 0%, rgba(167, 188, 203, 0) 55%),
+    radial-gradient(70% 60% at 90% 90%, rgba(111, 147, 132, 0.18) 0%, rgba(111, 147, 132, 0) 55%),
+    linear-gradient(165deg, #f7f8f6 0%, #f1f4f1 55%, #eceff0 100%);
 }
 
 .cta-grad {
   background-image: linear-gradient(
     270deg,
-    #4c8a6b 4%,
-    #7db898 38%,
-    #f5d9ae 78%,
-    #fdf0d8 100%
+    #5f8574 4%,
+    #8fa99a 38%,
+    #cdb69c 78%,
+    #e7ded0 100%
   );
 }
 
 .meadow-grad {
-  background-color: #f4f8f1;
+  background-color: #f2f5f2;
   background-image:
-    radial-gradient(90% 120% at 85% 8%, rgba(207, 227, 214, 0.9) 0%, rgba(244, 248, 241, 0) 60%),
-    radial-gradient(70% 80% at 8% 92%, rgba(249, 227, 183, 0.7) 0%, rgba(244, 248, 241, 0) 55%),
-    linear-gradient(150deg, #f8faf4 0%, #f2f7ee 55%, #eef4e6 100%);
+    radial-gradient(90% 120% at 85% 8%, rgba(111, 147, 132, 0.22) 0%, rgba(242, 245, 242, 0) 60%),
+    radial-gradient(70% 80% at 8% 92%, rgba(167, 188, 203, 0.2) 0%, rgba(242, 245, 242, 0) 55%),
+    linear-gradient(150deg, #f6f8f5 0%, #f0f4f0 55%, #eaf0ea 100%);
 }
 
 .grain::after {
@@ -106,14 +118,14 @@ body {
 }
 
 .btn-dark {
-  background: #3e7a5e;
-  color: #fffcf5;
+  background: #6f9384;
+  color: #ffffff;
   border-radius: 999px;
-  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 .btn-dark:hover {
-  background: #336750;
-  box-shadow: 0 12px 28px -10px rgba(62, 122, 94, 0.55);
+  background: #5f8272;
+  box-shadow: 0 12px 28px -10px rgba(111, 147, 132, 0.5);
   transform: translateY(-1px);
 }
 
@@ -266,7 +278,7 @@ body {
 .marquee:hover .marquee-track { animation-play-state: paused; }
 
 ::selection {
-  background: #cfe3d6;
+  background: #d6e2da;
   color: #23312a;
 }
 

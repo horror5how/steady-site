@@ -456,21 +456,21 @@ export default function VoiceHero() {
     "Steady is here.";
 
   return (
-    <section className="px-5 pb-8 pt-28 sm:pt-40">
-      <div className="mx-auto flex min-h-[580px] max-w-[680px] flex-col">
+    <section className="px-5 pb-12 pt-32 sm:pt-48">
+      <div className="mx-auto flex min-h-[620px] max-w-[660px] flex-col">
         {/* hero text */}
         <div className="text-center">
-          <h1 className="text-balance text-[30px] font-semibold leading-[1.15] tracking-tight text-ink sm:text-[40px]">
+          <h1 className="text-balance text-[26px] font-semibold leading-[1.18] tracking-tight text-ink sm:text-[34px]">
             A calm voice for a loud mind.
           </h1>
-          <p className="mx-auto mt-5 max-w-[440px] text-balance text-[15px] leading-relaxed text-ink-soft sm:text-[16.5px]">
+          <p className="mx-auto mt-6 max-w-[420px] text-balance text-[14px] leading-relaxed text-ink-soft sm:text-[15.5px]">
             Steady talks you out of looping thoughts and back into the present. Speak or type — your first minute is free.
           </p>
         </div>
 
         {/* the line */}
-        <canvas ref={canvasRef} className="mt-28 h-[110px] w-full sm:mt-36 sm:h-[130px]" aria-hidden />
-        <p className="mt-3 text-center text-[13.5px] text-ink-soft/70" aria-live="polite">{status}</p>
+        <canvas ref={canvasRef} className="mt-32 h-[100px] w-full sm:mt-44 sm:h-[120px]" aria-hidden />
+        <p className="mt-4 text-center text-[13px] text-ink-soft/70" aria-live="polite">{status}</p>
 
         {needsTap && (
           <button
@@ -482,7 +482,7 @@ export default function VoiceHero() {
         )}
 
         {/* chat */}
-        <div ref={chatRef} className="mt-8 max-h-[300px] flex-1 space-y-5 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_28px)]">
+        <div ref={chatRef} className="mt-12 max-h-[300px] flex-1 space-y-6 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_28px)]">
           {lines.map((l, i) =>
             l.who === "steady" ? (
               <p key={i} className="max-w-[92%] text-[15px] leading-loose text-ink">{l.text}</p>
@@ -495,7 +495,7 @@ export default function VoiceHero() {
 
         {/* first-visit choice */}
         {phase === "ready" && apiOk && (
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button onClick={startVoice} className="btn-dark inline-flex items-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold">
               Allow microphone
             </button>
@@ -533,7 +533,7 @@ export default function VoiceHero() {
         {/* typing rail: always available except during boot */}
         {phase !== "boot" && phase !== "done" && (
           <form
-            className="mt-8 flex items-center gap-2"
+            className="mt-10 flex items-center gap-2"
             onSubmit={(e) => { e.preventDefault(); sendText(input); }}
           >
             <input
@@ -553,7 +553,7 @@ export default function VoiceHero() {
           </form>
         )}
 
-        <p className="mt-6 text-center text-[12.5px] text-ink-soft/70">
+        <p className="mt-8 text-center text-[12.5px] text-ink-soft/70">
           A one minute taster. Free to start · no card · <a href="/know-more" className="underline decoration-ink-soft/30 underline-offset-2 hover:text-ink">how it works</a>
         </p>
       </div>

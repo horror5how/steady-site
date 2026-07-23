@@ -292,7 +292,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="flex-1 bg-white">
+      <main className="flex-1">
         <VoiceHero />
         <Collage />
         <Problems />

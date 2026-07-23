@@ -29,7 +29,7 @@ export default function Nav() {
         className={`flex items-center justify-center gap-3 px-4 text-[13px] text-white transition-all duration-300 ${
           scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-12 py-2.5 opacity-100"
         }`}
-        style={{ background: "#3e7a5e" }}
+        style={{ background: "#6f9384" }}
       >
         <span>Free to start. Your first conversation takes ten minutes. 🌱</span>
         <a
