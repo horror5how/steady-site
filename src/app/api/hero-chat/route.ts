@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { takeQuota, clientIp } from "@/lib/hero-limit";
+import { takeQuota, clientIp, openaiFetch } from "@/lib/hero-limit";
 
 export const dynamic = "force-dynamic";
 
-const MODEL = process.env.HERO_CHAT_MODEL || "gpt-4o-mini";
+const MODELS = [process.env.HERO_CHAT_MODEL || "gpt-4o-mini", "gpt-4.1-mini"];
 
 const PERSONA = `You are Steady, a warm companion chatting with a visitor in the text box on the beingsteady.com homepage. This is a short public taster, not a therapy session.
 
@@ -24,8 +24,9 @@ type Msg = { role: "user" | "assistant"; content: string };
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
-  const q = takeQuota("chat", clientIp(req.headers), req.cookies.get("sh_c")?.value);
-  if (!q.ok) return NextResponse.json({ error: "limit" }, { status: 429 });
+  const q = await takeQuota("chat", clientIp(req.headers), req.cookies.get("sh_c")?.value);
+  if (q.verdict === "budget") return NextResponse.json({ error: "budget" }, { status: 503 });
+  if (q.verdict === "ip_limit") return NextResponse.json({ error: "limit" }, { status: 429 });
 
   let messages: Msg[] = [];
   try {
@@ -39,31 +40,27 @@ export async function POST(req: NextRequest) {
   }
   if (!messages.length) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  let upstream: Response | null = null;
-  try {
-    upstream = await fetch("https://api.openai.com/v1/chat/completions", {
+  let reply: string | undefined;
+  for (const model of [...new Set(MODELS)]) {
+    const upstream = await openaiFetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(15000),
+      headers: { "Content-Type": "application/json" },
+      timeoutMs: 15000,
       body: JSON.stringify({
-        model: MODEL,
+        model,
         max_tokens: 180,
         temperature: 0.8,
         messages: [{ role: "system", content: PERSONA }, ...messages],
       }),
     });
-  } catch {
-    upstream = null;
+    if (upstream?.ok) {
+      const data = await upstream.json();
+      reply = data?.choices?.[0]?.message?.content?.trim();
+      if (reply) break;
+    } else if (upstream) {
+      console.error("hero-chat model failed", model, upstream.status, (await upstream.text()).slice(0, 200));
+    }
   }
-  if (!upstream || !upstream.ok) {
-    if (upstream) console.error("hero-chat failed", upstream.status, (await upstream.text()).slice(0, 300));
-    return NextResponse.json({ error: "unavailable" }, { status: 502 });
-  }
-  const data = await upstream.json();
-  const reply = data?.choices?.[0]?.message?.content?.trim();
   if (!reply) return NextResponse.json({ error: "unavailable" }, { status: 502 });
   const res = NextResponse.json({ reply });
   res.cookies.set("sh_c", q.cookie, { maxAge: 86400, httpOnly: true, sameSite: "lax", path: "/" });

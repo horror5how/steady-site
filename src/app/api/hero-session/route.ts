@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { takeQuota, clientIp } from "@/lib/hero-limit";
+import { takeQuota, clientIp, openaiFetch } from "@/lib/hero-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -34,37 +34,30 @@ export async function POST(req: NextRequest) {
   if (!originAllowed(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
-  const q = takeQuota("voice", clientIp(req.headers), req.cookies.get("sh_v")?.value);
-  if (!q.ok) return NextResponse.json({ error: "limit" }, { status: 429 });
+  const q = await takeQuota("voice", clientIp(req.headers), req.cookies.get("sh_v")?.value);
+  if (q.verdict === "budget") return NextResponse.json({ error: "budget" }, { status: 503 });
+  if (q.verdict === "ip_limit") return NextResponse.json({ error: "limit" }, { status: 429 });
 
-  let upstream: Response | null = null;
-  try {
-    upstream = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(8000),
-      body: JSON.stringify({
-        expires_after: { anchor: "created_at", seconds: 120 },
-        session: {
-          type: "realtime",
-          model: MODEL,
-          instructions: HERO_PERSONA,
-          audio: {
-            input: {
-              transcription: { model: "gpt-4o-mini-transcribe" },
-              turn_detection: { type: "semantic_vad" },
-            },
-            output: { voice: VOICE },
+  const upstream = await openaiFetch("https://api.openai.com/v1/realtime/client_secrets", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    timeoutMs: 8000,
+    body: JSON.stringify({
+      expires_after: { anchor: "created_at", seconds: 120 },
+      session: {
+        type: "realtime",
+        model: MODEL,
+        instructions: HERO_PERSONA,
+        audio: {
+          input: {
+            transcription: { model: "gpt-4o-mini-transcribe" },
+            turn_detection: { type: "semantic_vad" },
           },
+          output: { voice: VOICE },
         },
-      }),
-    });
-  } catch {
-    upstream = null;
-  }
+      },
+    }),
+  });
   if (!upstream || !upstream.ok) {
     if (upstream) console.error("hero-session mint failed", upstream.status, (await upstream.text()).slice(0, 300));
     return NextResponse.json({ error: "voice_unavailable" }, { status: 502 });

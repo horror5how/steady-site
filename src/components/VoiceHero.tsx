@@ -8,14 +8,54 @@ const WRAP_AT = 46; // inject "wrap up" note here
 const HARD_KILL = 75; // absolute failsafe
 const MAX_TEXT_TURNS = 12;
 
+const PH_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || "phc_CDKFjeVGfuEEid74UGx5CNwNFaqaijF8b6e9A6QhLruM";
+const PH_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+
 type Phase = "boot" | "ready" | "connecting" | "voice" | "text" | "done";
 type Line = { who: "steady" | "you"; text: string };
 
-const FIRST_LINE = "Allow your microphone to speak to me, or chat to me down here.";
+const FIRST_LINES: Record<string, string> = {
+  "mic-first": "Allow your microphone to speak to me, or chat to me down here.",
+  "question-first": "What's looping in your head right now? Say it out loud with your microphone, or type it down here.",
+};
 const TYPED_GREETING =
   "No mic, no problem. Hey, I'm Steady. What's your name, or what would you like me to call you? I'm being trained to help people step out of looping thoughts and reassurance seeking, and live more in the present. What's on your mind today?";
 const GOODBYE =
   "That's our first minute together. I'd love to keep going properly. It's free, and I'll remember where we left off.";
+const RESTING =
+  "My voice has done a lot of talking today and is having a rest. Type to me here, or come into the full app.";
+
+/* fire-and-forget PostHog capture; never blocks or throws */
+function ph(event: string, props: Record<string, unknown> = {}) {
+  try {
+    let id = localStorage.getItem("steady-hero-id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("steady-hero-id", id);
+    }
+    const payload = {
+      api_key: PH_KEY,
+      event,
+      distinct_id: id,
+      properties: { ...props, source: "hero-taster", $current_url: location.href },
+    };
+    navigator.sendBeacon?.(`${PH_HOST}/i/v0/e/`, new Blob([JSON.stringify(payload)], { type: "application/json" })) ||
+      fetch(`${PH_HOST}/i/v0/e/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), keepalive: true }).catch(() => {});
+  } catch {}
+}
+
+function pickVariant(): string {
+  try {
+    let v = localStorage.getItem("steady-hero-var");
+    if (!v || !FIRST_LINES[v]) {
+      v = Math.random() < 0.5 ? "mic-first" : "question-first";
+      localStorage.setItem("steady-hero-var", v);
+    }
+    return v;
+  } catch {
+    return "mic-first";
+  }
+}
 
 export default function VoiceHero() {
   const [phase, setPhase] = useState<Phase>("boot");
@@ -36,11 +76,28 @@ export default function VoiceHero() {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const wave = useRef({ amp: 0.07, phase: 0, speaking: false, userSpeaking: false, energy: 0 });
   const steadyDraft = useRef("");
+  const variantRef = useRef("mic-first");
+  const linesRef = useRef<Line[]>([]);
   const phaseRef = useRef<Phase>("boot");
   phaseRef.current = phase;
+  linesRef.current = lines;
 
   const say = useCallback((who: Line["who"], text: string) => {
     setLines((l) => [...l, { who, text }]);
+  }, []);
+
+  /* taster transcript rides to the app in the URL hash → product greets them as known */
+  const ctaHref = useCallback(() => {
+    const convo = linesRef.current.filter((l) => !Object.values(FIRST_LINES).includes(l.text));
+    if (!convo.length) return APP;
+    try {
+      const excerpt = convo.slice(-6).map((l) => `${l.who === "you" ? "Them" : "Steady"}: ${l.text.slice(0, 160)}`);
+      const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ at: Date.now(), excerpt }))));
+      if (payload.length > 1500) return APP;
+      return `${APP}/#taster=${payload}`;
+    } catch {
+      return APP;
+    }
   }, []);
 
   /* ---------- wave canvas ---------- */
@@ -52,12 +109,12 @@ export default function VoiceHero() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
 
-    const ribbon = (w: number, mid: number, amp: number, ph: number, freq: number, off: number, color: string, glow: string, lw: number) => {
+    const ribbon = (w: number, mid: number, amp: number, ph2: number, freq: number, off: number, color: string, glow: string, lw: number) => {
       ctx.beginPath();
       for (let x = 0; x <= w; x += 3) {
         const t = x / w;
         const env = Math.pow(Math.sin(Math.PI * t), 1.4);
-        const y = mid + env * amp * (Math.sin(t * freq + ph + off) * 0.7 + Math.sin(t * freq * 0.5 - ph * 0.6 + off) * 0.3);
+        const y = mid + env * amp * (Math.sin(t * freq + ph2 + off) * 0.7 + Math.sin(t * freq * 0.5 - ph2 * 0.6 + off) * 0.3);
         x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.strokeStyle = color;
@@ -79,12 +136,11 @@ export default function VoiceHero() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const s = wave.current;
+      // ponytail: line only comes alive when Steady speaks. Idle AND user-speaking = a steady, near-flat line.
       const target = s.speaking
         ? 0.55 + Math.min(0.35, s.energy * 6) + 0.12 * Math.sin(s.phase * 2.1)
-        : s.userSpeaking
-          ? 0.16
-          : 0.07;
-      s.amp += (target - s.amp) * 0.1;
+        : 0.035;
+      s.amp += (target - s.amp) * 0.08;
       s.phase += 0.035 + s.amp * 0.05;
       const mid = h / 2;
       const maxAmp = h * 0.42 * Math.min(1, s.amp);
@@ -94,7 +150,6 @@ export default function VoiceHero() {
     };
     render();
     if (reduced) {
-      // one gentle static frame per speaking-state change instead of animation
       const id = setInterval(render, 800);
       return () => clearInterval(id);
     }
@@ -104,6 +159,7 @@ export default function VoiceHero() {
   /* ---------- boot: warm the lambda, never block more than 4s ---------- */
   useEffect(() => {
     let alive = true;
+    variantRef.current = pickVariant();
     const started = Date.now();
     const warm = fetch("/api/hero-session", { method: "GET" })
       .then((r) => r.json())
@@ -116,11 +172,21 @@ export default function VoiceHero() {
         if (!alive) return;
         setApiOk(ok);
         setPhase("ready");
-        setLines([{ who: "steady", text: ok ? FIRST_LINE : "I'm resting right now. Come meet me properly in the app, it's free." }]);
+        setLines([{ who: "steady", text: ok ? FIRST_LINES[variantRef.current] : "I'm resting right now. Come meet me properly in the app, it's free." }]);
+        ph("hero_ready", { api_ok: ok, variant: variantRef.current });
       }, wait);
     });
     return () => {
       alive = false;
+    };
+  }, []);
+
+  /* ---------- QA hook (read-only) ---------- */
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__steadyHero = {
+      get phase() { return phaseRef.current; },
+      get lines() { return linesRef.current; },
+      get wave() { return { ...wave.current }; },
     };
   }, []);
 
@@ -144,6 +210,7 @@ export default function VoiceHero() {
     if (goodbye) {
       setPhase("done");
       setLines((l) => [...l, { who: "steady", text: GOODBYE }]);
+      ph("voice_completed", { variant: variantRef.current });
     }
   }, []);
 
@@ -169,107 +236,124 @@ export default function VoiceHero() {
     setLines((l) => [...l, { who: "steady", text: reason }]);
   }, [teardown]);
 
+  /* mint + WebRTC connect with a placeholder transceiver; mic track swaps in when granted */
+  const connectRealtime = useCallback(async () => {
+    const mintRes = await fetch("/api/hero-session", { method: "POST" });
+    if (!mintRes.ok) {
+      const err = (await mintRes.json().catch(() => ({})))?.error;
+      throw Object.assign(new Error("mint"), { code: mintRes.status === 429 ? "limit" : err === "budget" ? "budget" : "mint" });
+    }
+    const { secret, model } = await mintRes.json();
+    const pc = new RTCPeerConnection();
+    pcRef.current = pc;
+    const transceiver = pc.addTransceiver("audio", { direction: "sendrecv" });
+    pc.onconnectionstatechange = () => {
+      if (["failed", "disconnected", "closed"].includes(pc.connectionState) && phaseRef.current === "voice") {
+        ph("voice_dropped", { variant: variantRef.current });
+        fallbackToText("We lost the line. Type to me here instead.");
+      }
+    };
+    pc.ontrack = (ev) => {
+      const audio = audioRef.current || new Audio();
+      audioRef.current = audio;
+      audio.autoplay = true;
+      audio.srcObject = ev.streams[0];
+      audio.play().catch(() => setNeedsTap(true));
+      try {
+        const ac = new AudioContext();
+        const src = ac.createMediaStreamSource(ev.streams[0]);
+        const an = ac.createAnalyser();
+        an.fftSize = 256;
+        src.connect(an);
+        const buf = new Uint8Array(an.frequencyBinCount);
+        const poll = () => {
+          if (!pcRef.current) return;
+          an.getByteFrequencyData(buf);
+          let sum = 0;
+          for (let i = 0; i < buf.length; i++) sum += buf[i];
+          wave.current.energy = sum / buf.length / 255;
+          requestAnimationFrame(poll);
+        };
+        poll();
+      } catch {} // analyser is a bonus; speaking flags carry the wave
+    };
+
+    const dc = pc.createDataChannel("oai-events");
+    dcRef.current = dc;
+    dc.onopen = () => dc.send(JSON.stringify({ type: "response.create" }));
+    dc.onmessage = (ev) => {
+      let msg: { type?: string; transcript?: string; delta?: string } = {};
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      const t = msg.type || "";
+      if (t.endsWith("input_audio_transcription.completed") && msg.transcript?.trim()) {
+        say("you", msg.transcript.trim());
+      } else if ((t === "response.output_audio_transcript.delta" || t === "response.audio_transcript.delta") && msg.delta) {
+        steadyDraft.current += msg.delta;
+        setLines((l) => {
+          const copy = [...l];
+          const last = copy[copy.length - 1];
+          if (last?.who === "steady" && last.text.length <= steadyDraft.current.length && steadyDraft.current.startsWith(last.text.slice(0, 20))) {
+            copy[copy.length - 1] = { who: "steady", text: steadyDraft.current };
+            return copy;
+          }
+          return [...copy, { who: "steady", text: steadyDraft.current }];
+        });
+        wave.current.speaking = true; // deltas double as the speaking signal; buffer events can lag
+      } else if (t.endsWith("audio_transcript.done")) {
+        steadyDraft.current = "";
+      } else if (t === "response.done") {
+        wave.current.speaking = false;
+      } else if (t === "output_audio_buffer.started") {
+        wave.current.speaking = true;
+      } else if (t === "output_audio_buffer.stopped" || t === "output_audio_buffer.cleared") {
+        wave.current.speaking = false;
+      } else if (t === "input_audio_buffer.speech_started") {
+        wave.current.userSpeaking = true;
+      } else if (t === "input_audio_buffer.speech_stopped") {
+        wave.current.userSpeaking = false;
+      }
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    const sdpRes = await fetch(`https://api.openai.com/v1/realtime/calls?model=${encodeURIComponent(model)}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/sdp" },
+      body: offer.sdp,
+    });
+    if (!sdpRes.ok) throw new Error("sdp " + sdpRes.status);
+    await pc.setRemoteDescription({ type: "answer", sdp: await sdpRes.text() });
+    return transceiver;
+  }, [say, fallbackToText]);
+
   const startVoice = useCallback(async () => {
     if (!apiOk) {
       window.location.href = APP;
       return;
     }
     setPhase("connecting");
+    ph("mic_clicked", { variant: variantRef.current });
+    // permission prompt and WebRTC handshake run in parallel: first word ~1s sooner
+    const micPromise = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    const connectPromise = connectRealtime();
     let mic: MediaStream;
     try {
-      mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      mic = await micPromise;
+      ph("mic_granted", { variant: variantRef.current });
     } catch {
+      ph("mic_denied", { variant: variantRef.current });
+      connectPromise.then(() => teardown(false)).catch(() => {});
       setPhase("text");
       say("steady", "All good, we can type instead. What's your name?");
       return;
     }
     micRef.current = mic;
     try {
-      const mintRes = await fetch("/api/hero-session", { method: "POST" });
-      if (mintRes.status === 429) {
-        fallbackToText("You've used today's free voice minutes on this connection. Type to me here, or open the full app for a real session.");
-        return;
-      }
-      if (!mintRes.ok) throw new Error("mint " + mintRes.status);
-      const { secret, model } = await mintRes.json();
-
-      const pc = new RTCPeerConnection();
-      pcRef.current = pc;
-      pc.addTrack(mic.getTracks()[0], mic);
-      pc.onconnectionstatechange = () => {
-        if (["failed", "disconnected", "closed"].includes(pc.connectionState) && phaseRef.current === "voice") {
-          fallbackToText("We lost the line. Type to me here instead.");
-        }
-      };
-      pc.ontrack = (ev) => {
-        const audio = audioRef.current || new Audio();
-        audioRef.current = audio;
-        audio.autoplay = true;
-        audio.srcObject = ev.streams[0];
-        audio.play().catch(() => setNeedsTap(true));
-        try {
-          const ac = new AudioContext();
-          const src = ac.createMediaStreamSource(ev.streams[0]);
-          const an = ac.createAnalyser();
-          an.fftSize = 256;
-          src.connect(an);
-          const buf = new Uint8Array(an.frequencyBinCount);
-          const poll = () => {
-            if (!pcRef.current) return;
-            an.getByteFrequencyData(buf);
-            let sum = 0;
-            for (let i = 0; i < buf.length; i++) sum += buf[i];
-            wave.current.energy = sum / buf.length / 255;
-            requestAnimationFrame(poll);
-          };
-          poll();
-        } catch {} // analyser is a bonus; speaking flags carry the wave
-      };
-
-      const dc = pc.createDataChannel("oai-events");
-      dcRef.current = dc;
-      dc.onopen = () => dc.send(JSON.stringify({ type: "response.create" }));
-      dc.onmessage = (ev) => {
-        let msg: { type?: string; transcript?: string; delta?: string } = {};
-        try { msg = JSON.parse(ev.data); } catch { return; }
-        const t = msg.type || "";
-        if (t.endsWith("input_audio_transcription.completed") && msg.transcript?.trim()) {
-          say("you", msg.transcript.trim());
-        } else if ((t === "response.output_audio_transcript.delta" || t === "response.audio_transcript.delta") && msg.delta) {
-          steadyDraft.current += msg.delta;
-          setLines((l) => {
-            const copy = [...l];
-            const last = copy[copy.length - 1];
-            if (last?.who === "steady" && last.text.length <= steadyDraft.current.length && steadyDraft.current.startsWith(last.text.slice(0, 20))) {
-              copy[copy.length - 1] = { who: "steady", text: steadyDraft.current };
-              return copy;
-            }
-            return [...copy, { who: "steady", text: steadyDraft.current }];
-          });
-        } else if (t.endsWith("audio_transcript.done")) {
-          steadyDraft.current = "";
-        } else if (t === "output_audio_buffer.started") {
-          wave.current.speaking = true;
-        } else if (t === "output_audio_buffer.stopped" || t === "output_audio_buffer.cleared") {
-          wave.current.speaking = false;
-        } else if (t === "input_audio_buffer.speech_started") {
-          wave.current.userSpeaking = true;
-        } else if (t === "input_audio_buffer.speech_stopped") {
-          wave.current.userSpeaking = false;
-        }
-      };
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      const sdpRes = await fetch(`https://api.openai.com/v1/realtime/calls?model=${encodeURIComponent(model)}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/sdp" },
-        body: offer.sdp,
-      });
-      if (!sdpRes.ok) throw new Error("sdp " + sdpRes.status);
-      await pc.setRemoteDescription({ type: "answer", sdp: await sdpRes.text() });
+      const transceiver = await connectPromise;
+      await transceiver.sender.replaceTrack(mic.getTracks()[0]);
 
       setPhase("voice");
+      ph("voice_started", { variant: variantRef.current });
       setSecondsLeft(VOICE_SECONDS);
       const startedAt = Date.now();
       const tick = setInterval(() => {
@@ -289,10 +373,18 @@ export default function VoiceHero() {
       timersRef.current.push(setTimeout(() => teardown(true), VOICE_SECONDS * 1000));
       timersRef.current.push(setTimeout(() => teardown(false), HARD_KILL * 1000));
     } catch (e) {
+      const code = (e as { code?: string })?.code;
       console.error("voice start failed", e);
-      fallbackToText("My voice is being shy right now. Type to me here instead. What's your name?");
+      ph("voice_failed", { variant: variantRef.current, code: code || "unknown" });
+      if (code === "limit") {
+        fallbackToText("You've used today's free voice minutes on this connection. Type to me here, or open the full app for a real session.");
+      } else if (code === "budget") {
+        fallbackToText(RESTING);
+      } else {
+        fallbackToText("My voice is being shy right now. Type to me here instead. What's your name?");
+      }
     }
-  }, [apiOk, say, fallbackToText, teardown]);
+  }, [apiOk, say, fallbackToText, teardown, connectRealtime]);
 
   /* ---------- text chat ---------- */
   const sendText = useCallback(async (raw: string) => {
@@ -302,6 +394,7 @@ export default function VoiceHero() {
     if (phaseRef.current === "voice" || phaseRef.current === "connecting") teardown(false);
     if (phaseRef.current !== "text") setPhase("text");
     say("you", text);
+    ph("text_message", { variant: variantRef.current });
     if (!apiOk) {
       say("steady", "I can't chat right here just now, but the full app is one tap away and free.");
       return;
@@ -314,7 +407,7 @@ export default function VoiceHero() {
     }
     setThinking(true);
     const history = [...lines, { who: "you" as const, text }]
-      .filter((l) => l.text !== FIRST_LINE)
+      .filter((l) => !Object.values(FIRST_LINES).includes(l.text))
       .map((l) => ({ role: l.who === "you" ? "user" : "assistant", content: l.text }));
     let reply: string | null = null;
     for (let attempt = 0; attempt < 2 && !reply; attempt++) {
@@ -328,6 +421,10 @@ export default function VoiceHero() {
           reply = "We've chatted a lot today from this connection. Come into the full app, it's free and has no taster limits.";
           break;
         }
+        if (r.status === 503) {
+          reply = RESTING;
+          break;
+        }
         if (r.ok) reply = (await r.json()).reply;
       } catch {}
       if (!reply) await new Promise((res) => setTimeout(res, 800));
@@ -338,6 +435,7 @@ export default function VoiceHero() {
 
   const startTyping = useCallback(() => {
     setPhase("text");
+    ph("type_clicked", { variant: variantRef.current });
     say("steady", TYPED_GREETING);
   }, [say]);
 
@@ -358,12 +456,21 @@ export default function VoiceHero() {
     "Steady is here.";
 
   return (
-    <section className="bg-white px-5 pb-4 pt-28 sm:pt-32">
-      <h1 className="sr-only">Steady, a voice companion for looping thoughts. Talk to Steady right now.</h1>
-      <div className="mx-auto flex min-h-[540px] max-w-[760px] flex-col">
+    <section className="px-5 pb-8 pt-28 sm:pt-40">
+      <div className="mx-auto flex min-h-[580px] max-w-[680px] flex-col">
+        {/* hero text */}
+        <div className="text-center">
+          <h1 className="text-balance text-[30px] font-semibold leading-[1.15] tracking-tight text-ink sm:text-[40px]">
+            A calm voice for a loud mind.
+          </h1>
+          <p className="mx-auto mt-5 max-w-[440px] text-balance text-[15px] leading-relaxed text-ink-soft sm:text-[16.5px]">
+            Steady talks you out of looping thoughts and back into the present. Speak or type — your first minute is free.
+          </p>
+        </div>
+
         {/* the line */}
-        <canvas ref={canvasRef} className="h-[140px] w-full sm:h-[170px]" aria-hidden />
-        <p className="mt-2 text-center text-[14px] text-ink-soft/80" aria-live="polite">{status}</p>
+        <canvas ref={canvasRef} className="mt-28 h-[110px] w-full sm:mt-36 sm:h-[130px]" aria-hidden />
+        <p className="mt-3 text-center text-[13.5px] text-ink-soft/70" aria-live="polite">{status}</p>
 
         {needsTap && (
           <button
@@ -375,15 +482,15 @@ export default function VoiceHero() {
         )}
 
         {/* chat */}
-        <div ref={chatRef} className="mt-6 max-h-[300px] flex-1 space-y-4 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_28px)]">
+        <div ref={chatRef} className="mt-8 max-h-[300px] flex-1 space-y-5 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_28px)]">
           {lines.map((l, i) =>
             l.who === "steady" ? (
-              <p key={i} className="max-w-[92%] text-[16.5px] leading-relaxed text-ink">{l.text}</p>
+              <p key={i} className="max-w-[92%] text-[15px] leading-loose text-ink">{l.text}</p>
             ) : (
-              <p key={i} className="ml-auto w-fit max-w-[85%] rounded-2xl bg-[#f2f7ee] px-4 py-2 text-[15.5px] leading-relaxed text-ink">{l.text}</p>
+              <p key={i} className="ml-auto w-fit max-w-[85%] rounded-2xl bg-[#f2f7ee] px-4 py-2.5 text-[14px] leading-relaxed text-ink">{l.text}</p>
             )
           )}
-          {thinking && <p className="text-[15px] text-ink-soft/70">…</p>}
+          {thinking && <p className="text-[14px] text-ink-soft/70">…</p>}
         </div>
 
         {/* first-visit choice */}
@@ -416,7 +523,7 @@ export default function VoiceHero() {
         {/* CTA after taster */}
         {(phase === "done" || (phase === "ready" && !apiOk)) && (
           <div className="mt-5 flex flex-col items-center gap-2">
-            <a href={APP} className="btn-dark inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
+            <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
               Keep talking with Steady, free
             </a>
             <span className="text-[13px] text-ink-soft">No card. No waiting list. Steady remembers you.</span>
@@ -426,7 +533,7 @@ export default function VoiceHero() {
         {/* typing rail: always available except during boot */}
         {phase !== "boot" && phase !== "done" && (
           <form
-            className="mt-6 flex items-center gap-2"
+            className="mt-8 flex items-center gap-2"
             onSubmit={(e) => { e.preventDefault(); sendText(input); }}
           >
             <input
@@ -434,19 +541,19 @@ export default function VoiceHero() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Chat to Steady here…"
               maxLength={600}
-              className="w-full rounded-full border border-black/10 bg-white px-5 py-3 text-[15px] text-ink shadow-sm outline-none transition focus:border-sage/60"
+              className="w-full rounded-full border border-black/10 bg-white px-5 py-3.5 text-[14px] text-ink shadow-sm outline-none transition focus:border-sage/60"
             />
             <button
               type="submit"
               disabled={!input.trim() || thinking}
-              className="btn-dark rounded-full px-5 py-3 text-[14.5px] font-semibold disabled:opacity-40"
+              className="btn-dark rounded-full px-5 py-3.5 text-[14px] font-semibold disabled:opacity-40"
             >
               Send
             </button>
           </form>
         )}
 
-        <p className="mt-4 text-center text-[12.5px] text-ink-soft/70">
+        <p className="mt-6 text-center text-[12.5px] text-ink-soft/70">
           A one minute taster. Free to start · no card · <a href="/know-more" className="underline decoration-ink-soft/30 underline-offset-2 hover:text-ink">how it works</a>
         </p>
       </div>
