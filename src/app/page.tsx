@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav";
 import Reveal from "@/components/Reveal";
+import VoiceHero from "@/components/VoiceHero";
 import Cta from "@/components/Cta";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -39,45 +40,7 @@ function BrowserFrame({ src, alt }: { src: string; alt: string }) {
 
 /* ---------- sections ---------- */
 
-function Hero() {
-  return (
-    <section className="px-5 pb-10 pt-36 text-center sm:pt-40">
-      <Reveal>
-        <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-1.5 text-[13px] font-medium text-ink-soft shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-sage" />
-          A warm voice companion for looping thoughts
-        </span>
-      </Reveal>
-      <Reveal delay={80}>
-        <h1 className="mx-auto mt-6 max-w-[820px] text-[42px] font-bold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[64px]">
-          Your head is loud.
-          <br />
-          Let&apos;s talk it quiet.
-        </h1>
-      </Reveal>
-      <Reveal delay={140}>
-        <p className="mx-auto mt-5 max-w-[560px] text-[16px] leading-relaxed text-ink-soft sm:text-[17px]">
-          Steady is a friendly voice that helps you say the loop out loud, see
-          it clearly, and practice letting it pass. Built on the method
-          therapists trust.
-        </p>
-      </Reveal>
-      <Reveal delay={200}>
-        <div className="mt-8 flex flex-col items-center gap-3">
-          <a
-            href={APP}
-            className="btn-dark inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold"
-          >
-            Say hello to Steady
-          </a>
-          <span className="text-[13px] text-ink-soft">
-            Free to start. No card. No waiting list.
-          </span>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
+/* Hero = live Steady taster (VoiceHero component) */
 
 function Collage() {
   return (
@@ -330,7 +293,7 @@ export default function Home() {
     <>
       <Nav />
       <main className="flex-1 bg-white">
-        <Hero />
+        <VoiceHero />
         <Collage />
         <Problems />
         <Value />
