@@ -26,15 +26,14 @@ export default function Nav() {
     <header className="fixed inset-x-0 top-0 z-50">
       {/* Promo bar */}
       <div
-        className={`flex items-center justify-center gap-3 px-4 text-[13px] text-white transition-all duration-300 ${
+        className={`flex items-center justify-center gap-3 border-b border-black/5 bg-white/80 px-4 text-[13px] text-ink-soft backdrop-blur-xl transition-all duration-300 ${
           scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-12 py-2.5 opacity-100"
         }`}
-        style={{ background: "#6f9384" }}
       >
-        <span>Free to start. Your first conversation takes ten minutes. 🌱</span>
+        <span>Free to start. Your first conversation takes ten minutes.</span>
         <a
           href="https://steady-erp-voice-fresh.vercel.app"
-          className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 font-medium text-white transition hover:bg-white/25"
+          className="btn-mint inline-flex items-center gap-1 px-3 py-1 font-medium"
         >
           Say hello <ArrowRight className="h-3 w-3" />
         </a>

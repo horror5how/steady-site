@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav";
 import Reveal from "@/components/Reveal";
+import ScrollStory from "@/components/ScrollStory";
 import VoiceHero from "@/components/VoiceHero";
 import Cta from "@/components/Cta";
 import Footer from "@/components/Footer";
@@ -42,124 +43,58 @@ function BrowserFrame({ src, alt }: { src: string; alt: string }) {
 
 /* Hero = live Steady taster (VoiceHero component) */
 
-function Collage() {
-  return (
-    <section className="overflow-hidden px-5 pb-20 pt-8">
-      <Reveal>
-        <div className="mx-auto flex max-w-[1150px] items-center justify-center gap-4 sm:gap-5">
-          {/* photo left */}
-          <div className="hidden w-[190px] shrink-0 -rotate-2 overflow-hidden rounded-3xl shadow-lg lg:block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/night-loop.jpg" alt="Lying awake at night with looping thoughts" className="h-[300px] w-full object-cover" />
-          </div>
-
-          {/* stat card sage */}
-          <div className="hidden h-[240px] w-[180px] shrink-0 flex-col justify-between rounded-3xl p-5 text-white shadow-lg sm:flex"
-            style={{ background: "linear-gradient(160deg,#4c8a6b 0%,#23312a 100%)" }}>
-            <span className="text-[40px] font-bold leading-none tracking-tight">24/7</span>
-            <span className="text-[14px] leading-snug text-white/85">
-              There the moment the loop starts. Day or 3am.
-            </span>
-          </div>
-
-          {/* phone centre */}
-          <div className="w-[250px] shrink-0 sm:w-[290px]">
-            <PhoneFrame src="/app/mobile-session.png" alt="Steady mobile app during a live voice session" />
-          </div>
-
-          {/* stat card peach */}
-          <div className="hidden h-[240px] w-[180px] shrink-0 flex-col justify-between rounded-3xl p-5 shadow-lg sm:flex"
-            style={{ background: "linear-gradient(160deg,#f9e3b7 0%,#dd8f58 100%)" }}>
-            <span className="text-[40px] font-bold leading-none tracking-tight text-forest">10 min</span>
-            <span className="text-[14px] leading-snug text-forest/80">
-              Your first conversation. Speaking, not typing.
-            </span>
-          </div>
-
-          {/* photo right */}
-          <div className="hidden w-[190px] shrink-0 rotate-2 overflow-hidden rounded-3xl shadow-lg lg:block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/warm-portrait.jpg" alt="Smiling with relief after a Steady session" className="h-[300px] w-full object-cover" />
-          </div>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
-const problems = [
+const journeys = [
   {
-    quote: "It's 1am and I'm still checking the front door.",
-    body: "Locks, ovens, emails you already sent. Checking buys a minute of calm, then the doubt comes straight back.",
-    photo: "/photos/checking-door.jpg",
-    alt: "Checking the front door late at night",
-    bg: "#e8f0fb",
+    problem: {
+      photo: "/photos/window-lost.jpg",
+      alt: "Lost in thought by the window",
+      text: "One intrusive thought hijacks the whole afternoon. You argue with it; it argues back, louder.",
+    },
+    solution: {
+      photo: "/photos/calm-breath.jpg",
+      alt: "Breathing slowly, calm again",
+      text: "You say it out loud instead. Steady helps you name it and let it pass — afternoon back.",
+    },
   },
   {
-    quote: "I ask “are you sure?” ten times a day.",
-    body: "Partners, friends, group chats. Every reassurance feels good for an hour and feeds the loop for a week.",
-    photo: "/photos/asking-reassurance.jpg",
-    alt: "Asking a partner for reassurance again",
-    bg: "#efe9fa",
+    problem: {
+      photo: "/photos/checking-door.jpg",
+      alt: "Checking the front door late at night",
+      text: "The front door, checked five times. Relief lasts a minute; the doubt comes straight back.",
+    },
+    solution: {
+      photo: "/photos/proud-progress.jpg",
+      alt: "Quietly proud after resisting the urge",
+      text: "One conversation replaces the sixth check. The urge passes without the ritual — that's the win.",
+    },
   },
   {
-    quote: "One scary thought takes my whole afternoon.",
-    body: "A thought lands, you argue with it, it argues back. The harder you push it away, the louder it gets.",
-    photo: "/photos/window-lost.jpg",
-    alt: "Lost in thought by the window",
-    bg: "#fdeee1",
+    problem: {
+      photo: "/photos/asking-reassurance.jpg",
+      alt: "Asking a partner for reassurance again",
+      text: "“Are you sure?” — ten times a day. Every answer feeds the loop for a week.",
+    },
+    solution: {
+      photo: "/photos/friends-laughing.jpg",
+      alt: "Laughing with friends, present again",
+      text: "Steady never feeds the loop. You practise sitting with the maybe — and people become people again.",
+    },
   },
   {
-    quote: "Googling symptoms ate my evening. Again.",
-    body: "Forty tabs later there is no answer, just a bigger knot. Research feels productive. It is the loop in disguise.",
-    photo: "/photos/googling-night.jpg",
-    alt: "Late-night searching for answers",
-    bg: "#e7f3e9",
+    problem: {
+      photo: "/photos/googling-night.jpg",
+      alt: "Late-night searching for answers",
+      text: "Forty tabs of symptoms at midnight. Research that feels productive and never ends.",
+    },
+    solution: {
+      photo: "/photos/sunrise-exhale.jpg",
+      alt: "Exhaling at sunrise, rested",
+      text: "Your loop gets mapped: trigger, thought, habit. You wake with a plan, not a search history.",
+    },
   },
 ];
 
-function Problems() {
-  return (
-    <section className="px-5 py-20">
-      <div className="mx-auto max-w-[1150px]">
-        <Reveal>
-          <p className="text-center text-[14px] font-semibold uppercase tracking-wide text-sage">
-            The loop you know too well
-          </p>
-          <h2 className="mx-auto mt-3 max-w-[640px] text-center text-[32px] font-bold leading-tight tracking-[-0.02em] text-ink sm:text-[44px]">
-            Sound familiar?
-          </h2>
-          <p className="mx-auto mt-4 max-w-[560px] text-center text-[16px] leading-relaxed text-ink-soft">
-            Looping thoughts are exhausting because everything you try brings
-            relief for a moment and makes the loop stronger for the long run.
-          </p>
-        </Reveal>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {problems.map((p, i) => (
-            <Reveal key={p.quote} delay={i * 80}>
-              <div
-                className="flex h-full flex-col overflow-hidden rounded-3xl"
-                style={{ background: p.bg }}
-              >
-                <div className="flex flex-1 flex-col p-6">
-                  <span className="text-[22px] leading-none text-ink/30">&ldquo;</span>
-                  <p className="mt-1 text-[17px] font-semibold leading-snug text-ink">
-                    {p.quote}
-                  </p>
-                  <p className="mt-3 text-[14px] leading-relaxed text-ink/70">
-                    {p.body}
-                  </p>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.photo} alt={p.alt} className="h-[180px] w-full object-cover" />
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+/* Collage + ProblemsSolutions now live inside ScrollStory (pinned phone, layers stack in on scroll) */
 
 const values = [
   {
@@ -294,8 +229,7 @@ export default function Home() {
       <Nav />
       <main className="flex-1">
         <VoiceHero />
-        <Collage />
-        <Problems />
+        <ScrollStory journeys={journeys} />
         <Value />
         <AppShowcase />
         <Cta />

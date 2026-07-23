@@ -6,10 +6,12 @@ export default function Reveal({
   children,
   className = "",
   delay = 0,
+  from = "up",
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  from?: "up" | "left" | "right";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -64,7 +66,7 @@ export default function Reveal({
   return (
     <div
       ref={ref}
-      className={`reveal ${shown ? "in" : ""} ${className}`}
+      className={`reveal ${from === "left" ? "reveal-l" : from === "right" ? "reveal-r" : ""} ${shown ? "in" : ""} ${className}`}
       style={{ transitionDelay: shown ? `${delay}ms` : "0ms" }}
     >
       {children}

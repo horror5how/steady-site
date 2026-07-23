@@ -144,8 +144,8 @@ export default function VoiceHero() {
       s.phase += 0.035 + s.amp * 0.05;
       const mid = h / 2;
       const maxAmp = h * 0.42 * Math.min(1, s.amp);
-      ribbon(w, mid, maxAmp, s.phase, 6.5, 0, "#22302b", "rgba(62,122,94,0.45)", 1.7);
-      ribbon(w, mid, maxAmp * 0.65, -s.phase * 0.8, 5.0, 1.7, "rgba(34,48,43,0.55)", "rgba(62,122,94,0.3)", 1.1);
+      ribbon(w, mid, maxAmp, s.phase, 6.5, 0, "#2b3135", "rgba(109,117,123,0.4)", 1.7);
+      ribbon(w, mid, maxAmp * 0.65, -s.phase * 0.8, 5.0, 1.7, "rgba(43,49,53,0.5)", "rgba(109,117,123,0.3)", 1.1);
       if (!reduced) raf = requestAnimationFrame(render);
     };
     render();
@@ -456,107 +456,191 @@ export default function VoiceHero() {
     "Steady is here.";
 
   return (
-    <section className="px-5 pb-12 pt-32 sm:pt-48">
-      <div className="mx-auto flex min-h-[620px] max-w-[660px] flex-col">
-        {/* hero text */}
-        <div className="text-center">
-          <h1 className="text-balance text-[26px] font-semibold leading-[1.18] tracking-tight text-ink sm:text-[34px]">
+    <>
+      {/* ================= TOP: the minimal taster — first thing you see ================= */}
+      <section className="flex min-h-[88svh] flex-col justify-center px-5 pb-10 pt-28 sm:pt-32">
+        <div className="mx-auto flex w-full max-w-[720px] flex-col">
+          {/* hero text — quiet, small */}
+          <h1 className="text-balance text-center text-[22px] font-semibold leading-snug tracking-tight text-ink sm:text-[26px]">
             A calm voice for a loud mind.
           </h1>
-          <p className="mx-auto mt-6 max-w-[420px] text-balance text-[14px] leading-relaxed text-ink-soft sm:text-[15.5px]">
-            Steady talks you out of looping thoughts and back into the present. Speak or type — your first minute is free.
+          <p className="mx-auto mt-4 max-w-[400px] text-balance text-center text-[13.5px] leading-relaxed text-ink-soft">
+            Say what&apos;s looping — Steady talks you back into the present.
+          </p>
+
+          {/* the line */}
+          <canvas ref={canvasRef} className="mt-16 h-[110px] w-full sm:mt-20 sm:h-[130px]" aria-hidden />
+          <p className="mt-4 text-center text-[13.5px] text-ink-soft/80" aria-live="polite">{status}</p>
+
+          {needsTap && (
+            <button
+              onClick={() => { audioRef.current?.play().then(() => setNeedsTap(false)).catch(() => {}); }}
+              className="mx-auto mt-4 rounded-full border border-line bg-white px-5 py-2 text-[13px] font-semibold text-ink shadow-sm"
+            >
+              Tap to hear Steady
+            </button>
+          )}
+
+          {/* chat — spacious */}
+          <div ref={chatRef} className="mt-10 max-h-[260px] space-y-6 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_26px)]">
+            {lines.map((l, i) =>
+              l.who === "steady" ? (
+                <p key={i} className="mx-auto max-w-[520px] text-center text-[14.5px] leading-loose text-ink-soft">{l.text}</p>
+              ) : (
+                <p key={i} className="ml-auto w-fit max-w-[80%] rounded-2xl bg-white px-4 py-2 text-[13.5px] leading-relaxed text-ink shadow-sm">{l.text}</p>
+              )
+            )}
+            {thinking && <p className="text-center text-[13.5px] text-ink-soft/60">…</p>}
+          </div>
+
+          {/* first-visit choice — small, airy */}
+          {phase === "ready" && apiOk && (
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+              <button onClick={startVoice} className="btn-dark inline-flex items-center px-5 py-2.5 text-[13px] font-semibold">
+                Allow microphone
+              </button>
+              <button onClick={startTyping} className="rounded-full border border-line bg-white px-5 py-2.5 text-[13px] font-semibold text-ink transition hover:bg-cream-2">
+                I&apos;d rather type
+              </button>
+            </div>
+          )}
+
+          {/* live voice controls */}
+          {phase === "voice" && (
+            <div className="mt-10 flex items-center justify-center gap-3">
+              <button onClick={toggleMic} className="rounded-full border border-line bg-white px-5 py-2 text-[13px] font-semibold text-ink shadow-sm">
+                {micPaused ? "Resume microphone" : "Pause microphone"}
+              </button>
+              <button onClick={() => teardown(true)} className="rounded-full px-3 py-2 text-[13px] font-medium text-ink-soft hover:text-ink">
+                End
+              </button>
+              <span className="rounded-full bg-cream-2 px-3 py-1.5 text-[12px] font-semibold tabular-nums text-ink-soft">
+                0:{String(secondsLeft).padStart(2, "0")}
+              </span>
+            </div>
+          )}
+
+          {/* CTA after taster */}
+          {(phase === "done" || (phase === "ready" && !apiOk)) && (
+            <div className="mt-10 flex flex-col items-center gap-2.5">
+              <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center px-6 py-3 text-[14px] font-semibold">
+                Keep talking with Steady, free
+              </a>
+              <span className="text-[12.5px] text-ink-soft">No card. No waiting list. Steady remembers you.</span>
+            </div>
+          )}
+
+          {/* typing rail — boxy composer */}
+          {phase !== "boot" && phase !== "done" && (
+            <form
+              className="mx-auto mt-10 w-full max-w-[520px]"
+              onSubmit={(e) => { e.preventDefault(); sendText(input); }}
+            >
+              <div className="rounded-[1.2rem] border border-line bg-white px-4 pb-3 pt-3.5 shadow-[0_10px_30px_-18px_rgba(35,40,44,0.3)] transition focus-within:border-ink/25">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendText(input); }
+                  }}
+                  placeholder="Chat to Steady here…"
+                  maxLength={600}
+                  rows={2}
+                  className="w-full resize-none bg-transparent text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-ink-soft/60"
+                />
+                <div className="mt-1 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || thinking}
+                    aria-label="Send"
+                    className="grid h-8 w-8 place-items-center rounded-[0.65rem] border border-line bg-cream-2 text-ink transition hover:bg-line disabled:opacity-40"
+                  >
+                    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          <p className="mt-9 text-center text-[12px] text-ink-soft/70">
+            A one minute taster. Free to start · no card · <a href="/know-more" className="underline decoration-ink-soft/30 underline-offset-2 hover:text-ink">how it works</a>
           </p>
         </div>
+      </section>
 
-        {/* the line */}
-        <canvas ref={canvasRef} className="mt-32 h-[100px] w-full sm:mt-44 sm:h-[120px]" aria-hidden />
-        <p className="mt-4 text-center text-[13px] text-ink-soft/70" aria-live="polite">{status}</p>
+      {/* ================= BELOW: editorial hero, pushed down ================= */}
+      <section className="px-5 pb-20 pt-16 sm:pt-24">
+        <div className="mx-auto grid max-w-[1180px] items-center gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12">
 
-        {needsTap && (
-          <button
-            onClick={() => { audioRef.current?.play().then(() => setNeedsTap(false)).catch(() => {}); }}
-            className="mx-auto mt-3 rounded-full border border-black/10 bg-white px-5 py-2 text-[14px] font-semibold text-ink shadow-sm"
-          >
-            Tap to hear Steady
-          </button>
-        )}
+          {/* editorial left */}
+          <div className="text-center lg:text-left">
+            <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-1.5 text-[13px] font-medium text-ink">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#bfe3cf]" />
+                Looping thoughts
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-1.5 text-[13px] font-medium text-ink">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#e9d3bc]" />
+                Reassurance seeking
+              </span>
+            </div>
 
-        {/* chat */}
-        <div ref={chatRef} className="mt-12 max-h-[300px] flex-1 space-y-6 overflow-y-auto px-1 [mask-image:linear-gradient(to_bottom,transparent,black_28px)]">
-          {lines.map((l, i) =>
-            l.who === "steady" ? (
-              <p key={i} className="max-w-[92%] text-[15px] leading-loose text-ink">{l.text}</p>
-            ) : (
-              <p key={i} className="ml-auto w-fit max-w-[85%] rounded-2xl bg-[#f2f7ee] px-4 py-2.5 text-[14px] leading-relaxed text-ink">{l.text}</p>
-            )
-          )}
-          {thinking && <p className="text-[14px] text-ink-soft/70">…</p>}
+            <h2 className="mt-9 text-balance text-[38px] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[52px] lg:text-[56px]">
+              Built for the nights the loop wins.
+            </h2>
+
+            <div className="mx-auto mt-10 h-px w-44 bg-line lg:mx-0" />
+
+            <p className="mx-auto mt-9 max-w-[420px] text-[15px] leading-relaxed text-ink-soft sm:text-[16px] lg:mx-0">
+              Steady talks you out of looping thoughts and back into the present — out loud, in a voice that remembers you.
+            </p>
+
+            <div className="mt-11 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <a
+                href={ctaHref()}
+                onClick={() => ph("cta_click", { variant: variantRef.current })}
+                className="btn-mint inline-flex items-center px-7 py-3.5 text-[15px] font-semibold"
+              >
+                Start free
+              </a>
+              <a
+                href="/know-more"
+                className="rounded-full border border-line bg-white px-7 py-3.5 text-[15px] font-semibold text-ink transition hover:bg-cream-2"
+              >
+                How it works
+              </a>
+            </div>
+          </div>
+
+          {/* photo right with glass overlays */}
+          <div className="relative">
+            <div className="overflow-hidden rounded-[2.6rem]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/photos/hero-woman-relief.jpg"
+                alt="A woman exhaling, shoulders dropping in relief"
+                className="h-[480px] w-full object-cover sm:h-[560px]"
+              />
+            </div>
+
+            <div className="glass-panel absolute right-5 top-5 rounded-2xl px-4 py-3 text-left">
+              <p className="text-[17px] font-semibold leading-none text-ink">1 min</p>
+              <p className="mt-1 text-[11.5px] leading-tight text-ink/70">free taster<br />no card</p>
+            </div>
+
+            <div className="glass-panel absolute inset-x-5 bottom-5 rounded-[1.6rem] px-5 py-4">
+              <p className="text-[13.5px] leading-relaxed text-ink">
+                &ldquo;It&apos;s 2am and my head is spinning.&rdquo;
+              </p>
+              <p className="mt-1.5 text-[12px] text-ink/60">
+                The moment Steady is built for. Scroll up and say hello — he&apos;s already listening.
+              </p>
+            </div>
+          </div>
         </div>
-
-        {/* first-visit choice */}
-        {phase === "ready" && apiOk && (
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={startVoice} className="btn-dark inline-flex items-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold">
-              Allow microphone
-            </button>
-            <button onClick={startTyping} className="rounded-full border border-black/10 bg-white px-6 py-3 text-[15px] font-semibold text-ink transition hover:bg-cream-2">
-              I&apos;d rather type
-            </button>
-          </div>
-        )}
-
-        {/* live voice controls */}
-        {phase === "voice" && (
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <button onClick={toggleMic} className="rounded-full border border-black/10 bg-white px-6 py-2.5 text-[14.5px] font-semibold text-ink shadow-sm">
-              {micPaused ? "Resume microphone" : "Pause microphone"}
-            </button>
-            <button onClick={() => teardown(true)} className="rounded-full px-4 py-2.5 text-[14px] font-medium text-ink-soft hover:text-ink">
-              End
-            </button>
-            <span className="rounded-full bg-cream-2 px-3 py-1.5 text-[12.5px] font-semibold tabular-nums text-ink-soft">
-              0:{String(secondsLeft).padStart(2, "0")}
-            </span>
-          </div>
-        )}
-
-        {/* CTA after taster */}
-        {(phase === "done" || (phase === "ready" && !apiOk)) && (
-          <div className="mt-5 flex flex-col items-center gap-2">
-            <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
-              Keep talking with Steady, free
-            </a>
-            <span className="text-[13px] text-ink-soft">No card. No waiting list. Steady remembers you.</span>
-          </div>
-        )}
-
-        {/* typing rail: always available except during boot */}
-        {phase !== "boot" && phase !== "done" && (
-          <form
-            className="mt-10 flex items-center gap-2"
-            onSubmit={(e) => { e.preventDefault(); sendText(input); }}
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Chat to Steady here…"
-              maxLength={600}
-              className="w-full rounded-full border border-black/10 bg-white px-5 py-3.5 text-[14px] text-ink shadow-sm outline-none transition focus:border-sage/60"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || thinking}
-              className="btn-dark rounded-full px-5 py-3.5 text-[14px] font-semibold disabled:opacity-40"
-            >
-              Send
-            </button>
-          </form>
-        )}
-
-        <p className="mt-8 text-center text-[12.5px] text-ink-soft/70">
-          A one minute taster. Free to start · no card · <a href="/know-more" className="underline decoration-ink-soft/30 underline-offset-2 hover:text-ink">how it works</a>
-        </p>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
