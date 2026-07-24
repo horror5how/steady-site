@@ -14,6 +14,8 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Resources",
     links: [
+      { label: "The loop library", href: "/help" },
+      { label: "Why it works", href: "/evidence" },
       { label: "Pricing", href: "/pricing" },
       { label: "FAQ", href: "/faq" },
       { label: "Blog", href: "/blog" },
@@ -25,7 +27,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
     title: "Legal",
     links: [
       { label: "Terms", href: "#" },
-      { label: "Privacy Policy", href: "#" },
+      { label: "Privacy Promise", href: "/privacy" },
       { label: "Medical Disclaimer", href: "/faq#disclaimer" },
     ],
   },
@@ -96,7 +98,7 @@ export default function Footer() {
         <div className="flex flex-col items-start justify-between gap-3 border-t border-white/10 py-8 mt-8 text-[13px] text-white/45 sm:flex-row sm:items-center">
           <span>© {new Date().getFullYear()} Steady. Made with care for busy minds.</span>
           <span className="flex gap-5">
-            <a href="#" className="transition hover:text-white">Privacy</a>
+            <a href="/privacy" className="transition hover:text-white">Privacy</a>
             <a href="#" className="transition hover:text-white">Terms</a>
           </span>
         </div>
