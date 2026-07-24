@@ -1,32 +1,24 @@
-"use client";
-
-import { useEffect } from "react";
-
-// beingsteady.com/dashboard = the Steady product.
-// ponytail: the product is still a separate app (steady-erp-voice-fresh),
-// so for now this redirects there. Swap for a same-domain proxy/host
-// once the product moves under beingsteady.com.
+// beingsteady.com/dashboard hosts the Steady product on-domain via a full-bleed
+// iframe. The product runs from its own origin (assets, /api, mic all same-origin
+// to itself); the product allows framing from beingsteady.com via CSP frame-ancestors.
+// ponytail: iframe until the product moves into this repo/domain for real.
 const PRODUCT = "https://steady-erp-voice-fresh.vercel.app/";
 
-export default function Dashboard() {
-  useEffect(() => {
-    window.location.replace(PRODUCT);
-  }, []);
+export const metadata = { title: "Steady" };
 
+export default function Dashboard() {
   return (
-    <main
-      style={{ background: "#f6f3ea" }}
-      className="grid min-h-[100dvh] place-items-center px-6 text-center"
-    >
-      <div>
-        <p className="text-[16px] text-ink">Opening Steady…</p>
-        <a
-          href={PRODUCT}
-          className="mt-3 inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#336750]"
-        >
-          Continue to Steady
-        </a>
-      </div>
-    </main>
+    <iframe
+      src={PRODUCT}
+      title="Steady"
+      allow="microphone; camera; autoplay; clipboard-write"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        border: "none",
+      }}
+    />
   );
 }
