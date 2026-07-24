@@ -116,7 +116,7 @@ export default function Patterns() {
                     All four run on the same engine. The same gentle practice unwinds them.
                   </p>
                   <a
-                    href="https://steady-erp-voice-fresh.vercel.app"
+                    href="/signup"
                     className="btn-light mt-5 inline-flex items-center gap-2 px-5 py-2.5 text-[14.5px] font-semibold"
                   >
                     Start unwinding yours <ArrowRight className="h-4 w-4" />

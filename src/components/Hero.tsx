@@ -24,7 +24,7 @@ export default function Hero() {
           </p>
           <div className="rise rise-4 mt-8 flex flex-wrap items-center gap-4">
             <a
-              href="https://steady-erp-voice-fresh.vercel.app"
+              href="/signup"
               className="group inline-flex items-center gap-3 rounded-full bg-sage py-2 pl-6 pr-2 text-[15.5px] font-semibold text-white shadow-[0_14px_36px_-12px_rgba(62,122,94,0.6)] transition hover:bg-[#336750]"
             >
               Start talking, free
