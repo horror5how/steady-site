@@ -60,8 +60,14 @@ export default function Nav() {
                 <button className="flex items-center gap-1 text-ink/80 transition hover:text-ink">
                   Product <ChevronDown className="h-3.5 w-3.5" />
                 </button>
-                {open && (
-                  <div className="absolute left-1/2 top-full w-[370px] -translate-x-1/2 pt-4">
+                <div
+                  className={`absolute left-1/2 top-full w-[370px] -translate-x-1/2 pt-4 transition-[opacity,transform] duration-[180ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] ${
+                    open
+                      ? "pointer-events-auto scale-100 opacity-100"
+                      : "pointer-events-none scale-[0.96] opacity-0"
+                  }`}
+                  style={{ transformOrigin: "top center" }}
+                >
                     <div className="glass-light rounded-2xl p-2">
                       {products.map(({ name, desc, Icon, href }) => (
                         <a
@@ -80,7 +86,6 @@ export default function Nav() {
                       ))}
                     </div>
                   </div>
-                )}
               </div>
               {[
                 { label: "How it works", href: "/know-more" },
