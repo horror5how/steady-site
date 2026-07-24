@@ -114,7 +114,7 @@ export default function ScrollStory({ journeys }: { journeys: Journey[] }) {
             <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
               The loop &rarr; the way out
             </p>
-            <h2 className="mt-2 text-[32px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+            <h2 className="mt-2 text-[34px] font-bold leading-[0.97] tracking-[-0.035em] text-ink">
               Before Steady, and after
             </h2>
           </div>
@@ -191,7 +191,7 @@ export default function ScrollStory({ journeys }: { journeys: Journey[] }) {
             <p className="mt-14 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
               The loop &rarr; the way out
             </p>
-            <h2 className="mt-3 text-center text-[32px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+            <h2 className="mt-3 text-center text-[34px] font-bold leading-[0.97] tracking-[-0.035em] text-ink">
               Before Steady, and after
             </h2>
           </Reveal>

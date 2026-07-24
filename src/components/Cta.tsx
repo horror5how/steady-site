@@ -8,7 +8,7 @@ export default function Cta() {
         <div className="grid items-center gap-10 md:grid-cols-[1.2fr_1fr] md:gap-16">
           <Reveal>
             <div className="text-white">
-              <h2 className="max-w-[620px] text-balance text-[38px] font-semibold leading-[1.04] tracking-[-0.025em] drop-shadow-sm md:text-[56px]">
+              <h2 className="max-w-[620px] text-balance text-[40px] font-bold leading-[0.97] tracking-[-0.035em] drop-shadow-sm md:text-[60px]">
                 Ten minutes from now, it could be out of your head
               </h2>
               <p className="mt-5 max-w-[480px] text-[17px] leading-relaxed text-white/90">

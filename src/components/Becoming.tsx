@@ -32,7 +32,7 @@ export default function Becoming() {
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-sage">
               Why talking works
             </p>
-            <h2 className="mt-4 text-[36px] font-semibold tracking-[-0.02em] text-ink md:text-[46px]">
+            <h2 className="mt-4 text-[38px] font-bold leading-[0.97] tracking-[-0.035em] text-ink md:text-[50px]">
               Saying it out loud changes everything
             </h2>
             <p className="mt-5 text-[17px] leading-relaxed text-ink-soft">

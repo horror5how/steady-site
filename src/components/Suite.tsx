@@ -155,7 +155,7 @@ export default function Suite() {
     <section id="suite" className="bg-cream">
       <div className="mx-auto max-w-[1200px] px-5 pt-24 pb-10 text-center">
         <Reveal>
-          <h2 className="text-[34px] font-semibold tracking-[-0.02em] text-ink md:text-[44px]">
+          <h2 className="text-[36px] font-bold leading-[0.97] tracking-[-0.035em] text-ink md:text-[48px]">
             How Steady helps
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] text-[16px] text-ink-soft">

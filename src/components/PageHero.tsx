@@ -23,7 +23,7 @@ export default function PageHero({
             {kicker}
           </p>
           <h1
-            className={`rise rise-2 mt-4 text-balance text-[38px] font-semibold leading-[1.06] tracking-[-0.02em] text-ink md:text-[52px] ${
+            className={`rise rise-2 mt-4 text-balance text-[40px] font-bold leading-[0.97] tracking-[-0.04em] text-ink md:text-[56px] ${
               photo ? "" : "mx-auto max-w-[860px]"
             }`}
           >

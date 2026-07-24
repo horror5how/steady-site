@@ -49,7 +49,7 @@ export default function Patterns() {
     <section id="patterns" className="bg-cream">
       <div className="mx-auto max-w-[1200px] px-5 py-20 md:py-24">
         <Reveal>
-          <h2 className="text-center text-[34px] font-semibold tracking-[-0.02em] text-ink md:text-[44px]">
+          <h2 className="text-center text-[36px] font-bold leading-[0.97] tracking-[-0.035em] text-ink md:text-[48px]">
             Which one is your loop?
           </h2>
           <p className="mx-auto mt-4 max-w-[520px] text-center text-[16px] text-ink-soft">

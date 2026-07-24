@@ -39,7 +39,7 @@ export default function EmpathyBanner() {
               <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-sage">
                 Meet Steady
               </p>
-              <h2 className="mt-4 text-balance text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink md:text-[46px]">
+              <h2 className="mt-4 text-balance text-[36px] font-bold leading-[0.98] tracking-[-0.035em] text-ink md:text-[48px]">
                 Empathy-based AI, here to help you live the life you&rsquo;re meant to.
               </h2>
               <p className="mt-5 text-[17px] leading-relaxed text-ink-soft">

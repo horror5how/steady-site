@@ -461,10 +461,12 @@ export default function VoiceHero() {
       <section className="flex min-h-[88svh] flex-col justify-center px-5 pb-10 pt-28 sm:pt-32">
         <div className="mx-auto flex w-full max-w-[720px] flex-col">
           {/* hero text — quiet, small */}
-          <h1 className="text-balance text-center text-[22px] font-semibold leading-snug tracking-tight text-ink sm:text-[26px]">
-            A calm voice for a loud mind.
+          <h1 className="text-center text-[40px] font-bold leading-[0.95] tracking-[-0.04em] text-ink sm:text-[52px] md:text-[60px]">
+            A calm voice
+            <br />
+            for a loud mind.
           </h1>
-          <p className="mx-auto mt-4 max-w-[400px] text-balance text-center text-[13.5px] leading-relaxed text-ink-soft">
+          <p className="mx-auto mt-5 max-w-[440px] text-balance text-center text-[15px] leading-relaxed text-ink-soft sm:text-[16px]">
             Say what&apos;s looping — Steady talks you back into the present.
           </p>
 
@@ -587,7 +589,7 @@ export default function VoiceHero() {
               </span>
             </div>
 
-            <h2 className="mt-9 text-balance text-[38px] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[52px] lg:text-[56px]">
+            <h2 className="mt-9 text-balance text-[40px] font-bold leading-[0.97] tracking-[-0.04em] text-ink sm:text-[52px] lg:text-[58px]">
               Built for the nights the loop wins.
             </h2>
 
