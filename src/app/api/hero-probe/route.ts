@@ -31,7 +31,10 @@ async function probe(): Promise<string[]> {
       signal: AbortSignal.timeout(25000),
     });
     const body = await r.text();
-    const healthy = body.includes('"secret":"ek_') || body.includes('"budget"');
+    // 429 = per-IP rate limiter fired (the probe hit its own 4/day cap). That means the
+    // endpoint is ALIVE and guarding correctly — not an outage. Only a mint that's
+    // unreachable / 5xx (dead OpenAI key, crash) is a real failure worth waking Hayat.
+    const healthy = r.status === 429 || body.includes('"secret":"ek_') || body.includes('"budget"');
     if (!healthy) fails.push(`mint=${r.status}:${body.slice(0, 80)}`);
   } catch { fails.push("mint=unreachable"); }
 
