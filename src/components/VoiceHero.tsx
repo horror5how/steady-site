@@ -372,7 +372,13 @@ export default function VoiceHero() {
 
   /* mint + WebRTC connect with a placeholder transceiver; mic track swaps in when granted */
   const connectRealtime = useCallback(async () => {
-    const mintRes = await fetch("/api/hero-session", { method: "POST" });
+    let devKey = "";
+    try { devKey = localStorage.getItem("steady-dev-key") || ""; } catch {}
+    const mintRes = await fetch("/api/hero-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(devKey ? { dev: devKey } : {}),
+    });
     if (!mintRes.ok) {
       const err = (await mintRes.json().catch(() => ({})))?.error;
       throw Object.assign(new Error("mint"), { code: mintRes.status === 429 ? "limit" : err === "budget" ? "budget" : "mint" });

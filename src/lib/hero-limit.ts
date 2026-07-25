@@ -8,7 +8,7 @@ const SECRET = process.env.HERO_LIMIT_SECRET || (process.env.OPENAI_API_KEY || "
 const BLOB_TOKEN = process.env.HERO_BLOB_RW_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
 const mem = new Map<string, number>();
 
-export const LIMITS = { voice: 4, chat: 40 } as const;
+export const LIMITS = { voice: 12, chat: 40 } as const;
 export const DAILY_BUDGET = {
   voice: Number(process.env.HERO_DAILY_VOICE_BUDGET) || 300,
   chat: Number(process.env.HERO_DAILY_CHAT_BUDGET) || 2000,

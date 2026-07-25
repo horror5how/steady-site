@@ -34,9 +34,17 @@ export async function POST(req: NextRequest) {
   if (!originAllowed(req)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
-  const q = await takeQuota("voice", clientIp(req.headers), req.cookies.get("sh_v")?.value);
-  if (q.verdict === "budget") return NextResponse.json({ error: "budget" }, { status: 503 });
-  if (q.verdict === "ip_limit") return NextResponse.json({ error: "limit" }, { status: 429 });
+  // Dev bypass: testing key skips the visitor quota entirely (set HERO_DEV_KEY env,
+  // put the same value in localStorage "steady-dev-key" in the browser).
+  const reqBody = await req.json().catch(() => ({} as { dev?: string }));
+  const isDev = Boolean(process.env.HERO_DEV_KEY && reqBody?.dev === process.env.HERO_DEV_KEY);
+  let quotaCookie: string | undefined;
+  if (!isDev) {
+    const q = await takeQuota("voice", clientIp(req.headers), req.cookies.get("sh_v")?.value);
+    if (q.verdict === "budget") return NextResponse.json({ error: "budget" }, { status: 503 });
+    if (q.verdict === "ip_limit") return NextResponse.json({ error: "limit" }, { status: 429 });
+    quotaCookie = q.cookie;
+  }
 
   const upstream = await openaiFetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
@@ -67,6 +75,6 @@ export async function POST(req: NextRequest) {
   }
   const body = await upstream.json();
   const res = NextResponse.json({ secret: body.value, model: MODEL });
-  res.cookies.set("sh_v", q.cookie, { maxAge: 86400, httpOnly: true, sameSite: "lax", path: "/" });
+  if (quotaCookie) res.cookies.set("sh_v", quotaCookie, { maxAge: 86400, httpOnly: true, sameSite: "lax", path: "/" });
   return res;
 }
