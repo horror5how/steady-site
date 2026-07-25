@@ -14,10 +14,10 @@ const MAX_TEXT_TURNS = 12;
    up today. Cedar speaks every word; the realtime model only transcribes. */
 const SCRIPT = {
   greeting:
-    "Hi there. I'm Steady, and it's really good to have you here. Before we begin — what would you like me to call you?",
+    "Hi there. I'm Steady, and it's really good to have you here. Before we begin, what would you like me to call you?",
   explain: (name: string) =>
     `${name}. It's a real pleasure that you've come here to look into Steady. Let me tell you a little about me. ` +
-    "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away — " +
+    "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away, " +
     "intrusive thoughts, rumination, the spirals that quietly pull you out of the present. " +
     "Do you have anything on your mind that you think you might need help with?",
 };
@@ -39,10 +39,6 @@ const PH_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.co
 type Phase = "boot" | "ready" | "connecting" | "voice" | "text" | "done";
 type Line = { who: "steady" | "you"; text: string };
 
-const FIRST_LINES: Record<string, string> = {
-  "mic-first": "Allow your microphone to speak to me, or chat to me down here.",
-  "question-first": "What's looping in your head right now? Say it out loud with your microphone, or type it down here.",
-};
 const TYPED_GREETING =
   "No mic, no problem. Hey, I'm Steady. What's your name, or what would you like me to call you? I'm being trained to help people step out of looping thoughts and reassurance seeking, and live more in the present. What's on your mind today?";
 const GOODBYE =
@@ -72,7 +68,7 @@ function ph(event: string, props: Record<string, unknown> = {}) {
 function pickVariant(): string {
   try {
     let v = localStorage.getItem("steady-hero-var");
-    if (!v || !FIRST_LINES[v]) {
+    if (!v || !["mic-first", "question-first"].includes(v)) {
       v = Math.random() < 0.5 ? "mic-first" : "question-first";
       localStorage.setItem("steady-hero-var", v);
     }
@@ -191,7 +187,8 @@ export default function VoiceHero() {
         if (!alive) return;
         setApiOk(ok);
         setPhase("ready");
-        setLines([{ who: "steady", text: ok ? FIRST_LINES[variantRef.current] : "I'm resting right now. Come meet me properly in the app, it's free." }]);
+        // start from blank: Steady has not spoken yet, so the chat shows nothing
+        setLines(ok ? [] : [{ who: "steady", text: "I'm resting right now. Come meet me properly in the app, it's free." }]);
         ph("hero_ready", { api_ok: ok, variant: variantRef.current });
       }, wait);
     });
@@ -331,7 +328,7 @@ export default function VoiceHero() {
   const brainTurn = useCallback(async (userText: string) => {
     setThinking(true);
     const history = linesRef.current
-      .filter((l) => l.text && !Object.values(FIRST_LINES).includes(l.text))
+      .filter((l) => l.text)
       .map((l) => ({ role: l.who === "you" ? "user" : "assistant", content: l.text }));
     const last = history[history.length - 1];
     if (!(last?.role === "user" && last.content === userText)) history.push({ role: "user", content: userText });
@@ -527,7 +524,7 @@ export default function VoiceHero() {
     }
     setThinking(true);
     const history = [...lines, { who: "you" as const, text }]
-      .filter((l) => !Object.values(FIRST_LINES).includes(l.text))
+      .filter((l) => l.text)
       .map((l) => ({ role: l.who === "you" ? "user" : "assistant", content: l.text }));
     let reply: string | null = null;
     for (let attempt = 0; attempt < 2 && !reply; attempt++) {

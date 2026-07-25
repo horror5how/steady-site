@@ -9,9 +9,9 @@ export const dynamic = "force-dynamic";
 const MODEL = "gpt-4o-mini-tts";
 const VOICE = process.env.HERO_SAY_VOICE || "cedar";
 const INSTRUCTIONS = [
-  "You are Steady. Read the text exactly as written, word for word — never add, drop, or paraphrase anything.",
-  "Voice: a warm, mature, deeply calm and caring man. Emotionally present and genuinely kind.",
-  "Pace: slow and unhurried. Leave a real, natural pause after every full stop, and a shorter breath after commas and dashes. Never rush, never sound like a machine reading text.",
+  "You are Steady. Read the text exactly as written, word for word, never add, drop, or paraphrase anything.",
+  "Voice: a warm, mature, calm and caring man. Emotionally present and genuinely kind.",
+  "Pace: natural conversational speed, easy and confident. A brief natural pause at full stops, nothing drawn out. Never sound like a machine reading text.",
   "Let gentle feeling colour the words, especially the empathetic lines. British English.",
 ].join(" ");
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       voice: VOICE,
       input: text,
       response_format: "mp3",
-      speed: 0.92,
+      speed: 1.02,
       instructions: INSTRUCTIONS,
     }),
   });
