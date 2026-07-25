@@ -13,23 +13,24 @@ export default function Cta() {
               </h2>
               <p className="mt-5 max-w-[480px] text-[17px] leading-relaxed text-white/90">
                 Say hello, say what's looping, and feel what it's like to have a warm voice
-                on your side. Free to start. No card. No pressure.
+                on your side. Steady is an invite-only research trial right now — free, no
+                card, adults 18 and over.
               </p>
               <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <a
-                  href="/signup"
+                  href="/invite"
                   className="btn-light inline-flex items-center gap-2 px-6 py-3.5 text-[15px] font-semibold"
                 >
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-sage/15">
                     <Sparkle className="h-3 w-3 text-sage" />
                   </span>
-                  Start talking, free
+                  Click here to be invited
                 </a>
                 <a
-                  href="/pricing"
+                  href="/know-more"
                   className="inline-flex items-center px-4 py-3.5 text-[15px] font-semibold text-white/95 transition hover:text-white"
                 >
-                  See pricing →
+                  How it works →
                 </a>
               </div>
             </div>

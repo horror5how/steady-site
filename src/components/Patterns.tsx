@@ -28,7 +28,7 @@ const patterns = [
     name: "The compulsion",
     quote: "“One more check, and then I'll be able to relax.”",
     body: "Check the lock. Reread the email. Count it, redo it, get it “just right”. The action buys quiet — and quietly teaches your brain the fear was real.",
-    help: "Practicing the trigger without the ritual (called ERP) is the most-proven approach there is — large, lasting improvements across 37 clinical trials.",
+    help: "Practising the trigger without the ritual is the approach OCD specialists are trained in. The research behind it studies that approach with a therapist — not this app, and not any app.",
     cite: "Öst et al., meta-analysis, 2015",
     link: "https://pubmed.ncbi.nlm.nih.gov/26117062/",
   },
@@ -116,10 +116,10 @@ export default function Patterns() {
                     All four run on the same engine. The same gentle practice unwinds them.
                   </p>
                   <a
-                    href="/signup"
+                    href="/invite"
                     className="btn-light mt-5 inline-flex items-center gap-2 px-5 py-2.5 text-[14.5px] font-semibold"
                   >
-                    Start unwinding yours <ArrowRight className="h-4 w-4" />
+                    Apply for an invitation <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
               </div>

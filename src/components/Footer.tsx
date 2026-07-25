@@ -1,5 +1,8 @@
 import { LinkedIn, XLogo, TikTok, Instagram } from "./icons";
 
+// TODO(hayat): confirm the exact registered company name + number for the fine print.
+const TERMS = "https://steady-erp-voice-fresh.vercel.app/legal/terms.html";
+
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Product",
@@ -26,7 +29,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Legal",
     links: [
-      { label: "Terms", href: "#" },
+      { label: "Terms", href: TERMS },
       { label: "Privacy Promise", href: "/privacy" },
       { label: "Medical Disclaimer", href: "/faq#disclaimer" },
     ],
@@ -96,10 +99,17 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col items-start justify-between gap-3 border-t border-white/10 py-8 mt-8 text-[13px] text-white/45 sm:flex-row sm:items-center">
-          <span>© {new Date().getFullYear()} Steady. Made with care for busy minds.</span>
+          <span>
+            © {new Date().getFullYear()} Steady. Made with care for busy minds.
+            <br />
+            <span className="text-white/35">
+              Steady is an invite-only research trial operated by Beyond Elevation Ltd,
+              registered in England and Wales. Contact hayat@beyondelevation.com.
+            </span>
+          </span>
           <span className="flex gap-5">
             <a href="/privacy" className="transition hover:text-white">Privacy</a>
-            <a href="#" className="transition hover:text-white">Terms</a>
+            <a href={TERMS} className="transition hover:text-white">Terms</a>
           </span>
         </div>
       </div>

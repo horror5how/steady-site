@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { analyticsAllowed } from "./CookieBanner";
 
-const APP = "https://steady-erp-voice-fresh.vercel.app";
+// ponytail: kept for when the product opens publicly; invite-only trial routes to /invite.
+export const APP = "https://steady-erp-voice-fresh.vercel.app";
 const VOICE_SECONDS = 150; // scripted intro is unhurried; no longer a hard 60s cut
 const HARD_KILL = 200; // absolute failsafe
 const MAX_TEXT_TURNS = 12;
@@ -42,12 +44,14 @@ type Line = { who: "steady" | "you"; text: string };
 const TYPED_GREETING =
   "No mic, no problem. Hey, I'm Steady. What's your name, or what would you like me to call you? I'm being trained to help people step out of looping thoughts and reassurance seeking, and live more in the present. What's on your mind today?";
 const GOODBYE =
-  "That's our first minute together. I'd love to keep going properly. It's free, and I'll remember where we left off.";
+  "That's our first minute together. I'd love to keep going properly. Steady is invite-only while we're still testing, so apply for an invitation just above and I'll pick up where we left off.";
 const RESTING =
   "My voice has done a lot of talking today and is having a rest. Type to me here, or come into the full app.";
 
-/* fire-and-forget PostHog capture; never blocks or throws */
+/* fire-and-forget PostHog capture; never blocks or throws.
+   Gated on cookie consent: no consent, no identifier, no event. */
 function ph(event: string, props: Record<string, unknown> = {}) {
+  if (!analyticsAllowed()) return;
   try {
     let id = localStorage.getItem("steady-hero-id");
     if (!id) {
@@ -113,7 +117,9 @@ export default function VoiceHero() {
 
   /* every visit starts blank — the taster transcript is never carried anywhere,
      so no stale chat from a previous session can ever resurface */
-  const ctaHref = useCallback(() => APP, []);
+  // ponytail: invite-only trial — every public CTA goes to the application, not the app.
+  // Restore APP here when the product opens to the public.
+  const ctaHref = useCallback(() => "/invite", []);
 
   /* ---------- wave canvas ---------- */
   useEffect(() => {
@@ -459,7 +465,7 @@ export default function VoiceHero() {
 
   const startVoice = useCallback(async () => {
     if (!apiOk) {
-      window.location.href = APP;
+      window.location.href = "/invite";
       return;
     }
     setPhase("connecting");
@@ -620,14 +626,24 @@ export default function VoiceHero() {
 
           {/* first-visit choice — small, airy */}
           {phase === "ready" && apiOk && (
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-              <button onClick={startVoice} className="btn-dark inline-flex items-center px-5 py-2.5 text-[13px] font-semibold">
-                Allow microphone
-              </button>
-              <button onClick={startTyping} className="rounded-full border border-line bg-white px-5 py-2.5 text-[13px] font-semibold text-ink transition hover:bg-cream-2">
-                I&apos;d rather type
-              </button>
-            </div>
+            <>
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+                <button onClick={startVoice} className="btn-dark inline-flex items-center px-5 py-2.5 text-[13px] font-semibold">
+                  Allow microphone
+                </button>
+                <button onClick={startTyping} className="rounded-full border border-line bg-white px-5 py-2.5 text-[13px] font-semibold text-ink transition hover:bg-cream-2">
+                  I&apos;d rather type
+                </button>
+              </div>
+              {/* Disclosure before the mic opens: it is an AI, it is not care, and this
+                  taster is not saved. Adults only. */}
+              <p className="mx-auto mt-5 max-w-[440px] text-center text-[12px] leading-relaxed text-ink-soft/80">
+                You&rsquo;ll be talking to an AI, not a person — and it isn&rsquo;t therapy, medical
+                care or crisis support. Adults 18+. Your voice is processed by OpenAI to power the
+                conversation and this one-minute taster isn&rsquo;t saved. If you need someone now,
+                call or text <strong className="font-semibold text-ink">988</strong> in the US.
+              </p>
+            </>
           )}
 
           {/* live voice controls */}
@@ -649,9 +665,9 @@ export default function VoiceHero() {
           {(phase === "done" || (phase === "ready" && !apiOk)) && (
             <div className="mt-10 flex flex-col items-center gap-2.5">
               <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center px-6 py-3 text-[14px] font-semibold">
-                Keep talking with Steady, free
+                Apply for an invitation
               </a>
-              <span className="text-[12.5px] text-ink-soft">No card. No waiting list. Steady remembers you.</span>
+              <span className="text-[12.5px] text-ink-soft">Invite-only while we test. Free, no card, adults 18+.</span>
             </div>
           )}
 
@@ -728,7 +744,7 @@ export default function VoiceHero() {
                 onClick={() => ph("cta_click", { variant: variantRef.current })}
                 className="btn-mint inline-flex items-center px-7 py-3.5 text-[15px] font-semibold"
               >
-                Start free
+                Click here to be invited
               </a>
               <a
                 href="/know-more"

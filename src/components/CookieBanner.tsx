@@ -2,20 +2,41 @@
 
 import { useEffect, useState } from "react";
 
+// One key, three states: unset (no analytics yet), "accepted", "rejected".
+// analyticsAllowed() is the single gate every analytics call must pass through —
+// a Reject button that does nothing is worse than no banner at all.
+export const CONSENT_KEY = "sh-cookie";
+
+export function analyticsAllowed(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === "accepted";
+  } catch {
+    return false;
+  }
+}
+
 export default function CookieBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (!localStorage.getItem("sh-cookie")) setShow(true);
+      try {
+        if (!localStorage.getItem(CONSENT_KEY)) setShow(true);
+      } catch {
+        /* storage blocked — no banner, and analyticsAllowed() stays false */
+      }
     }, 900);
     return () => clearTimeout(t);
   }, []);
 
   if (!show) return null;
 
-  const dismiss = () => {
-    localStorage.setItem("sh-cookie", "1");
+  const choose = (value: "accepted" | "rejected") => {
+    try {
+      localStorage.setItem(CONSENT_KEY, value);
+    } catch {
+      /* ignore */
+    }
     setShow(false);
   };
 
@@ -25,25 +46,24 @@ export default function CookieBanner() {
         <div className="max-w-[640px]">
           <p className="text-[14px] font-semibold text-ink">We use cookies</p>
           <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">
-            We use essential cookies to make this site work. With your consent, we may also use
-            non-essential cookies to improve your experience and analyze how you use the site.
+            Essential cookies keep this site working. If you accept, we also measure which pages and
+            buttons people use, so we can make it better. Reject and we measure nothing — the site
+            works exactly the same. See our{" "}
+            <a href="/privacy" className="underline underline-offset-2">
+              privacy page
+            </a>
+            .
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2.5">
           <button
-            onClick={dismiss}
-            className="text-[13px] font-medium text-ink-soft underline-offset-2 transition hover:text-ink hover:underline"
-          >
-            Cookie Settings
-          </button>
-          <button
-            onClick={dismiss}
+            onClick={() => choose("rejected")}
             className="rounded-full border border-ink/15 px-4 py-2 text-[13px] font-semibold text-ink transition hover:bg-ink/5"
           >
             Reject all
           </button>
           <button
-            onClick={dismiss}
+            onClick={() => choose("accepted")}
             className="btn-dark px-4 py-2 text-[13px] font-semibold"
           >
             Accept all

@@ -1,15 +1,7 @@
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import AuthForm from "@/components/AuthForm";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Try Steady — Sign up" };
-
+// ponytail: no public signup during the invite-only trial — one door, and it is /invite.
+// Restore the AuthForm page (git history) when the product opens publicly.
 export default function Signup() {
-  return (
-    <>
-      <Nav />
-      <AuthForm mode="signup" />
-      <Footer />
-    </>
-  );
+  redirect("/invite");
 }
