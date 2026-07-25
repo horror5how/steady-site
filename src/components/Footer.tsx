@@ -19,7 +19,6 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
     links: [
       { label: "The loop library", href: "/help" },
       { label: "Why it works", href: "/evidence" },
-      { label: "Pricing", href: "/pricing" },
       { label: "FAQ", href: "/faq" },
       { label: "Blog", href: "/blog" },
       { label: "Find a therapist", href: "/therapists" },

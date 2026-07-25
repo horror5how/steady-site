@@ -89,7 +89,6 @@ export default function Nav() {
               </div>
               {[
                 { label: "How it works", href: "/know-more" },
-                { label: "Pricing", href: "/pricing" },
                 { label: "FAQ", href: "/faq" },
                 { label: "Blog", href: "/blog" },
                 { label: "Therapists", href: "/therapists" },
