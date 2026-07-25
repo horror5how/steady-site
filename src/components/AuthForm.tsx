@@ -36,11 +36,16 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const c = copy[mode];
   const [busy, setBusy] = useState(false);
+  const [name, setName] = useState("");
 
-  // No backend yet — swallow the submit and go straight to the dashboard.
+  // No backend yet — keep the name for Steady's in-app welcome, then dashboard.
   function go(e?: React.FormEvent) {
     e?.preventDefault();
     setBusy(true);
+    try {
+      const first = name.trim().split(/\s+/)[0];
+      if (first) localStorage.setItem("steady-user-name", first);
+    } catch {}
     router.push("/dashboard");
   }
 
@@ -54,7 +59,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           {mode === "signup" && (
             <label className="text-[13px] font-medium text-ink-soft">
               Name
-              <input type="text" autoComplete="name" placeholder="Your name" className={inputCls} />
+              <input type="text" autoComplete="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
             </label>
           )}
           <label className="text-[13px] font-medium text-ink-soft">
