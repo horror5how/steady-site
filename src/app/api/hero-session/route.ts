@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
         audio: {
           input: {
             transcription: { model: "gpt-4o-mini-transcribe" },
-            turn_detection: { type: "semantic_vad" },
+            // The intro is a locked client-driven script spoken via /api/hero-say.
+            // The realtime model is used ONLY to transcribe the visitor, never to speak,
+            // so it must not auto-respond and improvise.
+            turn_detection: { type: "semantic_vad", create_response: false },
           },
           output: { voice: VOICE },
         },

@@ -3,10 +3,41 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 const APP = "https://steady-erp-voice-fresh.vercel.app";
-const VOICE_SECONDS = 60;
-const WRAP_AT = 46; // inject "wrap up" note here
-const HARD_KILL = 75; // absolute failsafe
+const VOICE_SECONDS = 150; // scripted intro is unhurried; no longer a hard 60s cut
+const HARD_KILL = 200; // absolute failsafe
 const MAX_TEXT_TURNS = 12;
+
+/* The homepage voice intro is a LOCKED script, spoken as clean Cedar audio via
+   /api/hero-say. The realtime model never speaks it — no improv, no stammer. */
+const SCRIPT = {
+  greeting:
+    "Hi there. I'm Steady, and it's really good to have you here. Before we begin — what would you like me to call you?",
+  explain: (name: string) =>
+    `${name}. It's a real pleasure that you've come here to look into Steady. Let me tell you a little about me. ` +
+    "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away — " +
+    "intrusive thoughts, rumination, the spirals that quietly pull you out of the present. " +
+    "Do you have anything on your mind that you think you might need help with?",
+  empathy:
+    "I do understand. That really gets to you — and while it's happening, you don't get to live in the present, which is the whole beauty of life. " +
+    "So let me tell you how I work. At Steady, we follow a mapping system. I take you on a journey through that map, to understand you and your thought patterns more and more. " +
+    "I don't help by reassuring you, handing you antidotes, or giving you some quick fix. What I give you is the ability to say it out loud — and then to know that it's okay. " +
+    "We use science-backed, research-backed methods, like exposure therapy and speaking out loud to me, so you can live in the present and let the thoughts come and go. " +
+    "Do you have any questions for me? Fire away.",
+  closing:
+    "That's a really good thing to be thinking about. The honest truth is, the best way to feel how this works is to try it with me properly. " +
+    "So if you'd like to stay, and use Steady, you can sign up just above — and we'll begin together.",
+};
+
+// ponytail: naive spoken-first-name grab — strip lead-ins, take the salient word.
+function extractName(text: string): string {
+  let t = String(text || "").trim().replace(/[.!?,]+$/g, "");
+  t = t.replace(/^(hi|hey|hello|yeah|yes|well|um|uh|so|ok|okay)[,\s]+/i, "");
+  const m = t.match(/(?:call me|i am|i'?m|my name is|name'?s|it'?s|this is)\s+([A-Za-z][A-Za-z'-]*)/i);
+  let name = (m ? m[1] : t.split(/\s+/).pop()) || "";
+  name = name.replace(/[^A-Za-z'-]/g, "");
+  if (!name) return "friend";
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
 
 const PH_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || "phc_CDKFjeVGfuEEid74UGx5CNwNFaqaijF8b6e9A6QhLruM";
 const PH_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
@@ -75,7 +106,10 @@ export default function VoiceHero() {
   const micRef = useRef<MediaStream | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const wave = useRef({ amp: 0.07, phase: 0, speaking: false, userSpeaking: false, energy: 0 });
-  const steadyDraft = useRef("");
+  const ttsRef = useRef<HTMLAudioElement | null>(null);
+  const introStep = useRef(0);
+  const introName = useRef("");
+  const introSpeaking = useRef(false);
   const variantRef = useRef("mic-first");
   const linesRef = useRef<Line[]>([]);
   const phaseRef = useRef<Phase>("boot");
@@ -201,6 +235,8 @@ export default function VoiceHero() {
     timersRef.current = [];
     try { dcRef.current?.close(); } catch {}
     try { pcRef.current?.close(); } catch {}
+    try { ttsRef.current?.pause(); } catch {}
+    introSpeaking.current = false;
     micRef.current?.getTracks().forEach((t) => t.stop());
     dcRef.current = null;
     pcRef.current = null;
@@ -235,6 +271,67 @@ export default function VoiceHero() {
     setPhase("text");
     setLines((l) => [...l, { who: "steady", text: reason }]);
   }, [teardown]);
+
+  /* ---------- scripted intro: exact Cedar audio, mic muted while Steady speaks ---------- */
+  const setMic = useCallback((on: boolean) => {
+    const track = micRef.current?.getTracks?.()[0];
+    if (track) track.enabled = on;
+  }, []);
+
+  const heroSay = useCallback(async (line: string) => {
+    say("steady", line);
+    introSpeaking.current = true;
+    wave.current.speaking = true;
+    setMic(false); // no echo: the model must not hear and re-transcribe Steady's own voice
+    try {
+      const r = await fetch("/api/hero-say", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: line }),
+      });
+      if (!r.ok) throw new Error("say");
+      const url = URL.createObjectURL(await r.blob());
+      const a = new Audio(url);
+      ttsRef.current = a;
+      await new Promise<void>((resolve) => {
+        a.onended = () => resolve();
+        a.onerror = () => resolve();
+        a.play().catch(() => { setNeedsTap(true); resolve(); });
+      });
+      URL.revokeObjectURL(url);
+    } catch {
+      // audio failed — the line is already on screen; carry on
+    } finally {
+      wave.current.speaking = false;
+      introSpeaking.current = false;
+      setMic(true);
+    }
+  }, [say, setMic]);
+
+  const advanceIntro = useCallback((userText: string) => {
+    if (introSpeaking.current) return;
+    const step = introStep.current;
+    if (step === 0) {
+      introName.current = extractName(userText);
+      introStep.current = 1;
+      void heroSay(SCRIPT.explain(introName.current));
+    } else if (step === 1) {
+      introStep.current = 2;
+      void heroSay(SCRIPT.empathy);
+    } else if (step === 2) {
+      introStep.current = 3;
+      try { if (introName.current) localStorage.setItem("steady-signup-name", introName.current); } catch {}
+      void heroSay(SCRIPT.closing).then(() => { teardown(false); setPhase("done"); });
+    }
+    // step >= 3: intro is finished; the CTA is on screen
+  }, [heroSay, teardown]);
+
+  const beginIntro = useCallback(() => {
+    introStep.current = 0;
+    introName.current = "";
+    introSpeaking.current = false;
+    void heroSay(SCRIPT.greeting);
+  }, [heroSay]);
 
   /* mint + WebRTC connect with a placeholder transceiver; mic track swaps in when granted */
   const connectRealtime = useCallback(async () => {
@@ -280,33 +377,15 @@ export default function VoiceHero() {
 
     const dc = pc.createDataChannel("oai-events");
     dcRef.current = dc;
-    dc.onopen = () => dc.send(JSON.stringify({ type: "response.create" }));
+    dc.onopen = () => {}; // model never speaks; the scripted intro drives every turn
     dc.onmessage = (ev) => {
-      let msg: { type?: string; transcript?: string; delta?: string } = {};
+      let msg: { type?: string; transcript?: string } = {};
       try { msg = JSON.parse(ev.data); } catch { return; }
       const t = msg.type || "";
       if (t.endsWith("input_audio_transcription.completed") && msg.transcript?.trim()) {
+        if (introSpeaking.current) return; // ignore any echo of Steady's own voice
         say("you", msg.transcript.trim());
-      } else if ((t === "response.output_audio_transcript.delta" || t === "response.audio_transcript.delta") && msg.delta) {
-        steadyDraft.current += msg.delta;
-        setLines((l) => {
-          const copy = [...l];
-          const last = copy[copy.length - 1];
-          if (last?.who === "steady" && last.text.length <= steadyDraft.current.length && steadyDraft.current.startsWith(last.text.slice(0, 20))) {
-            copy[copy.length - 1] = { who: "steady", text: steadyDraft.current };
-            return copy;
-          }
-          return [...copy, { who: "steady", text: steadyDraft.current }];
-        });
-        wave.current.speaking = true; // deltas double as the speaking signal; buffer events can lag
-      } else if (t.endsWith("audio_transcript.done")) {
-        steadyDraft.current = "";
-      } else if (t === "response.done") {
-        wave.current.speaking = false;
-      } else if (t === "output_audio_buffer.started") {
-        wave.current.speaking = true;
-      } else if (t === "output_audio_buffer.stopped" || t === "output_audio_buffer.cleared") {
-        wave.current.speaking = false;
+        advanceIntro(msg.transcript.trim());
       } else if (t === "input_audio_buffer.speech_started") {
         wave.current.userSpeaking = true;
       } else if (t === "input_audio_buffer.speech_stopped") {
@@ -324,7 +403,7 @@ export default function VoiceHero() {
     if (!sdpRes.ok) throw new Error("sdp " + sdpRes.status);
     await pc.setRemoteDescription({ type: "answer", sdp: await sdpRes.text() });
     return transceiver;
-  }, [say, fallbackToText]);
+  }, [say, fallbackToText, advanceIntro]);
 
   const startVoice = useCallback(async () => {
     if (!apiOk) {
@@ -362,16 +441,8 @@ export default function VoiceHero() {
         if (left <= 0) clearInterval(tick);
       }, 1000);
       timersRef.current.push(tick as unknown as ReturnType<typeof setTimeout>);
-      timersRef.current.push(setTimeout(() => {
-        try {
-          dcRef.current?.send(JSON.stringify({
-            type: "conversation.item.create",
-            item: { type: "message", role: "system", content: [{ type: "input_text", text: "Time is nearly up. In your next reply, wrap up warmly in one short sentence and invite them to continue in the free full Steady app using the button below." }] },
-          }));
-        } catch {}
-      }, WRAP_AT * 1000));
-      timersRef.current.push(setTimeout(() => teardown(true), VOICE_SECONDS * 1000));
       timersRef.current.push(setTimeout(() => teardown(false), HARD_KILL * 1000));
+      beginIntro(); // scripted Cedar greeting starts now; the script ends the session itself
     } catch (e) {
       const code = (e as { code?: string })?.code;
       console.error("voice start failed", e);
@@ -384,7 +455,7 @@ export default function VoiceHero() {
         fallbackToText("My voice is being shy right now. Type to me here instead. What's your name?");
       }
     }
-  }, [apiOk, say, fallbackToText, teardown, connectRealtime]);
+  }, [apiOk, say, fallbackToText, teardown, connectRealtime, beginIntro]);
 
   /* ---------- text chat ---------- */
   const sendText = useCallback(async (raw: string) => {
