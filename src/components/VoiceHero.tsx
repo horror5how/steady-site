@@ -7,8 +7,11 @@ const VOICE_SECONDS = 150; // scripted intro is unhurried; no longer a hard 60s 
 const HARD_KILL = 200; // absolute failsafe
 const MAX_TEXT_TURNS = 12;
 
-/* The homepage voice intro is a LOCKED script, spoken as clean Cedar audio via
-   /api/hero-say. The realtime model never speaks it — no improv, no stammer. */
+/* The intro opens with two LOCKED lines (greeting, then name + what Steady is),
+   spoken as clean Cedar audio via /api/hero-say. Every turn after that is a LIVE
+   reply from /api/hero-brain — it answers what the person actually said, weaves in
+   the empathy + mapping-system content at the right moment, and closes on signing
+   up today. Cedar speaks every word; the realtime model only transcribes. */
 const SCRIPT = {
   greeting:
     "Hi there. I'm Steady, and it's really good to have you here. Before we begin — what would you like me to call you?",
@@ -17,15 +20,6 @@ const SCRIPT = {
     "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away — " +
     "intrusive thoughts, rumination, the spirals that quietly pull you out of the present. " +
     "Do you have anything on your mind that you think you might need help with?",
-  empathy:
-    "I do understand. That really gets to you — and while it's happening, you don't get to live in the present, which is the whole beauty of life. " +
-    "So let me tell you how I work. At Steady, we follow a mapping system. I take you on a journey through that map, to understand you and your thought patterns more and more. " +
-    "I don't help by reassuring you, handing you antidotes, or giving you some quick fix. What I give you is the ability to say it out loud — and then to know that it's okay. " +
-    "We use science-backed, research-backed methods, like exposure therapy and speaking out loud to me, so you can live in the present and let the thoughts come and go. " +
-    "Do you have any questions for me? Fire away.",
-  closing:
-    "That's a really good thing to be thinking about. The honest truth is, the best way to feel how this works is to try it with me properly. " +
-    "So if you'd like to stay, and use Steady, you can sign up just above — and we'll begin together.",
 };
 
 // ponytail: naive spoken-first-name grab — strip lead-ins, take the salient word.
@@ -107,6 +101,7 @@ export default function VoiceHero() {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const wave = useRef({ amp: 0.07, phase: 0, speaking: false, userSpeaking: false, energy: 0 });
   const ttsRef = useRef<HTMLAudioElement | null>(null);
+  const userDraft = useRef("");
   const introStep = useRef(0);
   const introName = useRef("");
   const introSpeaking = useRef(false);
@@ -120,19 +115,9 @@ export default function VoiceHero() {
     setLines((l) => [...l, { who, text }]);
   }, []);
 
-  /* taster transcript rides to the app in the URL hash → product greets them as known */
-  const ctaHref = useCallback(() => {
-    const convo = linesRef.current.filter((l) => !Object.values(FIRST_LINES).includes(l.text));
-    if (!convo.length) return APP;
-    try {
-      const excerpt = convo.slice(-6).map((l) => `${l.who === "you" ? "Them" : "Steady"}: ${l.text.slice(0, 160)}`);
-      const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ at: Date.now(), excerpt }))));
-      if (payload.length > 1500) return APP;
-      return `${APP}/#taster=${payload}`;
-    } catch {
-      return APP;
-    }
-  }, []);
+  /* every visit starts blank — the taster transcript is never carried anywhere,
+     so no stale chat from a previous session can ever resurface */
+  const ctaHref = useCallback(() => APP, []);
 
   /* ---------- wave canvas ---------- */
   useEffect(() => {
@@ -215,6 +200,13 @@ export default function VoiceHero() {
     };
   }, []);
 
+  /* ---------- fresh start on every visit: bfcache restores get a hard reload ---------- */
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted) window.location.reload(); };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+
   /* ---------- QA hook (read-only) ---------- */
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__steadyHero = {
@@ -272,17 +264,29 @@ export default function VoiceHero() {
     setLines((l) => [...l, { who: "steady", text: reason }]);
   }, [teardown]);
 
-  /* ---------- scripted intro: exact Cedar audio, mic muted while Steady speaks ---------- */
+  /* ---------- intro engine: Cedar audio + live captions, mic muted while Steady speaks ---------- */
   const setMic = useCallback((on: boolean) => {
     const track = micRef.current?.getTracks?.()[0];
     if (track) track.enabled = on;
   }, []);
 
+  /* update the newest line belonging to `who` (for live word-by-word captions) */
+  const updateLast = useCallback((who: Line["who"], text: string) => {
+    setLines((l) => {
+      const copy = [...l];
+      for (let i = copy.length - 1; i >= 0; i--) {
+        if (copy[i].who === who) { copy[i] = { who, text }; return copy; }
+      }
+      return [...copy, { who, text }];
+    });
+  }, []);
+
   const heroSay = useCallback(async (line: string) => {
-    say("steady", line);
+    say("steady", ""); // empty caption line; words appear as Steady speaks
     introSpeaking.current = true;
     wave.current.speaking = true;
     setMic(false); // no echo: the model must not hear and re-transcribe Steady's own voice
+    let reveal: ReturnType<typeof setInterval> | null = null;
     try {
       const r = await fetch("/api/hero-say", {
         method: "POST",
@@ -293,38 +297,74 @@ export default function VoiceHero() {
       const url = URL.createObjectURL(await r.blob());
       const a = new Audio(url);
       ttsRef.current = a;
+      const words = line.split(/\s+/);
+      const startReveal = () => {
+        // pace the caption to the real audio duration; small tail so text never beats the voice
+        const ms = Number.isFinite(a.duration) && a.duration > 1 ? (a.duration * 1000 * 0.96) / words.length : 320;
+        let i = 0;
+        reveal = setInterval(() => {
+          i++;
+          updateLast("steady", words.slice(0, i).join(" "));
+          if (i >= words.length && reveal) { clearInterval(reveal); reveal = null; }
+        }, ms);
+      };
       await new Promise<void>((resolve) => {
+        a.onloadedmetadata = () => {};
+        a.onplaying = startReveal;
         a.onended = () => resolve();
         a.onerror = () => resolve();
         a.play().catch(() => { setNeedsTap(true); resolve(); });
       });
       URL.revokeObjectURL(url);
     } catch {
-      // audio failed — the line is already on screen; carry on
+      // audio failed — show the full line so nothing is lost
     } finally {
+      if (reveal) clearInterval(reveal);
+      updateLast("steady", line);
       wave.current.speaking = false;
       introSpeaking.current = false;
       setMic(true);
     }
-  }, [say, setMic]);
+  }, [say, setMic, updateLast]);
+
+  /* live brain turn: answer what they actually said, steer toward loop -> method -> signup */
+  const brainTurn = useCallback(async (userText: string) => {
+    setThinking(true);
+    const history = linesRef.current
+      .filter((l) => l.text && !Object.values(FIRST_LINES).includes(l.text))
+      .map((l) => ({ role: l.who === "you" ? "user" : "assistant", content: l.text }));
+    const last = history[history.length - 1];
+    if (!(last?.role === "user" && last.content === userText)) history.push({ role: "user", content: userText });
+    let reply: string | null = null;
+    for (let attempt = 0; attempt < 2 && !reply; attempt++) {
+      try {
+        const r = await fetch("/api/hero-brain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history, name: introName.current }),
+        });
+        if (r.ok) reply = (await r.json()).reply;
+        else if (r.status === 429 || r.status === 503) break;
+      } catch {}
+      if (!reply) await new Promise((res) => setTimeout(res, 700));
+    }
+    setThinking(false);
+    await heroSay(reply || "I missed that — say it once more for me?");
+  }, [heroSay]);
 
   const advanceIntro = useCallback((userText: string) => {
     if (introSpeaking.current) return;
     const step = introStep.current;
     if (step === 0) {
       introName.current = extractName(userText);
+      try { if (introName.current) localStorage.setItem("steady-signup-name", introName.current); } catch {}
       introStep.current = 1;
       void heroSay(SCRIPT.explain(introName.current));
-    } else if (step === 1) {
-      introStep.current = 2;
-      void heroSay(SCRIPT.empathy);
-    } else if (step === 2) {
-      introStep.current = 3;
-      try { if (introName.current) localStorage.setItem("steady-signup-name", introName.current); } catch {}
-      void heroSay(SCRIPT.closing).then(() => { teardown(false); setPhase("done"); });
+    } else {
+      introStep.current = step + 1;
+      void brainTurn(userText);
     }
-    // step >= 3: intro is finished; the CTA is on screen
-  }, [heroSay, teardown]);
+  }, [heroSay, brainTurn]);
 
   const beginIntro = useCallback(() => {
     introStep.current = 0;
@@ -377,15 +417,24 @@ export default function VoiceHero() {
 
     const dc = pc.createDataChannel("oai-events");
     dcRef.current = dc;
-    dc.onopen = () => {}; // model never speaks; the scripted intro drives every turn
+    dc.onopen = () => {}; // model never speaks; the intro engine drives every turn
     dc.onmessage = (ev) => {
-      let msg: { type?: string; transcript?: string } = {};
+      let msg: { type?: string; transcript?: string; delta?: string } = {};
       try { msg = JSON.parse(ev.data); } catch { return; }
       const t = msg.type || "";
-      if (t.endsWith("input_audio_transcription.completed") && msg.transcript?.trim()) {
+      if (t.endsWith("input_audio_transcription.delta") && msg.delta) {
         if (introSpeaking.current) return; // ignore any echo of Steady's own voice
-        say("you", msg.transcript.trim());
-        advanceIntro(msg.transcript.trim());
+        // live caption of the visitor's own words as they speak
+        if (!userDraft.current) say("you", "");
+        userDraft.current += msg.delta;
+        updateLast("you", userDraft.current.trim());
+      } else if (t.endsWith("input_audio_transcription.completed") && msg.transcript?.trim()) {
+        if (introSpeaking.current) { userDraft.current = ""; return; }
+        const text = msg.transcript.trim();
+        if (userDraft.current) updateLast("you", text);
+        else say("you", text);
+        userDraft.current = "";
+        advanceIntro(text);
       } else if (t === "input_audio_buffer.speech_started") {
         wave.current.userSpeaking = true;
       } else if (t === "input_audio_buffer.speech_stopped") {
@@ -403,7 +452,7 @@ export default function VoiceHero() {
     if (!sdpRes.ok) throw new Error("sdp " + sdpRes.status);
     await pc.setRemoteDescription({ type: "answer", sdp: await sdpRes.text() });
     return transceiver;
-  }, [say, fallbackToText, advanceIntro]);
+  }, [say, fallbackToText, advanceIntro, updateLast]);
 
   const startVoice = useCallback(async () => {
     if (!apiOk) {
