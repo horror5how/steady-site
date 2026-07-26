@@ -1,5 +1,5 @@
 import { createDecipheriv, createCipheriv, randomBytes, timingSafeEqual } from "node:crypto";
-import { list, put, del } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
 
 // Operator-only review of invite applications. Reached by the Steady intel
 // dashboard, which proxies server-side so the key never reaches a browser.
@@ -98,10 +98,8 @@ export async function POST(request: Request) {
     reviewedAt: new Date().toISOString(),
   };
 
-  // Blob writes are immutable per URL, so replace: write the new sealed record,
-  // then drop the old one. Losing the delete leaves a duplicate, not a data loss.
-  await put(id, seal(updated), { access: "public", addRandomSuffix: false, contentType: "application/json" });
-  if (!target.pathname.endsWith(id)) await del(target.url);
+  // Same pathname, overwrite in place — the id already carries its random suffix.
+  await put(id, seal(updated), { access: "public", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });
 
   return Response.json({ ok: true, status: updated.status }, { headers: { "Cache-Control": "no-store" } });
 }
