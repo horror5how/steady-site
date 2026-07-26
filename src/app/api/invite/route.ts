@@ -59,6 +59,29 @@ export async function POST(request: Request) {
   const city = clean(body.city, 80);
   const about = clean(body.about, 1200);
   const agreed = body.agreed === true;
+  // Self-declared safety screen. Not a clinical assessment and never framed as
+  // one — it is the door policy for a trial with no clinician on the team.
+  const riskFlags = {
+    selfHarmOrHarmToOthers: body.riskSelfHarm === true,
+    recentCrisisOrHospital: body.riskRecentCrisis === true,
+    underCrisisCareNow: body.riskCrisisCare === true,
+  };
+  const screenedOut = Object.values(riskFlags).some(Boolean);
+  const ageBand = clean(body.ageBand, 20);
+  const goals = Array.isArray(body.goals) ? body.goals.slice(0, 3).map((g: unknown) => clean(g, 60)) : [];
+  const frequency = clean(body.frequency, 60);
+  // The flow exits before this, but a direct POST must not get past the age gate.
+  if (ageBand === "Under 18") {
+    return Response.json(
+      {
+        ok: false,
+        screenedOut: true,
+        error:
+          "Steady is being tested with adults only for now, so we can't take under-18s yet. If your thoughts are looping and it's hard, please talk to someone who can help: call or text 988, text HOME to 741741, or call 911 in an emergency. iocdf.org/find-help lists therapists who work with young people.",
+      },
+      { status: 200 },
+    );
+  }
 
   if (!name) return Response.json({ ok: false, error: "Please tell us your first name." }, { status: 400 });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) {
@@ -69,6 +92,18 @@ export async function POST(request: Request) {
     return Response.json(
       { ok: false, error: "We can only accept applications with the confirmation ticked." },
       { status: 400 },
+    );
+  }
+
+  if (screenedOut) {
+    return Response.json(
+      {
+        ok: false,
+        screenedOut: true,
+        error:
+          "Thank you for being honest — that matters. Steady is an early trial with no clinician on the team, so it is not the right place for you right now, and we would rather say that than take you in. Please talk to someone who can actually help: call or text 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911 if you are in immediate danger. For OCD-specialist therapists, iocdf.org/find-help is the best directory there is. We would genuinely be glad to hear from you again once things are steadier.",
+      },
+      { status: 200 },
     );
   }
 
@@ -96,6 +131,11 @@ export async function POST(request: Request) {
     city,
     about,
     agreedToTerms: true,
+    riskFlags,
+    ageBand,
+    goals,
+    frequency,
+    status: "pending",
     consentVersion: "2026-07-25-trial-v1",
     receivedAt: new Date().toISOString(),
     headerRegion: headerCountry === "US" ? headerRegion : headerCountry,
