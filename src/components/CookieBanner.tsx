@@ -37,6 +37,11 @@ export default function CookieBanner() {
     } catch {
       /* ignore */
     }
+    // Act on the choice immediately: accepting starts measurement for this
+    // visit, rejecting tears down anything already running.
+    void import("@/lib/analytics").then((m) =>
+      value === "accepted" ? m.onConsentAccepted() : m.stopAnalytics(),
+    );
     setShow(false);
   };
 

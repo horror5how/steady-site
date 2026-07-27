@@ -4,7 +4,6 @@ import ScrollStory from "@/components/ScrollStory";
 import VoiceHero from "@/components/VoiceHero";
 import Cta from "@/components/Cta";
 import Footer from "@/components/Footer";
-import CookieBanner from "@/components/CookieBanner";
 
 const APP = "https://steady-erp-voice-fresh.vercel.app";
 
@@ -235,7 +234,6 @@ export default function Home() {
         <Cta />
       </main>
       <Footer />
-      <CookieBanner />
     </>
   );
 }

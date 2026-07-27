@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { analyticsAllowed } from "./CookieBanner";
+import { ph as phCapture } from "@/lib/analytics";
 
 // ponytail: kept for when the product opens publicly; invite-only trial routes to /invite.
 export const APP = "https://steady-erp-voice-fresh.vercel.app";
@@ -35,8 +35,6 @@ function extractName(text: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-const PH_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || "phc_CDKFjeVGfuEEid74UGx5CNwNFaqaijF8b6e9A6QhLruM";
-const PH_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 
 type Phase = "boot" | "ready" | "connecting" | "voice" | "text" | "done";
 type Line = { who: "steady" | "you"; text: string };
@@ -48,25 +46,10 @@ const GOODBYE =
 const RESTING =
   "My voice has done a lot of talking today and is having a rest. Type to me here, or come into the full app.";
 
-/* fire-and-forget PostHog capture; never blocks or throws.
-   Gated on cookie consent: no consent, no identifier, no event. */
+/* Hero-taster events go through the shared PostHog client, which is already
+   consent-gated. Tagging the source here keeps every existing funnel intact. */
 function ph(event: string, props: Record<string, unknown> = {}) {
-  if (!analyticsAllowed()) return;
-  try {
-    let id = localStorage.getItem("steady-hero-id");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("steady-hero-id", id);
-    }
-    const payload = {
-      api_key: PH_KEY,
-      event,
-      distinct_id: id,
-      properties: { ...props, source: "hero-taster", $current_url: location.href },
-    };
-    navigator.sendBeacon?.(`${PH_HOST}/i/v0/e/`, new Blob([JSON.stringify(payload)], { type: "application/json" })) ||
-      fetch(`${PH_HOST}/i/v0/e/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), keepalive: true }).catch(() => {});
-  } catch {}
+  phCapture(event, { ...props, source: "hero-taster" });
 }
 
 function pickVariant(): string {

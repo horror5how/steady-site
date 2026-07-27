@@ -83,6 +83,17 @@ export default function PrivacyPage() {
 
             <Reveal>
               <div className="mt-10 rounded-2xl border border-line bg-white p-6 text-[14.5px] leading-relaxed text-ink-soft">
+                <strong className="text-ink">What we measure, and only if you say yes.</strong>{" "}
+                If you accept cookies, we use PostHog to see which pages and buttons people
+                use, and to replay how the site was navigated, so we can fix what&rsquo;s
+                confusing. Anything you type is masked before it leaves your browser, and in
+                the app itself the on-screen words are masked too, so a replay shows the
+                shape of a visit, never its content. Reject cookies and none of this runs.
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <div className="mt-4 rounded-2xl border border-line bg-white p-6 text-[14.5px] leading-relaxed text-ink-soft">
                 <strong className="text-ink">Questions?</strong> Ask Steady itself, it&rsquo;s
                 disarmingly honest about what it stores, or reach us any time. If we
                 wouldn&rsquo;t be comfortable with a practice, we don&rsquo;t build it.
