@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ph, stopReplay } from "@/lib/analytics";
 
 /* One question per screen. Warm questions first, legal last — by the time the
  * consent screen arrives someone has told us what they want help with, which is
@@ -56,7 +57,16 @@ const RISK_OPTIONS = [
 
 const BLOCKED_STATES = new Set(["IL", "NV", "WA"]);
 
-type Exit = { title: string; body: React.ReactNode } | null;
+/* Screen order, for analytics only. Kept out of the screens memo so the
+ * step-viewed effect fires once per step instead of once per render. Must stay
+ * in sync with the screen keys below — the dev-only check further down shouts
+ * in the console if the two ever drift. */
+const STEP_KEYS = [
+  "welcome", "goals", "frequency", "age", "name",
+  "email", "state", "risk", "about", "consent",
+] as const;
+
+type Exit = { title: string; body: React.ReactNode; reason: string } | null;
 
 const CRISIS_LINE = (
   <>
@@ -118,7 +128,11 @@ export default function InviteFlow() {
       });
       const result = await response.json().catch(() => ({ ok: false }));
       if (result.screenedOut || result.blocked) {
-        setExit({ title: "Not right now — and that's the honest answer", body: <p>{result.error}</p> });
+        setExit({
+          title: "Not right now — and that's the honest answer",
+          body: <p>{result.error}</p>,
+          reason: result.blocked ? "blocked_state" : "screened_out",
+        });
         return;
       }
       if (!response.ok || !result.ok) {
@@ -139,7 +153,7 @@ export default function InviteFlow() {
       key: "welcome",
       kicker: "Invite-only research trial",
       title: "Let’s see if Steady is right for you",
-      sub: "Six quick questions, about a minute. There are no wrong answers, and nothing here costs anything.",
+      sub: "Nine short questions and one thing to agree to — about two minutes. There are no wrong answers, and nothing here costs anything.",
       body: (
         <button type="button" onClick={next} className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
           Start
@@ -148,7 +162,7 @@ export default function InviteFlow() {
     },
     {
       key: "goals",
-      kicker: "Question 1 of 6",
+      kicker: "Question 1 of 9",
       title: "What brings you here?",
       sub: "Pick up to three. It helps us know who this first group should be.",
       body: (
@@ -171,14 +185,14 @@ export default function InviteFlow() {
     },
     {
       key: "frequency",
-      kicker: "Question 2 of 6",
+      kicker: "Question 2 of 9",
       title: "How much room does it take up?",
       sub: "However you answer is fine. We just want to understand the shape of it.",
       body: <Options options={FREQUENCY} selected={frequency ? [frequency] : []} onPick={(value) => { setFrequency(value); setTimeout(next, 180); }} />,
     },
     {
       key: "age",
-      kicker: "Question 3 of 6",
+      kicker: "Question 3 of 9",
       title: "What’s your age range?",
       sub: "Steady is for adults only while it’s still being tested.",
       body: (
@@ -189,6 +203,7 @@ export default function InviteFlow() {
             setAgeBand(value);
             if (value === "Under 18") {
               setExit({
+                reason: "under_18",
                 title: "We can’t take under-18s yet — sorry",
                 body: (
                   <>
@@ -217,7 +232,7 @@ export default function InviteFlow() {
     },
     {
       key: "name",
-      kicker: "Question 4 of 6",
+      kicker: "Question 4 of 9",
       title: "What should we call you?",
       sub: "First name is plenty.",
       body: (
@@ -233,7 +248,7 @@ export default function InviteFlow() {
     },
     {
       key: "email",
-      kicker: "Question 5 of 6",
+      kicker: "Question 5 of 9",
       title: "Where should the invitation go?",
       sub: "One email when there’s a place for you. Nothing else, ever.",
       body: (
@@ -250,7 +265,7 @@ export default function InviteFlow() {
     },
     {
       key: "state",
-      kicker: "Question 6 of 6",
+      kicker: "Question 6 of 9",
       title: "Which state are you in?",
       sub: "The rules for this kind of app are set state by state, so we have to ask.",
       body: (
@@ -263,6 +278,7 @@ export default function InviteFlow() {
                 setState(picked);
                 if (BLOCKED_STATES.has(picked)) {
                   setExit({
+                    reason: "blocked_state",
                     title: "Not available in your state yet",
                     body: (
                       <>
@@ -301,7 +317,7 @@ export default function InviteFlow() {
     },
     {
       key: "risk",
-      kicker: "One important one",
+      kicker: "Question 7 of 9 · one important one",
       title: "Has any of this been true in the last three months?",
       sub: "We ask because Steady has no clinician on the team yet. If any of these fit, there’s something better for you than us — and we’d rather point you to it.",
       body: (
@@ -320,7 +336,13 @@ export default function InviteFlow() {
             type="button"
             onClick={() => {
               if (RISK_OPTIONS.some((option) => risk[option.key])) {
+                /* Deliberately coarse: "screened_out", never which box was
+                 * ticked. The step-viewed funnel already tells us how many
+                 * leave here — labelling it with the health reason would put
+                 * clinical data in a third party, which the rest of this rail
+                 * is careful never to do. */
                 setExit({
+                  reason: "screened_out",
                   title: "There’s something better for you than us right now",
                   body: (
                     <>
@@ -350,7 +372,7 @@ export default function InviteFlow() {
     },
     {
       key: "about",
-      kicker: "Optional",
+      kicker: "Question 8 of 9 · optional",
       title: "Anything you’d like us to know?",
       sub: "Only what you’re comfortable writing down. Skip it if you’d rather.",
       body: (
@@ -376,7 +398,7 @@ export default function InviteFlow() {
     },
     {
       key: "consent",
-      kicker: "Last one, and it matters",
+      kicker: "Question 9 of 9 · and it matters",
       title: "The honest version, in six lines",
       sub: "Read these properly — they’re the deal, not the small print.",
       body: (
@@ -445,6 +467,30 @@ export default function InviteFlow() {
     liveRef.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step, exit, done]);
+
+  /* Session replay is on across the marketing site and masks typed input — but
+   * the answers here are buttons, not inputs, so a recording would show which
+   * risk box someone ticked. Never record this flow. */
+  useEffect(() => { stopReplay(); }, []);
+
+  /* Funnel instrumentation. Which step someone reaches, and how they left —
+   * nothing about what they answered. */
+  useEffect(() => {
+    if (exit || done) return;
+    ph("invite_step_viewed", { step, key: STEP_KEYS[Math.min(step, STEP_KEYS.length - 1)] });
+  }, [step, exit, done]);
+
+  useEffect(() => { if (exit) ph("invite_exit", { step, reason: exit.reason }); }, [exit, step]);
+  useEffect(() => { if (done) ph("invite_submitted"); }, [done]);
+
+  /* Mislabelled funnel steps are worse than none — catch drift in dev. */
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const actual = screens.map((screen) => screen.key).join(",");
+    if (actual !== STEP_KEYS.join(",")) {
+      console.error("[invite] STEP_KEYS out of sync with screens:", actual);
+    }
+  }, [screens]);
 
   if (exit) {
     return (
