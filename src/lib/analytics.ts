@@ -2,6 +2,8 @@
 
 import posthog from "posthog-js";
 import { analyticsAllowed } from "@/components/CookieBanner";
+import { isInternal, markNotTracked } from "@/lib/notrack";
+import { metaMirror, startMeta, stopMeta } from "@/lib/meta";
 
 // The project token is a public, write-only client key (like a GA measurement
 // ID) — it cannot read data back out. Env override lets us point a preview
@@ -16,33 +18,17 @@ export const CONSENT_EVENT = "steady-consent-changed";
      1. middleware.ts sets the steady_notrack cookie for INTERNAL_IPS,
      2. visiting any page once with ?notrack=1,
      3. the developer bypass button on /login and /signup.
-   Marked browsers never boot PostHog at all, so nothing is sent to drop later. */
-const NOTRACK_KEY = "steady-notrack";
-
+   A marked browser boots neither PostHog nor the Meta pixel, so nothing is
+   sent to drop later and our own visits never land in an ad audience. */
 export function markInternal(): void {
-  try {
-    localStorage.setItem(NOTRACK_KEY, "1");
-  } catch {
-    /* storage blocked — the cookie/query paths still work */
-  }
+  markNotTracked();
   try {
     posthog.opt_out_capturing();
   } catch {
     /* not booted yet, which is the point */
   }
+  stopMeta();
   stopAnalytics();
-}
-
-function isInternal(): boolean {
-  try {
-    if (new URLSearchParams(window.location.search).has("notrack")) {
-      localStorage.setItem(NOTRACK_KEY, "1");
-    }
-    if (localStorage.getItem(NOTRACK_KEY) === "1") return true;
-  } catch {
-    /* ignore */
-  }
-  return document.cookie.includes("steady_notrack=1");
 }
 
 let started = false;
@@ -77,6 +63,8 @@ export function startAnalytics(): void {
   } catch {
     /* analytics must never break the page */
   }
+  // Same consent gate, same internal-traffic gate, one call site.
+  startMeta();
 }
 
 function legacyId(): string | null {
@@ -96,6 +84,9 @@ export function ph(event: string, props: Record<string, unknown> = {}): void {
   } catch {
     /* ignore */
   }
+  // Single choke point for the whole site, so a new event is measured and
+  // retargetable in one place. metaMirror drops anything not on its allowlist.
+  metaMirror(event, props);
 }
 
 /* Stop replay for this page only, leaving event capture alone. The invite flow
