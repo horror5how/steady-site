@@ -26,7 +26,11 @@ export default function Dashboard() {
     <iframe
       src={src}
       title="Steady"
-      allow="microphone; camera; autoplay; clipboard-write"
+      // screen-wake-lock is policy-controlled and does NOT inherit into a
+      // cross-origin frame: without delegating it here the product's wake lock
+      // silently fails, and a phone sleeping mid-session ends the call. That is
+      // the exact case it exists for, so it has to be delegated explicitly.
+      allow="microphone; camera; autoplay; clipboard-write; screen-wake-lock"
       style={{
         position: "fixed",
         inset: 0,
