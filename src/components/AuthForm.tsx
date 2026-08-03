@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { markInternal } from "@/lib/analytics";
 
 type Mode = "login" | "signup";
 
@@ -90,10 +91,16 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           </button>
         </form>
 
-        {/* TEMPORARY developer shortcut — remove when real auth ships. */}
+        {/* TEMPORARY developer shortcut — remove when real auth ships.
+            Using it marks this browser internal: the click itself is not
+            captured (React's handler runs before autocapture's document
+            listener) and nothing after it is measured either. */}
         <button
           type="button"
-          onClick={() => go()}
+          onClick={() => {
+            markInternal();
+            go();
+          }}
           className="mt-3 w-full rounded-full border border-dashed border-line px-6 py-3 text-[14px] font-medium text-ink-soft transition hover:border-haze hover:text-ink"
         >
           Bypass (I&apos;m a developer)

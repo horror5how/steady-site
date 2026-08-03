@@ -11,6 +11,40 @@ const HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 
 export const CONSENT_EVENT = "steady-consent-changed";
 
+/* Our own visits are never measured. Three ways a browser gets marked internal,
+   any one of which sticks for good:
+     1. middleware.ts sets the steady_notrack cookie for INTERNAL_IPS,
+     2. visiting any page once with ?notrack=1,
+     3. the developer bypass button on /login and /signup.
+   Marked browsers never boot PostHog at all, so nothing is sent to drop later. */
+const NOTRACK_KEY = "steady-notrack";
+
+export function markInternal(): void {
+  try {
+    localStorage.setItem(NOTRACK_KEY, "1");
+  } catch {
+    /* storage blocked — the cookie/query paths still work */
+  }
+  try {
+    posthog.opt_out_capturing();
+  } catch {
+    /* not booted yet, which is the point */
+  }
+  stopAnalytics();
+}
+
+function isInternal(): boolean {
+  try {
+    if (new URLSearchParams(window.location.search).has("notrack")) {
+      localStorage.setItem(NOTRACK_KEY, "1");
+    }
+    if (localStorage.getItem(NOTRACK_KEY) === "1") return true;
+  } catch {
+    /* ignore */
+  }
+  return document.cookie.includes("steady_notrack=1");
+}
+
 let started = false;
 let replayBlocked = false;
 
@@ -18,6 +52,7 @@ let replayBlocked = false;
    every entry point calls it, and the first one that passes the gate wins. */
 export function startAnalytics(): void {
   if (started || typeof window === "undefined") return;
+  if (isInternal()) return;
   if (!analyticsAllowed()) return;
   started = true;
   try {
