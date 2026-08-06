@@ -7,7 +7,7 @@ const ctx = await b.newContext({ permissions: ["microphone"] });
 const p = await ctx.newPage();
 p.on("console", (m) => { if (m.type() === "error") console.log("console error:", m.text().slice(0, 200)); });
 
-await p.goto("http://localhost:3000/", { waitUntil: "domcontentloaded" });
+await p.goto(process.env.HERO_URL || "http://localhost:3000/", { waitUntil: "domcontentloaded" });
 await p.waitForFunction(() => window.__steadyHero?.phase === "ready", null, { timeout: 20000 });
 
 const t0 = Date.now();
