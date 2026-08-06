@@ -7,8 +7,9 @@ import AUDIO from "@/lib/hero-audio.json";
 /* Fixed lines are baked to static mp3 (scripts/gen-hero-audio.mjs) so they start
    instantly. Everything else streams from /api/hero-say as it is generated. */
 const CLIP = (file: string) => `/hero-audio/${file}.mp3`;
-const GREETING_CLIP = CLIP(AUDIO.clips[0].file);
-const FILLERS = AUDIO.clips.slice(1).map((c) => ({ text: c.text, src: CLIP(c.file) }));
+const clipText = (file: string) => AUDIO.clips.find((c) => c.file === file)?.text || "";
+const FILLERS = AUDIO.clips.filter((c) => c.file.startsWith("filler-")).map((c) => ({ text: c.text, src: CLIP(c.file) }));
+const BAKED = AUDIO.clips.map((c) => CLIP(c.file));
 const sayUrl = (line: string) => `/api/hero-say?t=${encodeURIComponent(line)}`;
 /* start pulling audio down before we need it, so playback begins the moment we do */
 function prewarm(src: string) {
@@ -31,9 +32,10 @@ const MAX_TEXT_TURNS = 12;
    the empathy + mapping-system content at the right moment, and closes on signing
    up today. Cedar speaks every word; the realtime model only transcribes. */
 const SCRIPT = {
-  greeting: AUDIO.clips[0].text,
+  greeting: clipText("greeting"),
+  meet: clipText("meet"),
   explain: (name: string) =>
-    `${name}. It's a real pleasure that you've come here to look into Steady. Let me tell you a little about me. ` +
+    `${name}. Let me tell you a little about me. ` +
     "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away, " +
     "intrusive thoughts, rumination, the spirals that quietly pull you out of the present. " +
     "Do you have anything on your mind that you think you might need help with?",
@@ -194,7 +196,7 @@ export default function VoiceHero() {
         setApiOk(ok);
         setPhase("ready");
         // pull the baked clips into cache now so the first word is instant later
-        if (ok) [GREETING_CLIP, ...FILLERS.map((f) => f.src)].forEach((src) => { const a = new Audio(); a.preload = "auto"; a.src = src; });
+        if (ok) BAKED.forEach((src) => { const a = new Audio(); a.preload = "auto"; a.src = src; });
         // start from blank: Steady has not spoken yet, so the chat shows nothing
         setLines(ok ? [] : [{ who: "steady", text: "I'm resting right now. Come meet me properly in the app, it's free." }]);
         ph("hero_ready", { api_ok: ok, variant: variantRef.current });
@@ -371,7 +373,15 @@ export default function VoiceHero() {
       introName.current = extractName(userText);
       try { if (introName.current) localStorage.setItem("steady-signup-name", introName.current); } catch {}
       introStep.current = 1;
-      void heroSay(SCRIPT.explain(introName.current));
+      /* the reply to their name is personal, so it cannot be baked — a baked beat
+         answers instantly while it is generated behind */
+      void (async () => {
+        const meet = heroSay(SCRIPT.meet, prewarm(CLIP("meet")));
+        const line = SCRIPT.explain(introName.current);
+        const warm = prewarm(sayUrl(line));
+        await meet;
+        await heroSay(line, warm);
+      })();
     } else {
       introStep.current = step + 1;
       void brainTurn(userText);
@@ -383,7 +393,7 @@ export default function VoiceHero() {
     introStep.current = 0;
     introName.current = "";
     introSpeaking.current = false;
-    return heroSay(SCRIPT.greeting, prewarm(GREETING_CLIP));
+    return heroSay(SCRIPT.greeting, prewarm(CLIP("greeting")));
   }, [heroSay]);
 
   /* mint + WebRTC connect with a placeholder transceiver; mic track swaps in when granted */

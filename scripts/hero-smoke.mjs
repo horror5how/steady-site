@@ -18,9 +18,23 @@ console.log(`greeting first words: +${Date.now() - t0}ms after click`);
 // wait for the greeting to finish speaking
 await p.waitForFunction(() => !window.__steadyHero.wave.speaking, null, { timeout: 40000 });
 
+await p.evaluate(() => {
+  window.__nameSamples = [];
+  window.__nt = performance.now();
+  window.__npoll = setInterval(() => window.__nameSamples.push([Math.round(performance.now() - window.__nt), window.__steadyHero.wave.speaking]), 50);
+});
 await p.evaluate(() => window.__steadyHero.advance("My name is Sam"));
-await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 2, null, { timeout: 20000 });
+await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 3, null, { timeout: 30000 });
 await p.waitForFunction(() => !window.__steadyHero.wave.speaking, null, { timeout: 60000 });
+console.log("name-step silent gaps:", JSON.stringify(await p.evaluate(() => {
+  clearInterval(window.__npoll);
+  const out = []; let start = null;
+  for (const [t, sp] of window.__nameSamples) {
+    if (!sp && start === null) start = t;
+    if (sp && start !== null) { out.push([start, t - start]); start = null; }
+  }
+  return out;
+})));
 
 // sample whether a voice is actually audible, every 50ms, for the whole turn
 await p.evaluate(() => {
@@ -30,9 +44,9 @@ await p.evaluate(() => {
 });
 const t1 = Date.now();
 await p.evaluate(() => window.__steadyHero.advance("I keep replaying an argument from work at two in the morning"));
-await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 3, null, { timeout: 20000 });
+await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 4, null, { timeout: 20000 });
 console.log(`holding line appears: +${Date.now() - t1}ms after the visitor stops talking`);
-await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 4, null, { timeout: 60000 });
+await p.waitForFunction(() => window.__steadyHero.lines.filter((l) => l.who === "steady").length >= 5, null, { timeout: 60000 });
 console.log(`live reply starts:   +${Date.now() - t1}ms`);
 
 await p.waitForFunction(() => window.__steadyHero.wave.speaking, null, { timeout: 20000 });
