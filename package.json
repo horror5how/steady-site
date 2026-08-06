@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "node scripts/check-meta.mjs && tsc --noEmit"
+    "check": "node scripts/check-meta.mjs && tsc --noEmit",
+    "hero:audio": "node scripts/gen-hero-audio.mjs",
+    "smoke:hero": "node scripts/hero-smoke.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.6.1",

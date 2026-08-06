@@ -2,6 +2,22 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ph as phCapture } from "@/lib/analytics";
+import AUDIO from "@/lib/hero-audio.json";
+
+/* Fixed lines are baked to static mp3 (scripts/gen-hero-audio.mjs) so they start
+   instantly. Everything else streams from /api/hero-say as it is generated. */
+const CLIP = (file: string) => `/hero-audio/${file}.mp3`;
+const GREETING_CLIP = CLIP(AUDIO.clips[0].file);
+const FILLERS = AUDIO.clips.slice(1).map((c) => ({ text: c.text, src: CLIP(c.file) }));
+const sayUrl = (line: string) => `/api/hero-say?t=${encodeURIComponent(line)}`;
+/* start pulling audio down before we need it, so playback begins the moment we do */
+function prewarm(src: string) {
+  const a = new Audio();
+  a.preload = "auto";
+  a.src = src;
+  a.load();
+  return a;
+}
 
 // ponytail: kept for when the product opens publicly; invite-only trial routes to /invite.
 export const APP = "https://steady-erp-voice-fresh.vercel.app";
@@ -15,8 +31,7 @@ const MAX_TEXT_TURNS = 12;
    the empathy + mapping-system content at the right moment, and closes on signing
    up today. Cedar speaks every word; the realtime model only transcribes. */
 const SCRIPT = {
-  greeting:
-    "Hi there. I'm Steady, and it's really good to have you here. Before we begin, what would you like me to call you?",
+  greeting: AUDIO.clips[0].text,
   explain: (name: string) =>
     `${name}. It's a real pleasure that you've come here to look into Steady. Let me tell you a little about me. ` +
     "I'm a science-backed, research-backed A.I., built to help people who are struggling with looping thoughts that don't seem to go away, " +
@@ -88,6 +103,8 @@ export default function VoiceHero() {
   const introStep = useRef(0);
   const introName = useRef("");
   const introSpeaking = useRef(false);
+  const lastFiller = useRef(0);
+  const advanceIntroRef = useRef<(text: string) => void>(() => {});
   const variantRef = useRef("mic-first");
   const linesRef = useRef<Line[]>([]);
   const phaseRef = useRef<Phase>("boot");
@@ -176,6 +193,8 @@ export default function VoiceHero() {
         if (!alive) return;
         setApiOk(ok);
         setPhase("ready");
+        // pull the baked clips into cache now so the first word is instant later
+        if (ok) [GREETING_CLIP, ...FILLERS.map((f) => f.src)].forEach((src) => { const a = new Audio(); a.preload = "auto"; a.src = src; });
         // start from blank: Steady has not spoken yet, so the chat shows nothing
         setLines(ok ? [] : [{ who: "steady", text: "I'm resting right now. Come meet me properly in the app, it's free." }]);
         ph("hero_ready", { api_ok: ok, variant: variantRef.current });
@@ -199,8 +218,11 @@ export default function VoiceHero() {
       get phase() { return phaseRef.current; },
       get lines() { return linesRef.current; },
       get wave() { return { ...wave.current }; },
+      /* QA: feed a turn exactly as the realtime transcript would, so the intro can be
+         driven end to end in a headless browser without a real microphone */
+      advance: (text: string) => { say("you", text); advanceIntroRef.current(text); },
     };
-  }, []);
+  }, [say]);
 
   /* ---------- autoscroll chat ---------- */
   useEffect(() => {
@@ -267,25 +289,23 @@ export default function VoiceHero() {
     });
   }, []);
 
-  const heroSay = useCallback(async (line: string) => {
+  /* Speak one line. Pass an already-warmed element (a baked clip, or a reply whose
+     audio was fetched during the holding line) to start instantly; otherwise the audio
+     streams straight off /api/hero-say, so the first words are heard while the rest is
+     still being generated. Nothing ever waits for a whole file to arrive. */
+  const heroSay = useCallback(async (line: string, warm?: HTMLAudioElement) => {
     say("steady", ""); // empty caption line; words appear as Steady speaks
     introSpeaking.current = true;
     wave.current.speaking = true;
     setMic(false); // no echo: the model must not hear and re-transcribe Steady's own voice
     let reveal: ReturnType<typeof setInterval> | null = null;
     try {
-      const r = await fetch("/api/hero-say", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: line }),
-      });
-      if (!r.ok) throw new Error("say");
-      const url = URL.createObjectURL(await r.blob());
-      const a = new Audio(url);
+      const a = warm || prewarm(sayUrl(line));
       ttsRef.current = a;
       const words = line.split(/\s+/);
       const startReveal = () => {
-        // pace the caption to the real audio duration; small tail so text never beats the voice
+        // pace the caption to the real audio duration when known; a streamed clip has
+        // no duration yet, so fall back to normal speaking speed
         const ms = Number.isFinite(a.duration) && a.duration > 1 ? (a.duration * 1000 * 0.96) / words.length : 320;
         let i = 0;
         reveal = setInterval(() => {
@@ -295,13 +315,11 @@ export default function VoiceHero() {
         }, ms);
       };
       await new Promise<void>((resolve) => {
-        a.onloadedmetadata = () => {};
         a.onplaying = startReveal;
         a.onended = () => resolve();
         a.onerror = () => resolve();
         a.play().catch(() => { setNeedsTap(true); resolve(); });
       });
-      URL.revokeObjectURL(url);
     } catch {
       // audio failed — show the full line so nothing is lost
     } finally {
@@ -315,6 +333,11 @@ export default function VoiceHero() {
 
   /* live brain turn: answer what they actually said, steer toward loop -> method -> signup */
   const brainTurn = useCallback(async (userText: string) => {
+    /* Steady answers the moment they stop talking: a warm holding line plays from a
+       baked clip while the real reply is being written and spoken behind it. The gap
+       is filled with a voice, not silence. */
+    const f = FILLERS[(lastFiller.current = (lastFiller.current + 1 + Math.floor(Math.random() * (FILLERS.length - 1))) % FILLERS.length)];
+    const fillerDone = heroSay(f.text, prewarm(f.src));
     setThinking(true);
     const history = linesRef.current
       .filter((l) => l.text)
@@ -335,7 +358,10 @@ export default function VoiceHero() {
       if (!reply) await new Promise((res) => setTimeout(res, 700));
     }
     setThinking(false);
-    await heroSay(reply || "I missed that — say it once more for me?");
+    const line = reply || "I missed that, say it once more for me?";
+    const warm = prewarm(sayUrl(line)); // fetch the reply's audio under the holding line
+    await fillerDone; // never talk over ourselves
+    await heroSay(line, warm);
   }, [heroSay]);
 
   const advanceIntro = useCallback((userText: string) => {
@@ -351,12 +377,13 @@ export default function VoiceHero() {
       void brainTurn(userText);
     }
   }, [heroSay, brainTurn]);
+  advanceIntroRef.current = advanceIntro;
 
   const beginIntro = useCallback(() => {
     introStep.current = 0;
     introName.current = "";
     introSpeaking.current = false;
-    void heroSay(SCRIPT.greeting);
+    return heroSay(SCRIPT.greeting, prewarm(GREETING_CLIP));
   }, [heroSay]);
 
   /* mint + WebRTC connect with a placeholder transceiver; mic track swaps in when granted */
@@ -468,22 +495,23 @@ export default function VoiceHero() {
       return;
     }
     micRef.current = mic;
+    setPhase("voice");
+    ph("voice_started", { variant: variantRef.current });
+    setSecondsLeft(VOICE_SECONDS);
+    const startedAt = Date.now();
+    const tick = setInterval(() => {
+      const left = VOICE_SECONDS - Math.floor((Date.now() - startedAt) / 1000);
+      setSecondsLeft(Math.max(0, left));
+      if (left <= 0) clearInterval(tick);
+    }, 1000);
+    timersRef.current.push(tick as unknown as ReturnType<typeof setTimeout>);
+    timersRef.current.push(setTimeout(() => teardown(false), HARD_KILL * 1000));
+    // the greeting is a baked clip, so it plays the instant the mic is granted —
+    // the WebRTC handshake finishes underneath it instead of holding it up
+    void beginIntro();
     try {
       const transceiver = await connectPromise;
       await transceiver.sender.replaceTrack(mic.getTracks()[0]);
-
-      setPhase("voice");
-      ph("voice_started", { variant: variantRef.current });
-      setSecondsLeft(VOICE_SECONDS);
-      const startedAt = Date.now();
-      const tick = setInterval(() => {
-        const left = VOICE_SECONDS - Math.floor((Date.now() - startedAt) / 1000);
-        setSecondsLeft(Math.max(0, left));
-        if (left <= 0) clearInterval(tick);
-      }, 1000);
-      timersRef.current.push(tick as unknown as ReturnType<typeof setTimeout>);
-      timersRef.current.push(setTimeout(() => teardown(false), HARD_KILL * 1000));
-      beginIntro(); // scripted Cedar greeting starts now; the script ends the session itself
     } catch (e) {
       const code = (e as { code?: string })?.code;
       console.error("voice start failed", e);
