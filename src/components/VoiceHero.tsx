@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ph as phCapture } from "@/lib/analytics";
 import AUDIO from "@/lib/hero-audio.json";
+import { pickFiller, allFillerClips } from "@/lib/filler-pool";
 
 /* Fixed lines are baked to static mp3 (scripts/gen-hero-audio.mjs) so they start
-   instantly. Everything else streams from /api/hero-say as it is generated. */
+   instantly. Everything else streams from /api/hero-say as it is generated. The
+   holding lines come from the shared 36-line emotion-matched pool (filler-pool.ts):
+   sentiment reads what the visitor said and answers in the right register. */
 const CLIP = (file: string) => `/hero-audio/${file}.mp3`;
 const clipText = (file: string) => AUDIO.clips.find((c) => c.file === file)?.text || "";
-const FILLERS = AUDIO.clips.filter((c) => c.file.startsWith("filler-")).map((c) => ({ text: c.text, src: CLIP(c.file) }));
-const BAKED = AUDIO.clips.map((c) => CLIP(c.file));
+const BAKED = [...AUDIO.clips.map((c) => CLIP(c.file)), ...allFillerClips()];
 const sayUrl = (line: string) => `/api/hero-say?t=${encodeURIComponent(line)}`;
 /* start pulling audio down before we need it, so playback begins the moment we do */
 function prewarm(src: string) {
@@ -105,7 +107,6 @@ export default function VoiceHero() {
   const introStep = useRef(0);
   const introName = useRef("");
   const introSpeaking = useRef(false);
-  const lastFiller = useRef(0);
   const advanceIntroRef = useRef<(text: string) => void>(() => {});
   const variantRef = useRef("mic-first");
   const linesRef = useRef<Line[]>([]);
@@ -335,10 +336,10 @@ export default function VoiceHero() {
 
   /* live brain turn: answer what they actually said, steer toward loop -> method -> signup */
   const brainTurn = useCallback(async (userText: string) => {
-    /* Steady answers the moment they stop talking: a warm holding line plays from a
-       baked clip while the real reply is being written and spoken behind it. The gap
-       is filled with a voice, not silence. */
-    const f = FILLERS[(lastFiller.current = (lastFiller.current + 1 + Math.floor(Math.random() * (FILLERS.length - 1))) % FILLERS.length)];
+    /* Steady answers the moment they stop talking: a holding line matched to the
+       feeling in their words plays from a baked clip while the real reply is written
+       and spoken behind it. The gap is filled with the right voice, not silence. */
+    const f = pickFiller(userText);
     const fillerDone = heroSay(f.text, prewarm(f.src));
     setThinking(true);
     const history = linesRef.current
