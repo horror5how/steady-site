@@ -9,12 +9,12 @@
 // Top-level, the cookie is first-party and everything holds in every browser.
 // The #member hash tells the product this is a signed-up member (not the
 // public taster) so it runs the get-to-know onboarding, greeting them by name.
-// ponytail: restore on-domain embedding only once the product itself lives on
-// a beingsteady.com subdomain (app.beingsteady.com is already attached to the
-// Vercel project and just needs the GoDaddy CNAME).
+// app.beingsteady.com is same-site with this page (CNAME live 2026-08-07), so
+// embedding could return; the top-level redirect stays because it is simpler
+// and cookie-proof in every browser.
 import { useEffect } from "react";
 
-const PRODUCT = "https://steady-erp-voice-fresh.vercel.app/";
+const PRODUCT = "https://app.beingsteady.com/";
 
 export default function Dashboard() {
   useEffect(() => {
