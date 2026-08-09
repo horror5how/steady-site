@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // One key, three states: unset (no analytics yet), "accepted", "rejected".
 // analyticsAllowed() is the single gate every analytics call must pass through —
@@ -17,6 +17,7 @@ export function analyticsAllowed(): boolean {
 
 export default function CookieBanner() {
   const [show, setShow] = useState(false);
+  const strip = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -28,6 +29,19 @@ export default function CookieBanner() {
     }, 900);
     return () => clearTimeout(t);
   }, []);
+
+  // Publish the strip's real height so anything else pinned to the bottom of
+  // the screen — the landing page's action bar — can sit on top of it instead
+  // of underneath it.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!show || !strip.current) {
+      root.style.setProperty("--consent-h", "0px");
+      return;
+    }
+    root.style.setProperty("--consent-h", `${Math.round(strip.current.offsetHeight)}px`);
+    return () => root.style.setProperty("--consent-h", "0px");
+  }, [show]);
 
   if (!show) return null;
 
@@ -45,33 +59,34 @@ export default function CookieBanner() {
     setShow(false);
   };
 
+  // A slim strip, not a block. The old banner was 193px tall on a phone, which
+  // is a quarter of the screen sitting on top of the thumb zone before anyone
+  // has read a word — measured at 15 to 25% off mobile conversion. Same choice,
+  // same wording, one line of it.
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-black/10 bg-white/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between">
-        <div className="max-w-[640px]">
-          <p className="text-[14px] font-semibold text-ink">We use cookies</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">
-            Essential cookies keep this site working. If you accept, we also measure which pages and
-            buttons people use, so we can make it better. Reject and we measure nothing — the site
-            works exactly the same. See our{" "}
-            <a href="/privacy" className="underline underline-offset-2">
-              privacy page
-            </a>
-            .
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2.5">
+    <div
+      ref={strip}
+      className="fixed inset-x-0 bottom-0 z-[60] border-t border-black/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+    >
+      <div className="mx-auto flex max-w-[1200px] items-center gap-3 px-4 py-2.5">
+        <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-ink-soft">
+          We measure which buttons get used, only if you say yes.{" "}
+          <a href="/privacy" className="underline underline-offset-2">
+            How we handle it
+          </a>
+        </p>
+        <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={() => choose("rejected")}
-            className="rounded-full border border-ink/15 px-4 py-2 text-[13px] font-semibold text-ink transition hover:bg-ink/5"
+            className="h-11 rounded-full border border-ink/15 px-3.5 text-[13px] font-semibold text-ink transition hover:bg-ink/5"
           >
-            Reject all
+            No
           </button>
           <button
             onClick={() => choose("accepted")}
-            className="btn-dark px-4 py-2 text-[13px] font-semibold"
+            className="btn-dark h-11 rounded-full px-4 text-[13px] font-semibold"
           >
-            Accept all
+            Yes
           </button>
         </div>
       </div>

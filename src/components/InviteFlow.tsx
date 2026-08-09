@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ph, stopReplay } from "@/lib/analytics";
+import { PREFILL_KEY } from "@/lib/landing";
 
 /* One question per screen. Warm questions first, legal last — by the time the
  * consent screen arrives someone has told us what they want help with, which is
@@ -101,6 +102,18 @@ export default function InviteFlow() {
   const [agreed, setAgreed] = useState(false);
 
   const liveRef = useRef<HTMLDivElement>(null);
+
+  // Somebody arriving from the ad landing page has already given their email.
+  // Asking for it a second time is the kind of small insult that loses people
+  // three questions from the end.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(PREFILL_KEY);
+      if (saved) setEmail(saved);
+    } catch {
+      /* storage blocked — they just type it again */
+    }
+  }, []);
 
   const go = useCallback((next: number) => {
     setError("");
