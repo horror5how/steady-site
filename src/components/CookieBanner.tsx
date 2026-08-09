@@ -32,15 +32,25 @@ export default function CookieBanner() {
 
   // Publish the strip's real height so anything else pinned to the bottom of
   // the screen — the landing page's action bar — can sit on top of it instead
-  // of underneath it.
+  // of underneath it. Observed rather than measured once: a single reading
+  // taken before the stylesheet lands reports the unstyled height, which was
+  // 279px against a real 65, and parked the landing page's action bar in the
+  // middle of the hero.
   useEffect(() => {
     const root = document.documentElement;
-    if (!show || !strip.current) {
+    const el = strip.current;
+    if (!show || !el) {
       root.style.setProperty("--consent-h", "0px");
       return;
     }
-    root.style.setProperty("--consent-h", `${Math.round(strip.current.offsetHeight)}px`);
-    return () => root.style.setProperty("--consent-h", "0px");
+    const publish = () => root.style.setProperty("--consent-h", `${Math.round(el.offsetHeight)}px`);
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.setProperty("--consent-h", "0px");
+    };
   }, [show]);
 
   if (!show) return null;

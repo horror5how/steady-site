@@ -248,20 +248,33 @@ export default function Landing({ variant }: { variant: Variant }) {
           className="object-cover object-center"
         />
         {motionOk ? (
-          <video
-            src="/orb-loop.mp4"
-            poster="/landing/orb-poster.jpg"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
+          // The loop is a square orb. Stretched to cover a 9:16 phone it crops
+          // to an unreadable brown smear, so it sits at its own aspect ratio in
+          // the upper half on a ground sampled from the footage, with its edges
+          // faded out so there is no visible seam.
+          <div
             aria-hidden
-            onCanPlay={() => setVideoReady(true)}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ${
+            className={`absolute inset-0 transition-opacity duration-[1200ms] ${
               videoReady ? "opacity-100" : "opacity-0"
             }`}
-          />
+            style={{ background: "linear-gradient(180deg,#bca88a 0%,#b79f7a 45%,#8d7a5e 100%)" }}
+          >
+            <video
+              src="/orb-loop.mp4"
+              poster="/landing/orb-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              onCanPlay={() => setVideoReady(true)}
+              className="absolute left-1/2 top-[6%] aspect-square w-[118%] -translate-x-1/2 object-cover"
+              style={{
+                maskImage: "radial-gradient(circle at 50% 50%, #000 52%, transparent 74%)",
+                WebkitMaskImage: "radial-gradient(circle at 50% 50%, #000 52%, transparent 74%)",
+              }}
+            />
+          </div>
         ) : null}
 
         {/* Scrim: the type sits on the bottom half, so the background is
@@ -507,12 +520,14 @@ export default function Landing({ variant }: { variant: Variant }) {
         </div>
       </section>
 
-      {/* ---------- Sticky action, once the hero is gone. ---------- */}
+      {/* ---------- Sticky action, once the hero is gone. ----------
+          Unmounted rather than translated off-screen. A transform only hides
+          it if it is flush to the bottom, and it is not — it sits on top of
+          the consent strip. Hidden means gone. */}
+      {showBar ? (
       <div
         style={{ bottom: "var(--consent-h, 0px)" }}
-        className={`fixed inset-x-0 z-50 border-t border-line bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-transform duration-300 ${
-          showBar ? "translate-y-0" : "translate-y-[130%]"
-        }`}
+        className="fixed inset-x-0 z-50 border-t border-line bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 py-2.5">
           <div className="min-w-0 flex-1">
@@ -532,6 +547,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           </button>
         </div>
       </div>
+      ) : null}
     </div>
   );
 }
