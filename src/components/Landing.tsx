@@ -140,6 +140,7 @@ export default function Landing({ variant }: { variant: Variant }) {
   const [motionOk, setMotionOk] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const depth = useRef(0);
 
   useEffect(() => {
@@ -155,6 +156,31 @@ export default function Landing({ variant }: { variant: Variant }) {
     const t = setTimeout(() => setMotionOk(true), 300);
     return () => clearTimeout(t);
   }, []);
+
+  // The autoplay attribute is not a guarantee. iOS Low Power Mode and a few
+  // desktop policies refuse it outright even for a muted, inline video, and
+  // the poster frame then sits there looking like a still. Ask once, and if
+  // the answer is no, start on the first thing the visitor touches.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!motionOk || !video) return;
+    let cleanup = () => {};
+    void video.play().catch(() => {
+      const kick = () => {
+        void video.play().catch(() => {});
+        cleanup();
+      };
+      window.addEventListener("touchstart", kick, { once: true, passive: true });
+      window.addEventListener("click", kick, { once: true });
+      window.addEventListener("scroll", kick, { once: true, passive: true });
+      cleanup = () => {
+        window.removeEventListener("touchstart", kick);
+        window.removeEventListener("click", kick);
+        window.removeEventListener("scroll", kick);
+      };
+    });
+    return () => cleanup();
+  }, [motionOk]);
 
   // The sticky bar appears once the hero is behind you, so it never covers the
   // form that is already on screen. Driven off scroll position rather than an
@@ -267,6 +293,7 @@ export default function Landing({ variant }: { variant: Variant }) {
               loop
               playsInline
               preload="auto"
+              ref={videoRef}
               onCanPlay={() => setVideoReady(true)}
               className="absolute left-1/2 top-[6%] aspect-square w-[118%] -translate-x-1/2 object-cover"
               style={{
