@@ -141,25 +141,22 @@ export default function Landing({ variant }: { variant: Variant }) {
     ph("landing_view", { variant: variant.key, ad: variant.ad });
   }, [variant]);
 
-  // Sticky bar appears once the hero is behind you, so it never competes with
-  // the form that is already on screen.
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setShowBar(!entry.isIntersecting),
-      { rootMargin: "-120px 0px 0px 0px" },
-    );
-    io.observe(hero);
-    return () => io.disconnect();
-  }, []);
-
-  // Scroll depth, quarter by quarter, reported once each.
+  // The sticky bar appears once the hero is behind you, so it never covers the
+  // form that is already on screen. Driven off scroll position rather than an
+  // IntersectionObserver: the hero is sized in dvh, and dvh changes every time
+  // a mobile browser collapses its address bar. An observer can miss that and
+  // leave the bar sitting on top of the hero CTA. Scroll position cannot.
+  //
+  // Same listener carries scroll depth, quarter by quarter, reported once each.
   useEffect(() => {
     const onScroll = () => {
+      const y = window.scrollY;
+      const hero = heroRef.current?.offsetHeight ?? window.innerHeight;
+      setShowBar(y > hero * 0.85);
+
       const max = document.body.scrollHeight - window.innerHeight;
       if (max <= 0) return;
-      const pct = Math.round((window.scrollY / max) * 100);
+      const pct = Math.round((y / max) * 100);
       for (const mark of [25, 50, 75, 100]) {
         if (pct >= mark && depth.current < mark) {
           depth.current = mark;
@@ -167,8 +164,13 @@ export default function Landing({ variant }: { variant: Variant }) {
         }
       }
     };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [variant]);
 
   const toForm = useCallback((place: string) => {
