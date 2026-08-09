@@ -31,7 +31,11 @@ export type Variant = {
   sub: string;
   /** Sits over the hero image, mirrors the ad's persistent overlay. */
   overlay: string;
+  /** The page's primary action: header, sticky bar, and the share button. */
   cta: string;
+  /** The email button. Usually the same, but ad 5's primary action is to pass
+   *  the page on, so its form has to ask for something different. */
+  formCta?: string;
   loop: LoopStep[];
   /** The ad's exclusion line. Who this is not for. */
   exclusion: string;
@@ -125,6 +129,7 @@ export const VARIANTS: Record<string, Variant> = {
     sub: "Nobody tells you the reassurance is the thing feeding it. Steady is a warm voice they can talk to that will never do what you did.",
     overlay: "You were trying to help",
     cta: "Send it to them",
+    formCta: "Show me what she would see",
     loop: [
       { label: "Trigger", text: "She asks the question again" },
       { label: "Thought", text: "“If I answer it properly this time…”" },

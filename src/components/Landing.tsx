@@ -107,7 +107,7 @@ function LeadForm({ variant, place }: FormProps) {
           disabled={sending}
           className="btn-dark inline-flex h-[52px] w-full items-center justify-center rounded-2xl px-6 text-[16px] font-semibold disabled:opacity-60"
         >
-          {sending ? "One moment…" : variant.cta}
+          {sending ? "One moment…" : variant.formCta ?? variant.cta}
         </button>
       </div>
       {error ? (
@@ -487,10 +487,10 @@ export default function Landing({ variant }: { variant: Variant }) {
           </div>
           <button
             type="button"
-            onClick={() => toForm("sticky_bar")}
+            onClick={() => (variant.forSomeoneElse ? share() : toForm("sticky_bar"))}
             className="btn-dark inline-flex h-12 shrink-0 items-center justify-center rounded-2xl px-5 text-[15px] font-semibold"
           >
-            {variant.cta}
+            {variant.forSomeoneElse && shared ? "Link copied" : variant.cta}
           </button>
         </div>
       </div>
