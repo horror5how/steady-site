@@ -134,12 +134,27 @@ function Chips() {
 export default function Landing({ variant }: { variant: Variant }) {
   const [showBar, setShowBar] = useState(false);
   const [shared, setShared] = useState(false);
+  // Starts false so the server sends no video tag at all: the photo is the
+  // LCP element either way, and a phone on Reduce Motion or Data Saver never
+  // pays for 442KB it did not ask for.
+  const [motionOk, setMotionOk] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const depth = useRef(0);
 
   useEffect(() => {
     ph("landing_view", { variant: variant.key, ad: variant.ad });
   }, [variant]);
+
+  // Decide about the background loop once the page is interactive, so it never
+  // competes with the hero image for the first paint.
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (reduce || conn?.saveData) return;
+    const t = setTimeout(() => setMotionOk(true), 300);
+    return () => clearTimeout(t);
+  }, []);
 
   // The sticky bar appears once the hero is behind you, so it never covers the
   // form that is already on screen. Driven off scroll position rather than an
@@ -219,6 +234,10 @@ export default function Landing({ variant }: { variant: Variant }) {
         id="apply"
         className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden pt-14"
       >
+        {/* The ad creative stays the base layer, so first paint is an image and
+            the page still looks like the ad that was just clicked. The orb loop
+            fades in on top once it can actually play — never before, so a slow
+            connection sees the photo rather than a black hole. */}
         <Image
           src={variant.image}
           alt={variant.imageAlt}
@@ -228,8 +247,25 @@ export default function Landing({ variant }: { variant: Variant }) {
           sizes="(max-width: 640px) 100vw, 560px"
           className="object-cover object-center"
         />
-        {/* Scrim: the type sits on the bottom half, so the image is darkened
-            from the bottom up rather than flattened everywhere. */}
+        {motionOk ? (
+          <video
+            src="/orb-loop.mp4"
+            poster="/landing/orb-poster.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden
+            onCanPlay={() => setVideoReady(true)}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ${
+              videoReady ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ) : null}
+
+        {/* Scrim: the type sits on the bottom half, so the background is
+            darkened from the bottom up rather than flattened everywhere. */}
         <div
           aria-hidden
           className="absolute inset-0 bg-[linear-gradient(to_top,rgba(18,20,22,0.95)_0%,rgba(18,20,22,0.9)_38%,rgba(18,20,22,0.45)_62%,rgba(18,20,22,0.15)_100%)]"
