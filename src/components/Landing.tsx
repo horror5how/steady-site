@@ -204,7 +204,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           <button
             type="button"
             onClick={() => toForm("header")}
-            className="h-9 rounded-full border border-ink/15 px-3.5 text-[13px] font-semibold text-ink transition active:scale-[0.97]"
+            className="h-11 rounded-full border border-ink/15 px-4 text-[13.5px] font-semibold text-ink transition active:scale-[0.97]"
           >
             {variant.forSomeoneElse ? "Have a look" : "Get my invite"}
           </button>
