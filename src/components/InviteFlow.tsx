@@ -496,6 +496,61 @@ export default function InviteFlow() {
   useEffect(() => { if (exit) ph("invite_exit", { step, reason: exit.reason }); }, [exit, step]);
   useEffect(() => { if (done) ph("invite_submitted"); }, [done]);
 
+  /* Drop-off instrumentation. Reaching a screen is already measured; leaving
+   * without finishing is not, and absence from the funnel cannot tell us which
+   * questions someone had answered when they gave up. This does.
+   *
+   * Answered flags only — never the answer itself. "yes"/"no" strings rather
+   * than booleans because PostHog property filters compare strings cleanly. */
+  const leaving = {
+    key: STEP_KEYS[Math.min(step, STEP_KEYS.length - 1)],
+    step,
+    q_goals: goals.length ? "yes" : "no",
+    q_frequency: frequency ? "yes" : "no",
+    q_age: ageBand ? "yes" : "no",
+    q_name: name.trim() ? "yes" : "no",
+    q_email: email.trim() ? "yes" : "no",
+    q_state: state ? "yes" : "no",
+    q_about: about.trim() ? "yes" : "no",
+    agreed: agreed ? "yes" : "no",
+    reached_consent: step >= STEP_KEYS.indexOf("consent") ? "yes" : "no",
+    had_error: error ? "yes" : "no",
+  };
+  const leavingRef = useRef(leaving);
+  leavingRef.current = leaving;
+
+  const doneRef = useRef(false);
+  doneRef.current = Boolean(done || exit);
+  const startedAtRef = useRef(0);
+  const sentForRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+    const leave = () => {
+      // Finishing and being screened out are already their own events, and a
+      // repeat tab-switch on the same screen is one drop-off, not five.
+      if (doneRef.current || sentForRef.current === leavingRef.current.key) return;
+      sentForRef.current = leavingRef.current.key;
+      ph(
+        "invite_abandoned",
+        { ...leavingRef.current, seconds: Math.round((Date.now() - startedAtRef.current) / 1000) },
+        { transport: "sendBeacon" },
+      );
+    };
+    const onHide = () => { if (document.visibilityState === "hidden") leave(); };
+    window.addEventListener("pagehide", leave);
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      window.removeEventListener("pagehide", leave);
+      document.removeEventListener("visibilitychange", onHide);
+    };
+  }, []);
+
+  /* The last screen has a submit that can fail. Someone who bounces off a
+   * broken submit looks identical to someone who changed their mind unless the
+   * failure is measured. */
+  useEffect(() => { if (error) ph("invite_submit_error", { step }); }, [error, step]);
+
   /* Mislabelled funnel steps are worse than none — catch drift in dev. */
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;

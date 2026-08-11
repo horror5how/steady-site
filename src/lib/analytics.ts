@@ -75,12 +75,19 @@ function legacyId(): string | null {
   }
 }
 
-/* Fire-and-forget capture. Never blocks, never throws. */
-export function ph(event: string, props: Record<string, unknown> = {}): void {
+/* Fire-and-forget capture. Never blocks, never throws.
+   `options` is passed straight through to posthog.capture — the one caller that
+   needs it is the invite abandon event, which fires as the page is closing and
+   must go out over sendBeacon or it never leaves. */
+export function ph(
+  event: string,
+  props: Record<string, unknown> = {},
+  options?: { transport?: "XHR" | "sendBeacon"; send_instantly?: boolean },
+): void {
   if (!started) startAnalytics();
   if (!started) return;
   try {
-    posthog.capture(event, props);
+    posthog.capture(event, props, options);
   } catch {
     /* ignore */
   }
