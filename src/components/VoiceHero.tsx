@@ -84,7 +84,7 @@ function pickVariant(): string {
   }
 }
 
-export default function VoiceHero() {
+export default function VoiceHero({ compact = false }: { compact?: boolean }) {
   const [phase, setPhase] = useState<Phase>("boot");
   const [lines, setLines] = useState<Line[]>([]);
   const [input, setInput] = useState("");
@@ -606,17 +606,19 @@ export default function VoiceHero() {
     phase === "done" ? "Come talk properly, it's free." :
     "Steady is here.";
 
+  const Heading = compact ? "h2" : "h1";
+
   return (
     <>
       {/* ================= TOP: the minimal taster — first thing you see ================= */}
       <section className="flex min-h-[88svh] flex-col justify-center px-5 pb-10 pt-28 sm:pt-32">
         <div className="mx-auto flex w-full max-w-[720px] flex-col">
           {/* hero text — quiet, small */}
-          <h1 className="text-center text-[40px] font-bold leading-[0.95] tracking-[-0.04em] text-ink sm:text-[52px] md:text-[60px]">
+          <Heading className="text-center text-[40px] font-bold leading-[0.95] tracking-[-0.04em] text-ink sm:text-[52px] md:text-[60px]">
             A calm voice
             <br />
             for a loud mind.
-          </h1>
+          </Heading>
           <p className="mx-auto mt-5 max-w-[440px] text-balance text-center text-[15px] leading-relaxed text-ink-soft sm:text-[16px]">
             Say what&apos;s looping — Steady talks you back into the present.
           </p>
@@ -706,6 +708,7 @@ export default function VoiceHero() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendText(input); }
                   }}
+                  aria-label="Message to Steady"
                   placeholder="Chat to Steady here…"
                   maxLength={600}
                   rows={2}
@@ -734,7 +737,7 @@ export default function VoiceHero() {
       </section>
 
       {/* ================= BELOW: editorial hero, pushed down ================= */}
-      <section className="px-5 pb-20 pt-16 sm:pt-24">
+      {!compact && <section className="px-5 pb-20 pt-16 sm:pt-24">
         <div className="mx-auto grid max-w-[1180px] items-center gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12">
 
           {/* editorial left */}
@@ -803,7 +806,7 @@ export default function VoiceHero() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
     </>
   );
 }
