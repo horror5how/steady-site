@@ -11,7 +11,20 @@ import { pickFiller, allFillerClips } from "@/lib/filler-pool";
    sentiment reads what the visitor said and answers in the right register. */
 const CLIP = (file: string) => `/hero-audio/${file}.mp3`;
 const clipText = (file: string) => AUDIO.clips.find((c) => c.file === file)?.text || "";
-const BAKED = [...AUDIO.clips.map((c) => CLIP(c.file)), ...allFillerClips()];
+/* The two locked opening lines are worth having ready the moment someone
+   presses the button. The filler pool is 1.2MB and nobody hears a word of it
+   until a conversation actually starts, so it waits until one does. */
+const OPENING = AUDIO.clips.map((c) => CLIP(c.file));
+let fillersWarmed = false;
+function warmFillers() {
+  if (fillersWarmed) return;
+  fillersWarmed = true;
+  for (const src of allFillerClips()) {
+    const a = new Audio();
+    a.preload = "auto";
+    a.src = src;
+  }
+}
 const sayUrl = (line: string) => `/api/hero-say?t=${encodeURIComponent(line)}`;
 /* start pulling audio down before we need it, so playback begins the moment we do */
 function prewarm(src: string) {
@@ -198,7 +211,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
         setApiOk(ok);
         setPhase("ready");
         // pull the baked clips into cache now so the first word is instant later
-        if (ok) BAKED.forEach((src) => { const a = new Audio(); a.preload = "auto"; a.src = src; });
+        if (ok) OPENING.forEach((src) => { const a = new Audio(); a.preload = "auto"; a.src = src; });
         // start from blank: Steady has not spoken yet, so the chat shows nothing
         setLines(ok ? [] : [{ who: "steady", text: "I'm resting right now. Come meet me properly in the app, it's free." }]);
         ph("hero_ready", { api_ok: ok, variant: variantRef.current });
@@ -486,6 +499,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
   }, [say, fallbackToText, advanceIntro, updateLast]);
 
   const startVoice = useCallback(async () => {
+    warmFillers();
     if (!apiOk) {
       window.location.href = "/invite";
       return;
@@ -586,6 +600,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
   }, [apiOk, lines, say, teardown, thinking]);
 
   const startTyping = useCallback(() => {
+    warmFillers();
     setPhase("text");
     ph("type_clicked", { variant: variantRef.current });
     say("steady", TYPED_GREETING);
