@@ -1052,6 +1052,154 @@
   align-items: center;
   color: var(--ink);
 }
+/* ---------- Photography: the loop at night, the steps, the payoff ---------- */
+.nightSection {
+  padding-top: 96px;
+}
+.nightBand {
+  position: relative;
+  margin: 0;
+  border-radius: 34px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0d1620;
+}
+.nightImage {
+  display: block;
+  width: 100%;
+  height: clamp(320px, 46vw, 540px);
+  object-fit: cover;
+  object-position: 42% 38%;
+  /* the sky palette laid gently over a warm frame, so it belongs to this page */
+  filter: saturate(0.82) contrast(1.04) brightness(0.92);
+}
+.nightBand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(200deg, #10378433 0%, transparent 48%),
+    linear-gradient(0deg, #08111bdd 0%, #08111b70 34%, transparent 62%);
+  pointer-events: none;
+}
+.nightCaption {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 44px 44px 38px;
+  color: #fff;
+  max-width: 620px;
+}
+.nightStamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  color: #ffffffcc;
+  padding: 7px 13px 7px 11px;
+  border-radius: 100px;
+  border: 1px solid #ffffff2e;
+  background: #ffffff14;
+  backdrop-filter: blur(10px);
+}
+.nightCaption p {
+  margin: 18px 0 0;
+  font-size: clamp(21px, 2.5vw, 30px);
+  line-height: 1.28;
+  letter-spacing: -0.035em;
+  color: #ffffffbb;
+}
+.nightCaption strong {
+  display: block;
+  font-weight: 500;
+  color: #fff;
+}
+
+.stepPhoto {
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 26px;
+  background: var(--cloud);
+}
+.stepPhoto img {
+  display: block;
+  width: 100%;
+  height: 232px;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.steps article:hover .stepPhoto img {
+  transform: scale(1.035);
+}
+
+.payoffSection {
+  padding-top: 104px;
+}
+.payoff {
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: 56px;
+  align-items: center;
+}
+.payoffPhoto {
+  margin: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--cloud);
+}
+.payoffPhoto img {
+  display: block;
+  width: 100%;
+  height: clamp(300px, 38vw, 430px);
+  object-fit: cover;
+  object-position: 58% 40%;
+}
+.payoffCopy h2 {
+  font-weight: 600;
+  font-size: 44px;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  margin: 0;
+}
+.payoffCopy p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 20px 0 0;
+  max-width: 420px;
+}
+.payoffCopy .textLink {
+  margin-top: 26px;
+}
+@media (max-width: 900px) {
+  .nightSection {
+    padding: 72px 16px 0;
+  }
+  .nightBand {
+    border-radius: 24px;
+  }
+  .nightCaption {
+    padding: 26px 22px 24px;
+  }
+  .stepPhoto img {
+    height: 200px;
+  }
+  .payoffSection {
+    padding: 76px 16px 0;
+  }
+  .payoff {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .payoffCopy h2 {
+    font-size: 31px;
+  }
+}
 /* ---------- Talk to Steady: the live taster, straight under the sky ---------- */
 .talkSection {
   padding-top: 86px;

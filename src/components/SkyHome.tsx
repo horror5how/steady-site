@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { ph } from "@/lib/analytics";
 import s from "./SkyHome.module.css";
 
@@ -531,6 +532,29 @@ export default function SkyHome() {
           </div>
         </section>
 
+        <section className={`${s.section} ${s.nightSection}`}>
+          <figure className={s.nightBand} data-reveal>
+            <Image
+              src="/photos/night-loop.jpg"
+              alt="Sitting awake late at night, the same thought going round"
+              width={1600}
+              height={1200}
+              sizes="(max-width: 900px) 100vw, 1128px"
+              className={s.nightImage}
+            />
+            <figcaption className={s.nightCaption}>
+              <span className={s.nightStamp}>
+                <span className={s.liveDot} />
+                2:14 AM
+              </span>
+              <p>
+                Seventh time round the same thought.
+                <strong>You don&rsquo;t have to argue with it on your own.</strong>
+              </p>
+            </figcaption>
+          </figure>
+        </section>
+
         <section id="how-it-works" className={`${s.section} ${s.howSection}`}>
           <div className={s.sectionHeading} data-reveal>
             <h2>
@@ -549,19 +573,34 @@ export default function SkyHome() {
                 "01",
                 "Find your words",
                 "Talk about what keeps coming back. Steady listens and helps you describe the pattern.",
+                "/photos/man-walk-talking.jpg",
+                "Walking and talking it through with headphones in",
               ],
               [
                 "02",
                 "Understand the loop",
                 "Connect the trigger, the thought and what you do next. Your experience, in your words.",
+                "/photos/kitchen-mapping.jpg",
+                "Talking at the kitchen table, working out what set it off",
               ],
               [
                 "03",
                 "Choose your next step",
                 "When you’re ready, work towards a small, agreed practice. You decide when to begin.",
+                "/photos/hopeful-walk.jpg",
+                "Walking out of the door into the light, a little easier",
               ],
-            ].map(([n, title, text]) => (
+            ].map(([n, title, text, photo, alt]) => (
               <article key={n}>
+                <div className={s.stepPhoto}>
+                  <Image
+                    src={photo}
+                    alt={alt}
+                    width={1200}
+                    height={900}
+                    sizes="(max-width: 900px) 100vw, 350px"
+                  />
+                </div>
                 <span className={s.stepNumber}>{n}</span>
                 <h3>{title}</h3>
                 <p>{text}</p>
@@ -685,6 +724,37 @@ export default function SkyHome() {
                 <p>{a}</p>
               </details>
             ))}
+          </div>
+        </section>
+
+        <section className={`${s.section} ${s.payoffSection}`}>
+          <div className={s.payoff} data-reveal>
+            <figure className={s.payoffPhoto}>
+              <Image
+                src="/photos/hero-woman-relief.jpg"
+                alt="Laughing on the sofa, hand on her chest, shoulders finally down"
+                width={1376}
+                height={768}
+                sizes="(max-width: 900px) 100vw, 620px"
+              />
+            </figure>
+            <div className={s.payoffCopy}>
+              <span className={s.eyebrow}>WHAT THE QUIET FEELS LIKE</span>
+              <h2>
+                The evening
+                <br />
+                gives itself back.
+              </h2>
+              <p>
+                Less checking. Less asking. Less one in the morning looking for
+                the answer that never lands. The loop gets quieter, and the hours
+                it was taking come back to you.
+              </p>
+              <a className={s.textLink} href="/know-more">
+                See how it works
+                <Icon name="arrow" size={17} />
+              </a>
+            </div>
           </div>
         </section>
 
