@@ -1200,79 +1200,68 @@
     font-size: 31px;
   }
 }
-/* ---------- Talk to Steady: the live taster on its own shader sky ---------- */
+/* ---------- Talk to Steady: full-bleed, live on the shader sphere ---------- */
 .talkSection {
-  padding-top: 86px;
-}
-.talkCard {
   position: relative;
   isolation: isolate;
-  border: 1px solid #ffffff1f;
-  border-radius: 34px;
-  /* the still frame: what the shader settles to, and what reduced-motion sees */
-  background:
-    radial-gradient(90% 70% at 62% 34%, #af38ff4d 0%, transparent 62%),
-    radial-gradient(70% 60% at 26% 72%, #809bd64d 0%, transparent 64%),
-    #05050a;
-  padding: 62px 36px 44px;
+  margin-top: 14px;
+  border-radius: 32px;
   overflow: hidden;
-  box-shadow:
-    0 1px 2px #05050a26,
-    0 30px 70px -40px #910aff80;
+  background: #000;
+  padding: 104px 24px 76px;
+  min-height: 780px;
+  display: flex;
+  align-items: center;
 }
 .talkBackdrop {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
-  border-radius: inherit;
 }
 .talkBackdrop canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  /* the sphere renders small in a wide frame — push it out to fill the card */
-  transform: scale(1.15);
-  transform-origin: 50% 46%;
-  /* the sphere swings through very bright phases — hold it back so type always reads */
-  filter: brightness(0.88) saturate(1.2);
 }
-/* keeps the type off the brightest part of the sphere */
-.talkCard::after {
+/* only enough shade to keep type readable through the sphere's brightest phase */
+.talkSection::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(120% 62% at 50% 2%, #05050ab0 0%, transparent 54%),
-    linear-gradient(0deg, #05050a9e 0%, transparent 40%),
-    #05050a3d;
+    radial-gradient(100% 56% at 50% 0%, #00000073 0%, transparent 58%),
+    linear-gradient(0deg, #00000066 0%, transparent 40%);
 }
-.talkHeading {
+.talkInner {
   position: relative;
   z-index: 2;
-  text-align: center;
-  max-width: 620px;
+  width: 100%;
+  max-width: 720px;
   margin: 0 auto;
 }
+.talkHeading {
+  text-align: center;
+}
 .talkHeading .eyebrow {
-  color: #ffffff8c;
+  color: #ffffff99;
 }
 .talkHeading h2 {
   font-weight: 600;
-  font-size: 42px;
+  font-size: 46px;
   letter-spacing: -0.045em;
-  line-height: 1.1;
+  line-height: 1.08;
   margin: 0;
   color: #fff;
+  text-shadow: 0 2px 30px #00000059;
 }
 .talkEm {
   white-space: nowrap;
-  color: #d7b9ff;
+  color: #dcc2ff;
 }
 .talkEm .waveform i {
-  background: #d7b9ff;
+  background: #dcc2ff;
 }
 .talkEm .waveform {
   display: inline-flex;
@@ -1283,15 +1272,13 @@
 .talkHeading p {
   font-size: 16px;
   line-height: 1.5;
-  color: #ffffffb0;
+  color: #ffffffbf;
   margin: 18px 0 0;
 }
 
 /* The taster ships with its own warm, light styling. These rules re-dress it
-   for the dark shader backdrop without forking the component. */
+   for the shader backdrop without forking the component. */
 .talkStage {
-  position: relative;
-  z-index: 2;
   margin-top: 6px;
 }
 .talkStage section {
@@ -1311,7 +1298,7 @@
   height: 84px !important;
 }
 .talkStage :is(p, span, small, strong, label) {
-  color: #ffffffcc;
+  color: #ffffffd6;
   font-family: inherit;
   letter-spacing: -0.01em;
 }
@@ -1328,16 +1315,14 @@
   border-radius: 100px;
   font-family: inherit;
 }
-/* primary: white pill on the dark sphere */
 .talkStage :global(.btn-dark) {
   background: #fff !important;
   color: #05050a !important;
-  box-shadow: 0 10px 30px -12px #ffffff4d;
+  box-shadow: 0 10px 30px -12px #ffffff59;
 }
-/* secondary + every other chip: glass */
 .talkStage button:not(:global(.btn-dark)) {
-  background: #ffffff14 !important;
-  border: 1px solid #ffffff2e !important;
+  background: #ffffff1a !important;
+  border: 1px solid #ffffff3d !important;
   color: #fff !important;
   backdrop-filter: blur(10px);
   box-shadow: none !important;
@@ -1347,18 +1332,17 @@
   color: #05050a !important;
   text-decoration: none;
 }
-/* what you said, in your own bubble */
 .talkStage section > div > div > p[class*="ml-auto"] {
-  background: #ffffff1a !important;
-  border: 1px solid #ffffff26;
+  background: #ffffff26 !important;
+  border: 1px solid #ffffff33;
   color: #fff !important;
   backdrop-filter: blur(10px);
   box-shadow: none !important;
 }
 .talkStage form > div {
   border-radius: 20px !important;
-  border-color: #ffffff2b !important;
-  background: #ffffff0f !important;
+  border-color: #ffffff38 !important;
+  background: #ffffff14 !important;
   backdrop-filter: blur(14px);
   box-shadow: none !important;
 }
@@ -1367,21 +1351,19 @@
   color: #fff !important;
 }
 .talkStage textarea::placeholder {
-  color: #ffffff73 !important;
+  color: #ffffff80 !important;
 }
 .talkStage form button {
   border-radius: 12px !important;
 }
 @media (max-width: 760px) {
   .talkSection {
-    padding: 64px 16px 0;
-  }
-  .talkCard {
-    border-radius: 26px;
-    padding: 44px 18px 32px;
+    border-radius: 24px;
+    padding: 68px 18px 52px;
+    min-height: 0;
   }
   .talkHeading h2 {
-    font-size: 31px;
+    font-size: 32px;
   }
   .talkEm {
     white-space: normal;
@@ -1392,12 +1374,11 @@
   .talkStage canvas {
     height: 66px !important;
   }
-  /* narrow column, more type over the brightest part of the sphere */
-  .talkCard::after {
+  .talkSection::after {
     background:
-      radial-gradient(130% 54% at 50% 0%, #05050ab0 0%, transparent 52%),
-      linear-gradient(0deg, #05050ab3 0%, transparent 46%),
-      #05050a5c;
+      radial-gradient(120% 50% at 50% 0%, #00000080 0%, transparent 54%),
+      linear-gradient(0deg, #00000080 0%, transparent 44%),
+      #0000001f;
   }
 }
 .loading {

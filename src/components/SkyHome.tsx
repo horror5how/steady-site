@@ -405,36 +405,36 @@ export default function SkyHome() {
         </div>
       </section>
 
-      <div className={s.belowHero}>
-        <section id="talk" className={`${s.section} ${s.talkSection}`} ref={talkRef}>
-          <div className={s.talkCard}>
-            <div className={s.talkBackdrop} aria-hidden="true">
-              {talkLive && !paused && <TalkBackdrop />}
-            </div>
-            <div className={s.talkHeading}>
-              <span className={s.eyebrow}>TALK TO STEADY NOW</span>
-              <h2>
-                Say it out loud.{" "}
-                <span className={s.talkEm}>
-                  He&rsquo;s listening
-                  <Wave small />
-                </span>
-              </h2>
-              <p>
-                One minute, right here on the page. No sign-up, no download &mdash;
-                speak to Steady, or type if you&rsquo;d rather.
-              </p>
-            </div>
-            <div className={s.talkStage}>
-              {talkLive ? (
-                <VoiceHero compact />
-              ) : (
-                <p className={s.loading}>Getting Steady ready…</p>
-              )}
-            </div>
+      <section id="talk" className={s.talkSection} ref={talkRef}>
+        <div className={s.talkBackdrop} aria-hidden="true">
+          {talkLive && !paused && <TalkBackdrop />}
+        </div>
+        <div className={s.talkInner}>
+          <div className={s.talkHeading}>
+            <span className={s.eyebrow}>TALK TO STEADY NOW</span>
+            <h2>
+              Say it out loud.{" "}
+              <span className={s.talkEm}>
+                He&rsquo;s listening
+                <Wave small />
+              </span>
+            </h2>
+            <p>
+              One minute, right here on the page. No sign-up, no download &mdash;
+              speak to Steady, or type if you&rsquo;d rather.
+            </p>
           </div>
-        </section>
+          <div className={s.talkStage}>
+            {talkLive ? (
+              <VoiceHero compact />
+            ) : (
+              <p className={s.loading}>Getting Steady ready…</p>
+            )}
+          </div>
+        </div>
+      </section>
 
+      <div className={s.belowHero}>
         <section id="features" className={`${s.section} ${s.firstSection}`}>
           <div className={s.sectionHeading} data-reveal>
             <span className={s.eyebrow}>YOUR MIND HAS A LOT TO SAY</span>
