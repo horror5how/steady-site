@@ -1052,47 +1052,123 @@
   align-items: center;
   color: var(--ink);
 }
-.dialog {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  width: min(700px, calc(100% - 28px));
-  max-height: 90svh;
-  border: 1px solid #e7edf2;
-  border-radius: 26px;
-  padding: 36px 18px 10px;
-  background: white;
-  color: var(--ink);
-  overflow: auto;
-  box-shadow: 0 30px 100px #10378425;
+/* ---------- Talk to Steady: the live taster, straight under the sky ---------- */
+.talkSection {
+  padding-top: 86px;
 }
-.dialog::backdrop {
-  background: #31475a70;
-  backdrop-filter: blur(8px);
+.talkCard {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid #e2ecf5;
+  border-radius: 34px;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #dcebf8 0%, #eef5fb 42%, #fff 78%);
+  padding: 56px 36px 40px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px #1037841a,
+    0 18px 44px -28px #10378455;
 }
-.closeDialog {
-  position: sticky;
-  top: 0;
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  width: 35px;
-  height: 35px;
-  background: #f5f5f5;
-  border: 1px solid #eee;
-  border-radius: 50%;
-  z-index: 5;
+.talkCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #9abfda, transparent);
 }
-.dialog section {
-  padding-top: 16px !important;
+.talkHeading {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto;
+}
+.talkHeading h2 {
+  font-weight: 600;
+  font-size: 42px;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  margin: 0;
+}
+.talkEm {
+  white-space: nowrap;
+  color: var(--blue);
+}
+.talkEm .waveform {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 10px;
+  transform: translateY(-2px);
+}
+.talkHeading p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+
+/* The taster ships with its own (warm, older) styling. These rules re-dress it
+   in the sky palette without forking the component. */
+.talkStage {
+  margin-top: 6px;
+}
+.talkStage section {
   min-height: 0 !important;
+  padding: 0 !important;
 }
-.dialog h2 {
-  font-size: 36px !important;
+/* its own headline duplicates the page hero — the section heading above says it */
+.talkStage section > div > h2,
+.talkStage section > div > h2 + p {
+  display: none;
 }
-.dialog canvas {
-  margin-top: 24px !important;
-  height: 65px !important;
+.talkStage section > div > div:empty {
+  display: none;
+}
+.talkStage canvas {
+  margin-top: 26px !important;
+  height: 84px !important;
+}
+.talkStage :is(button, a, p, textarea, span, strong) {
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+.talkStage button,
+.talkStage a[href] {
+  border-radius: 100px;
+}
+.talkStage :global(.btn-dark) {
+  background: var(--ink);
+  box-shadow:
+    0 1px 2px #2424281a,
+    0 3px 3px #24242817,
+    0 6px 4px #2424280d;
+}
+.talkStage textarea {
+  font-family: inherit;
+}
+.talkStage form > div {
+  border-radius: 20px !important;
+  border-color: #e2ecf5 !important;
+  box-shadow: 0 10px 30px -22px #103784 !important;
+}
+@media (max-width: 760px) {
+  .talkSection {
+    padding: 64px 16px 0;
+  }
+  .talkCard {
+    border-radius: 26px;
+    padding: 40px 18px 30px;
+  }
+  .talkHeading h2 {
+    font-size: 31px;
+  }
+  .talkEm {
+    white-space: normal;
+  }
+  .talkEm .waveform {
+    margin-left: 6px;
+  }
+  .talkStage canvas {
+    height: 66px !important;
+  }
 }
 .loading {
   text-align: center;

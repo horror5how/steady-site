@@ -126,7 +126,7 @@ function Wave({ small = false }: { small?: boolean }) {
           key={i}
           style={
             {
-              "--bar": `${16 + Math.sin(i * 1.73) ** 2 * 70}%`,
+              "--bar": `${(16 + Math.sin(i * 1.73) ** 2 * 70).toFixed(2)}%`,
               "--delay": `${i * -0.08}s`,
             } as CSSProperties
           }
@@ -252,8 +252,8 @@ export default function SkyHome() {
   const [example, setExample] = useState(0);
   const [paused, setPaused] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [demo, setDemo] = useState(false);
-  const dialog = useRef<HTMLDialogElement>(null);
+  const [talkLive, setTalkLive] = useState(false);
+  const talkRef = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -286,18 +286,27 @@ export default function SkyHome() {
       .forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
+  /* ponytail: the taster warms an API and prefetches its baked audio on mount,
+     so it only boots once the section is actually near the viewport. */
   useEffect(() => {
-    if (!demo) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    dialog.current?.showModal();
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [demo]);
+    const el = talkRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTalkLive(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const openDemo = () => {
-    setDemo(true);
-    setPaused(true);
+    setTalkLive(true);
+    ph("demo_open", { source: "sky-home" });
+    talkRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -394,6 +403,32 @@ export default function SkyHome() {
       </section>
 
       <div className={s.belowHero}>
+        <section id="talk" className={`${s.section} ${s.talkSection}`} ref={talkRef}>
+          <div className={s.talkCard}>
+            <div className={s.talkHeading}>
+              <span className={s.eyebrow}>TALK TO STEADY NOW</span>
+              <h2>
+                Say it out loud.{" "}
+                <span className={s.talkEm}>
+                  He&rsquo;s listening
+                  <Wave small />
+                </span>
+              </h2>
+              <p>
+                One minute, right here on the page. No sign-up, no download &mdash;
+                speak to Steady, or type if you&rsquo;d rather.
+              </p>
+            </div>
+            <div className={s.talkStage}>
+              {talkLive ? (
+                <VoiceHero compact />
+              ) : (
+                <p className={s.loading}>Getting Steady ready…</p>
+              )}
+            </div>
+          </div>
+        </section>
+
         <section id="features" className={`${s.section} ${s.firstSection}`}>
           <div className={s.sectionHeading} data-reveal>
             <span className={s.eyebrow}>YOUR MIND HAS A LOT TO SAY</span>
@@ -705,27 +740,6 @@ export default function SkyHome() {
           </div>
         </footer>
       </div>
-      {demo && (
-        <dialog
-          ref={dialog}
-          className={s.dialog}
-          aria-label="Meet Steady"
-          onClose={() => setDemo(false)}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) dialog.current?.close();
-          }}
-        >
-          <button
-            className={s.closeDialog}
-            autoFocus
-            aria-label="Close Steady taster"
-            onClick={() => dialog.current?.close()}
-          >
-            <Icon name="close" />
-          </button>
-          <VoiceHero compact />
-        </dialog>
-      )}
     </div>
   );
 }
