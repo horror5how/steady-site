@@ -44,7 +44,7 @@ taster — the visitor checks the claim themselves in sixty seconds.
 23. DONE — The nine questions framed as an assessment, with what happens next.
 24. DONE — Two-step opt-in: the form appears after the click.
 25. DONE — Thank-you page stacks the next step instead of saying thanks.
-26. TODO — Outbound leaks cut; one goal per page.
+26. DONE — Outbound leaks cut; one goal per page.
 
 ## Design, speed, craft
 
@@ -52,3 +52,9 @@ taster — the visitor checks the claim themselves in sixty seconds.
 28. TODO — Anti-slop audit against the 2026 blacklist.
 29. TODO — Speed pass: images, fonts, the WebGL canvas, PageSpeed measured.
 30. TODO — Micro-interactions, focus states, and full reduced-motion parity.
+
+## Audit notes
+
+- Item 26, measured on the live page: 30 links in total, of which three point
+  off-site. All three are the research citations, opening in a new tab. They
+  stay: a claim without its source is worth less than the click it costs.
