@@ -359,25 +359,37 @@ export default function SkyHome() {
           )}
         </header>
         <main id="main" className={s.heroCopy}>
+          <span className={s.heroKicker}>A calm voice for a loud mind</span>
           <h1>
-            A calm voice.
-            <br />
-            For a loud mind.
+            An AI voice that talks you
+            <br className={s.desktopBreak} /> out of looping thoughts.
           </h1>
           <p>
-            When the same thought keeps coming back,
-            <br className={s.desktopBreak} /> talk it through with Steady.
-            <br />
-            <strong>A little more room for living.</strong>
+            Say the thought that keeps coming back out loud, and hear it lose
+            its grip.{" "}
+            <strong>No waiting list. No diagnosis. No appointment.</strong>
           </p>
           <div className={s.heroActions}>
-            <Apply />
-            <button className={s.demoLink} onClick={openDemo}>
-              <Icon name="play" size={15} />
-              Meet Steady
+            <button className={s.button} onClick={openDemo}>
+              Talk to Steady now
+              <Icon name="arrow" size={16} />
             </button>
+            <Apply light>Apply for a place</Apply>
           </div>
-          <span className={s.heroNote}>Free to apply · Adults 18+</span>
+          <span className={s.heroNote}>
+            Free · No sign-up · 60 seconds · Adults 18+ · Not therapy
+          </span>
+          <div className={s.heroProof}>
+            <a href="/evidence">
+              <Icon name="check" size={15} />
+              Built on exposure practice &mdash; what NICE recommends first for
+              OCD in adults
+            </a>
+            <span>
+              <Icon name="lock" size={15} />
+              The taster isn&rsquo;t saved. Stop whenever you like.
+            </span>
+          </div>
         </main>
         <div className={s.skyWisps} aria-hidden="true" />
         <div className={s.stars} aria-hidden="true">
