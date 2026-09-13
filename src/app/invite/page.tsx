@@ -4,9 +4,9 @@ import Footer from "@/components/Footer";
 import InviteFlow from "@/components/InviteFlow";
 
 export const metadata: Metadata = {
-  title: "Apply for an invitation | Steady",
+  title: "Apply to use Steady | Steady",
   description:
-    "Apply to use Steady. The first million places go by application — you apply, we choose. Free, no card, adults 18+. Not therapy, not medical care, not an emergency service.",
+    "Apply to use Steady. Nine short questions and you are in straight away. Free, no card, adults 18+. Not therapy, not medical care, not an emergency service.",
   alternates: { canonical: "https://beingsteady.com/invite" },
 };
 

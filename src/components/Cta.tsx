@@ -13,8 +13,8 @@ export default function Cta() {
               </h2>
               <p className="mt-5 max-w-[480px] text-[17px] leading-relaxed text-white/90">
                 Say hello, say what's looping, and feel what it's like to have a warm voice
-                on your side. The first million places go by application right now — you
-                apply, we choose. Free, no card, adults 18 and over.
+                on your side. The first million places are open — answer nine questions and
+                you’re in. Free, no card, adults 18 and over.
               </p>
               <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <a

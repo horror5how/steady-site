@@ -119,7 +119,7 @@ export default function Patterns() {
                     href="/invite"
                     className="btn-light mt-5 inline-flex items-center gap-2 px-5 py-2.5 text-[14.5px] font-semibold"
                   >
-                    Apply for an invitation <ArrowRight className="h-4 w-4" />
+                    Apply for a place <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
               </div>

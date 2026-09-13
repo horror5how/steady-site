@@ -61,7 +61,7 @@ type Line = { who: "steady" | "you"; text: string };
 const TYPED_GREETING =
   "No mic, no problem. Hey, I'm Steady. What's your name, or what would you like me to call you? I'm being trained to help people step out of looping thoughts and reassurance seeking, and live more in the present. What's on your mind today?";
 const GOODBYE =
-  "That's our first minute together. I'd love to keep going properly. Places go by application while we're choosing our first million, so apply just above and I'll pick up where we left off.";
+  "That's our first minute together. I'd love to keep going properly. There are nine short questions just above, about two minutes, and you're in straight away — then I'll pick up where we left off.";
 const RESTING =
   "My voice has done a lot of talking today and is having a rest. Type to me here, or come into the full app.";
 
@@ -687,9 +687,9 @@ export default function VoiceHero() {
           {(phase === "done" || (phase === "ready" && !apiOk)) && (
             <div className="mt-10 flex flex-col items-center gap-2.5">
               <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center px-6 py-3 text-[14px] font-semibold">
-                Apply for an invitation
+                Apply for a place
               </a>
-              <span className="text-[12.5px] text-ink-soft">Apply first, we choose you. Free, no card, adults 18+.</span>
+              <span className="text-[12.5px] text-ink-soft">Nine questions and you’re in. Free, no card, adults 18+.</span>
             </div>
           )}
 

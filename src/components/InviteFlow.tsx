@@ -14,6 +14,8 @@ import { PREFILL_KEY } from "@/lib/landing";
  * resources. Nobody gets told they failed a test. */
 
 const APP = "https://steady-erp-voice-fresh.vercel.app";
+// Branded, same-site door an admitted applicant walks straight through.
+const APP_URL = "https://app.beingsteady.com/";
 const TERMS = `${APP}/legal/terms.html`;
 const PRIVACY = `${APP}/legal/privacy.html`;
 
@@ -164,9 +166,9 @@ export default function InviteFlow() {
   const screens = useMemo(() => [
     {
       key: "welcome",
-      kicker: "Apply first — we choose you",
+      kicker: "Answer these and you are in",
       title: "Let’s see if Steady is right for you",
-      sub: "Nine short questions and one thing to agree to — about two minutes. There are no wrong answers, and nothing here costs anything.",
+      sub: "Nine short questions and one thing to agree to — about two minutes. Answer them and you are in straight away, unless what you tell us means Steady is the wrong place for you right now. There are no wrong answers, and nothing here costs anything.",
       body: (
         <button type="button" onClick={next} className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
           Start
@@ -262,8 +264,8 @@ export default function InviteFlow() {
     {
       key: "email",
       kicker: "Question 5 of 9",
-      title: "Where should the invitation go?",
-      sub: "One email when there’s a place for you. Nothing else, ever.",
+      title: "What’s your email?",
+      sub: "So Steady knows you next time you come back. Nothing else, ever.",
       body: (
         <TextStep
           value={email}
@@ -422,7 +424,7 @@ export default function InviteFlow() {
               product. It is not therapy, not medical care, not a diagnosis and not an emergency
               service. It does not treat any condition.
             </li>
-            <li>I am <strong className="text-ink">18 or over</strong>, and I won’t pass my invitation to anyone under 18.</li>
+            <li>I am <strong className="text-ink">18 or over</strong>, and I won’t pass my access to anyone under 18.</li>
             <li>
               I’m taking part <strong className="text-ink">voluntarily</strong>. It may not help me,
               it can get things wrong, and I won’t rely on it in a crisis — I’ll call or text 988,
@@ -466,7 +468,7 @@ export default function InviteFlow() {
             disabled={!agreed || sending}
             className="btn-dark mt-7 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {sending ? "Sending…" : "Apply for my invitation"}
+            {sending ? "Letting you in…" : "Agree and start"}
           </button>
         </>
       ),
@@ -578,19 +580,25 @@ export default function InviteFlow() {
   if (done) {
     return (
       <Shell>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">Application received</p>
+        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">You’re in</p>
         <h1 className="mt-4 text-balance text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink md:text-[42px]">
-          Thank you, {name.trim() || "friend"} — that’s with us
+          You have a place, {name.trim() || "friend"} — start now if you want to
         </h1>
         <p className="mt-6 text-[16px] leading-relaxed text-ink-soft">
-          Every application is read by a person, not a filter. If there’s a place in this first group
-          you’ll get an email with your invitation and exactly what to expect. If not, we’ll keep you
-          first in line for the next one.
+          No waiting and no email to watch for. Open Steady, say what’s looping, and it picks up
+          from there. It works in the browser you’re already in — add it to your home screen and
+          it behaves like an app.
         </p>
-        <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">
-          If things are hard before then and you need someone today: {CRISIS_LINE}.
+        <a
+          href={APP_URL}
+          className="btn-dark mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold"
+        >
+          Open Steady
+        </a>
+        <p className="mt-6 text-[15px] leading-relaxed text-ink-soft">
+          If things get hard and you need someone today: {CRISIS_LINE}.
         </p>
-        <a href="/" className="mt-9 inline-flex items-center text-[15px] font-semibold text-ink underline underline-offset-4">
+        <a href="/" className="mt-8 inline-flex items-center text-[15px] font-semibold text-ink underline underline-offset-4">
           Back to Steady
         </a>
       </Shell>

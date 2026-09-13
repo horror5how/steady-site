@@ -30,12 +30,12 @@ export default function Nav() {
           scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-12 py-2.5 opacity-100"
         }`}
       >
-        <span>Free to use. The first million people apply &mdash; we choose who gets in.</span>
+        <span>Free to use. Answer nine questions and you&rsquo;re in &mdash; the first million places are open.</span>
         <a
           href="/invite"
           className="btn-mint inline-flex items-center gap-1 px-3 py-1 font-medium"
         >
-          Apply for an invitation <ArrowRight className="h-3 w-3" />
+          Apply for a place <ArrowRight className="h-3 w-3" />
         </a>
       </div>
 
@@ -115,7 +115,7 @@ export default function Nav() {
               href="/invite"
               className="btn-dark inline-flex items-center rounded-full px-4 py-2 text-[14px] font-semibold"
             >
-              Get invited
+              Apply
             </a>
           </div>
         </nav>

@@ -1,7 +1,10 @@
 import { createCipheriv, randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
 
-// Applications for a place — the first million are chosen, not self-served.
+// Applications for a place. Anyone who completes the questions and raises no
+// red flag is admitted on the spot — the questionnaire IS the decision, there is
+// no queue and nobody waits on an email. The only people turned away are the
+// three exits below: under 18, a blocked state, or a self-declared crisis risk.
 // ponytail: one append-only blob per application — no DB, no new dependency.
 //
 // Blocked states: Illinois and Nevada ban AI-delivered mental-health practice
@@ -9,6 +12,9 @@ import { put } from "@vercel/blob";
 // adds a private right of action over consumer health data. We take nobody
 // from those three until there is a clinician and counsel in place.
 const BLOCKED = new Set(["IL", "NV", "WA"]);
+
+// Where an admitted applicant goes, immediately.
+const APP_URL = "https://app.beingsteady.com/";
 
 const STATES = new Set([
   "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA",
@@ -135,9 +141,10 @@ export async function POST(request: Request) {
     ageBand,
     goals,
     frequency,
-    status: "pending",
+    status: "admitted",
     consentVersion: "2026-07-25-trial-v1",
     receivedAt: new Date().toISOString(),
+    admittedAt: new Date().toISOString(),
     headerRegion: headerCountry === "US" ? headerRegion : headerCountry,
   };
 
@@ -151,5 +158,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "We couldn't save that. Try again in a moment." }, { status: 502 });
   }
 
-  return Response.json({ ok: true });
+  // Admission is immediate. The blob is the record, not a request for a decision;
+  // if writing it failed above we have already told them to try again.
+  return Response.json({ ok: true, admitted: true, app: APP_URL });
 }

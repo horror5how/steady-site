@@ -40,7 +40,7 @@ export default function Hero() {
             </a>
           </div>
           <p className="rise rise-5 mt-5 text-[13.5px] text-ink-soft/80">
-            Apply first, we choose you · free, no card · adults 18+ · not therapy or medical care
+            Nine questions and you’re in · free, no card · adults 18+ · not therapy or medical care
           </p>
         </div>
 
