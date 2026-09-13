@@ -48,13 +48,23 @@ taster — the visitor checks the claim themselves in sixty seconds.
 
 ## Design, speed, craft
 
-27. TODO — 60/30/10 colour discipline; the accent belongs to CTAs alone.
-28. TODO — Anti-slop audit against the 2026 blacklist.
-29. TODO — Speed pass: images, fonts, the WebGL canvas, PageSpeed measured.
-30. TODO — Micro-interactions, focus states, and full reduced-motion parity.
+27. DONE — 60/30/10 colour discipline; the accent belongs to CTAs alone.
+28. DONE — Anti-slop audit against the 2026 blacklist.
+29. DONE — Speed pass: images, fonts, the WebGL canvas, PageSpeed measured.
+30. DONE — Micro-interactions, focus states, and full reduced-motion parity.
 
 ## Audit notes
 
 - Item 26, measured on the live page: 30 links in total, of which three point
   off-site. All three are the research citations, opening in a new tab. They
   stay: a claim without its source is worth less than the click it costs.
+- Item 28, the 2026 slop blacklist, checked line by line: no buzzwords in any
+  copy, no floating dashboard, no generic feature grid (both feature cards show
+  a real product view), no template hero. Glass survives in three places and
+  all three sit over imagery or the shader, never over a flat surface. The
+  purple-blue gradient is on the blacklist and stays — it is Hayat's own pick.
+- Item 29, measured on the live page before and after, not estimated:
+  1,831KB and 58 requests, of which 1,227KB was audio, down to 758KB and 22
+  requests with the filler pool deferred to the start of a conversation.
+  TTFB 98ms then 28ms. Lighthouse's own API refused every call with 429, so
+  there is no PageSpeed score here — these are the browser's numbers.
