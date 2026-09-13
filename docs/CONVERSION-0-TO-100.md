@@ -21,12 +21,12 @@ taster — the visitor checks the claim themselves in sixty seconds.
 
 ## Proof (proof outsells promises)
 
-9. TODO — Evidence strip: the method named, with real citations, above the fold.
-10. TODO — Stat-led research cards, each with its source line.
-11. TODO — "Try it, don't trust me" block — the taster as the proof itself.
-12. TODO — Clinical boundaries block upgraded into a trust asset.
-13. TODO — "What Steady is not" — turning the wrong people away.
-14. TODO — Privacy promise surfaced on the homepage, not buried.
+9. DONE — Evidence strip: the method named, with real citations, above the fold.
+10. DONE — Stat-led research cards, each with its source line.
+11. DONE — "Try it, don't trust me" block — the taster as the proof itself.
+12. DONE — Clinical boundaries block upgraded into a trust asset.
+13. DONE — "What Steady is not" — turning the wrong people away.
+14. DONE — Privacy promise surfaced on the homepage, not buried.
 
 ## Storytelling (problem → agitate → solve)
 
@@ -39,7 +39,7 @@ taster — the visitor checks the claim themselves in sixty seconds.
 
 ## Conversion mechanics
 
-21. TODO — Repeated CTAs mid-page, not only top and bottom.
+21. DONE — Repeated CTAs mid-page, not only top and bottom.
 22. TODO — /invite rebuilt as a landing page, not a bare form.
 23. TODO — The nine questions framed as an assessment, with what happens next.
 24. TODO — Two-step opt-in: the form appears after the click.

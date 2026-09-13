@@ -1099,6 +1099,192 @@
   align-items: center;
   color: var(--ink);
 }
+/* ---------- Mid-page CTA and the honest "not" list ---------- */
+.midCtaSection {
+  padding-top: 74px;
+}
+.midCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+  padding: 34px 38px;
+  border-radius: 24px;
+  border: 1px solid #e4edf5;
+  background: linear-gradient(104deg, #eef5fb 0%, #fbfdff 62%);
+}
+.midCta h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.midCta p {
+  margin: 9px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.midCta .button {
+  flex-shrink: 0;
+}
+.notList {
+  margin-top: 28px;
+  padding: 34px 38px;
+  border-radius: 22px;
+  border: 1px solid #f0f1f3;
+  background: #fff;
+}
+.notList h3 {
+  margin: 0 0 20px;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+.notList ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 34px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.notList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.notList li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #c2c6cd;
+}
+@media (max-width: 1000px) {
+  .notList ul {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .midCtaSection {
+    padding: 60px 16px 0;
+  }
+  .midCta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 28px 22px;
+  }
+  .midCta h3 {
+    font-size: 21px;
+  }
+  .notList {
+    padding: 26px 22px;
+  }
+}
+/* ---------- Evidence: every claim carries its source ---------- */
+.evidenceSection {
+  padding-top: 100px;
+}
+.evidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.evidenceCard {
+  display: flex;
+  flex-direction: column;
+  padding: 34px 32px 28px;
+  border: 1px solid #f0f1f3;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px #2424280f,
+    0 8px 20px -16px #24242826;
+}
+.evidenceCard h3 {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  margin: 0 0 14px;
+}
+.evidenceCard p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+.evidenceCard a {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--blue);
+  border-top: 1px solid #f0f1f3;
+  padding-top: 16px;
+}
+.evidenceCard a svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.evidenceCard a:hover {
+  text-decoration: underline;
+}
+.honesty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 34px;
+  margin-top: 24px;
+  padding: 26px 32px;
+  border-radius: 20px;
+  background: var(--cloud);
+}
+.honesty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 720px;
+}
+.honesty strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.honesty > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.honesty > a:hover {
+  text-decoration: underline;
+}
+@media (max-width: 1000px) {
+  .evidenceGrid {
+    grid-template-columns: 1fr;
+  }
+  .honesty {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+}
+@media (max-width: 760px) {
+  .evidenceSection {
+    padding: 76px 16px 0;
+  }
+  .evidenceCard {
+    padding: 28px 24px 24px;
+  }
+}
 /* ---------- Photography: the loop at night, the steps, the payoff ---------- */
 .nightSection {
   padding-top: 96px;

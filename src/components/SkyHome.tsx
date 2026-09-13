@@ -438,7 +438,8 @@ export default function SkyHome() {
                   </span>
                 </h2>
                 <p>
-                  One minute, right here on the page. No sign-up, no download
+                  Don&rsquo;t take our word for any of it. This is the actual
+                  product, not a video. One minute, no sign-up, no download
                   &mdash; speak to Steady, or type if you&rsquo;d rather.
                 </p>
               </div>
@@ -578,6 +579,19 @@ export default function SkyHome() {
           </figure>
         </section>
 
+        <section className={`${s.section} ${s.midCtaSection}`}>
+          <div className={s.midCta} data-reveal>
+            <div>
+              <h3>You can be talking to Steady in ten seconds.</h3>
+              <p>No sign-up, no download, nothing saved. Just say the thing.</p>
+            </div>
+            <button className={s.button} onClick={openDemo}>
+              Talk to Steady now
+              <Icon name="arrow" size={16} />
+            </button>
+          </div>
+        </section>
+
         <section id="how-it-works" className={`${s.section} ${s.howSection}`}>
           <div className={s.sectionHeading} data-reveal>
             <h2>
@@ -629,6 +643,65 @@ export default function SkyHome() {
                 <p>{text}</p>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="evidence" className={`${s.section} ${s.evidenceSection}`}>
+          <div className={s.sectionHeading} data-reveal>
+            <span className={s.eyebrow}>WHY ANY OF THIS WORKS</span>
+            <h2>
+              Not a new idea.
+              <br />A well-studied one, said out loud.
+            </h2>
+            <p>
+              Three things the research keeps finding. Every one of them is
+              linked to the paper it came from.
+            </p>
+          </div>
+          <div className={s.evidenceGrid} data-reveal>
+            {[
+              {
+                claim: "Facing it beats arguing with it",
+                body: "For adults with OCD, the first thing NICE tells clinicians to offer is CBT including exposure and response prevention — facing the feared thing in graded steps, without the escape move.",
+                source: "NICE guideline CG31, recommendation 1.5.1.1",
+                href: "https://www.nice.org.uk/guidance/cg31/chapter/Recommendations",
+              },
+              {
+                claim: "Surprise is the part that teaches",
+                body: "“The mismatch between expectancy and outcome is critical for new learning… The more the expectancy can be violated by experience, the greater the inhibitory learning.”",
+                source:
+                  "Craske et al., Maximizing Exposure Therapy, Behaviour Research and Therapy, 2014",
+                href: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4114726/",
+              },
+              {
+                claim: "The props are what keep it alive",
+                body: "“Safety signals alleviate distress in the short term, but when they are no longer present, the fear returns.” The checking, the asking, the phone in your hand.",
+                source:
+                  "Craske et al., 2014, on the removal of safety signals",
+                href: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4114726/",
+              },
+            ].map((e) => (
+              <article key={e.claim} className={s.evidenceCard}>
+                <h3>{e.claim}</h3>
+                <p>{e.body}</p>
+                <a href={e.href} target="_blank" rel="noreferrer noopener">
+                  {e.source}
+                  <Icon name="arrow" size={14} />
+                </a>
+              </article>
+            ))}
+          </div>
+          <div className={s.honesty} data-reveal>
+            <p>
+              <strong>Said plainly:</strong> the evidence backs the approach, not
+              any app, and certainly not a promise about you. Steady is a
+              practice companion. It is not therapy, not treatment, and not a
+              diagnosis.
+            </p>
+            <a href="/evidence">
+              Read the whole thinking
+              <Icon name="arrow" size={15} />
+            </a>
           </div>
         </section>
 
@@ -717,10 +790,27 @@ export default function SkyHome() {
               </article>
             ))}
           </div>
+          <div className={s.notList} data-reveal>
+            <h3>And plainly, what Steady is not</h3>
+            <ul>
+              {[
+                "Not a therapist, and not a replacement for one. If you can get professional care, take it.",
+                "Not a diagnosis. Steady will never tell you what you have.",
+                "Not crisis support. If you need someone now: 988 in the US, 999 or Samaritans on 116 123 in the UK.",
+                "Not for under 18s.",
+                "Not a promise about you. The evidence backs the practice, not an outcome.",
+              ].map((line) => (
+                <li key={line}>
+                  <Icon name="close" size={15} />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
           <div className={s.boundary} data-reveal>
             <p>
-              Steady is an AI practice companion, not therapy, medical advice or
-              crisis support. It does not replace professional care.
+              Your session notes are yours. You can see what Steady remembers
+              and make it forget any of it, whenever you want.
             </p>
             <a href="/privacy">
               Privacy promise
