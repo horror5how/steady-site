@@ -102,7 +102,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Steady. Made with care for busy minds.
             <br />
             <span className="text-white/35">
-              Steady is an invite-only research trial operated by Beyond Elevation Ltd,
+              Steady is operated by Beyond Elevation Ltd,
               registered in England and Wales. Contact hayat@beyondelevation.com.
             </span>
           </span>

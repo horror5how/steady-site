@@ -1,7 +1,7 @@
 import { createCipheriv, randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
 
-// Invite applications for the closed research trial.
+// Applications for a place — the first million are chosen, not self-served.
 // ponytail: one append-only blob per application — no DB, no new dependency.
 //
 // Blocked states: Illinois and Nevada ban AI-delivered mental-health practice

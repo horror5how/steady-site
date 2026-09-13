@@ -15,7 +15,7 @@ import { pickVariant } from "@/lib/landing";
 export const metadata: Metadata = {
   title: "Steady — a warm voice for looping thoughts",
   description:
-    "Say what’s looping and talk it out with a warm voice, tonight. Free to start, no card. An invite-only research trial for adults 18 and over.",
+    "Say what’s looping and talk it out with a warm voice, tonight. Free to start, no card. Apply for one of the first million places — you apply, we choose. Adults 18 and over.",
   robots: { index: false, follow: false },
 };
 

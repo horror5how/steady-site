@@ -357,8 +357,8 @@ export default function Landing({ variant }: { variant: Variant }) {
           </div>
 
           <p className="mt-3 text-[11.5px] leading-snug text-white/55">
-            An invite-only research trial for adults 18 and over. Steady is not therapy, not medical
-            care and not a crisis service.
+            Open by application for adults 18 and over — you apply, we choose. Steady is not therapy,
+            not medical care and not a crisis service.
           </p>
         </div>
       </section>
@@ -470,7 +470,7 @@ export default function Landing({ variant }: { variant: Variant }) {
             },
             {
               q: "What does it cost?",
-              a: "Nothing. There is no card, no trial that turns into a bill, and no waiting list to pay your way past. It is an invite-only research trial and we are taking a small first group.",
+              a: "Nothing. There is no card, no trial that turns into a bill, and no queue to pay your way past. The first million people apply and we choose who gets in.",
             },
           ].map((item) => (
             <details
@@ -506,8 +506,8 @@ export default function Landing({ variant }: { variant: Variant }) {
               : "Say hello, say what’s looping, and see what it’s like."}
           </h2>
           <p className="mt-3 text-[15.5px] leading-relaxed text-white/70">
-            Free, no card, adults 18 and over. We are taking a small first group, so the invite is
-            an application rather than a sign-up.
+            Free, no card, adults 18 and over. The first million places are chosen, so this is an
+            application rather than a sign-up.
           </p>
 
           <div className="mt-6 rounded-3xl bg-white p-3.5">
@@ -562,7 +562,7 @@ export default function Landing({ variant }: { variant: Variant }) {
               {variant.forSomeoneElse ? "Put it in front of her" : "Free. No card. About 2 minutes."}
             </p>
             <p className="truncate text-[12px] leading-tight text-ink-soft">
-              Invite-only research trial
+              Apply first — we choose you
             </p>
           </div>
           <button

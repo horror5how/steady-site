@@ -30,7 +30,7 @@ export default function Nav() {
           scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-12 py-2.5 opacity-100"
         }`}
       >
-        <span>Invite-only research trial. Free, and we&rsquo;re taking a small first group.</span>
+        <span>Free to use. The first million people apply &mdash; we choose who gets in.</span>
         <a
           href="/invite"
           className="btn-mint inline-flex items-center gap-1 px-3 py-1 font-medium"

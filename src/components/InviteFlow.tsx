@@ -164,7 +164,7 @@ export default function InviteFlow() {
   const screens = useMemo(() => [
     {
       key: "welcome",
-      kicker: "Invite-only research trial",
+      kicker: "Apply first — we choose you",
       title: "Let’s see if Steady is right for you",
       sub: "Nine short questions and one thing to agree to — about two minutes. There are no wrong answers, and nothing here costs anything.",
       body: (

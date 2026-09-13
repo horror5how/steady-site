@@ -50,7 +50,7 @@ export default function EmpathyBanner() {
                 href="/invite"
                 className="btn-dark mt-7 inline-flex items-center gap-2 px-6 py-3.5 text-[15.5px] font-semibold"
               >
-                <Mic className="h-4 w-4" /> Click here to be invited
+                <Mic className="h-4 w-4" /> Apply for a place
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>

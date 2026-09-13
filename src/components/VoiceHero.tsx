@@ -22,7 +22,7 @@ function prewarm(src: string) {
   return a;
 }
 
-// ponytail: kept for when the product opens publicly; invite-only trial routes to /invite.
+// ponytail: kept for when the product opens publicly; applications route to /invite.
 export const APP = "https://steady-erp-voice-fresh.vercel.app";
 const VOICE_SECONDS = 150; // scripted intro is unhurried; no longer a hard 60s cut
 const HARD_KILL = 200; // absolute failsafe
@@ -61,7 +61,7 @@ type Line = { who: "steady" | "you"; text: string };
 const TYPED_GREETING =
   "No mic, no problem. Hey, I'm Steady. What's your name, or what would you like me to call you? I'm being trained to help people step out of looping thoughts and reassurance seeking, and live more in the present. What's on your mind today?";
 const GOODBYE =
-  "That's our first minute together. I'd love to keep going properly. Steady is invite-only while we're still testing, so apply for an invitation just above and I'll pick up where we left off.";
+  "That's our first minute together. I'd love to keep going properly. Places go by application while we're choosing our first million, so apply just above and I'll pick up where we left off.";
 const RESTING =
   "My voice has done a lot of talking today and is having a rest. Type to me here, or come into the full app.";
 
@@ -120,7 +120,7 @@ export default function VoiceHero() {
 
   /* every visit starts blank — the taster transcript is never carried anywhere,
      so no stale chat from a previous session can ever resurface */
-  // ponytail: invite-only trial — every public CTA goes to the application, not the app.
+  // ponytail: places are chosen, not self-served — every public CTA goes to the application, not the app.
   // Restore APP here when the product opens to the public.
   const ctaHref = useCallback(() => "/invite", []);
 
@@ -689,7 +689,7 @@ export default function VoiceHero() {
               <a href={ctaHref()} onClick={() => ph("cta_click", { variant: variantRef.current })} className="btn-dark inline-flex items-center px-6 py-3 text-[14px] font-semibold">
                 Apply for an invitation
               </a>
-              <span className="text-[12.5px] text-ink-soft">Invite-only while we test. Free, no card, adults 18+.</span>
+              <span className="text-[12.5px] text-ink-soft">Apply first, we choose you. Free, no card, adults 18+.</span>
             </div>
           )}
 
@@ -766,7 +766,7 @@ export default function VoiceHero() {
                 onClick={() => ph("cta_click", { variant: variantRef.current })}
                 className="btn-mint inline-flex items-center px-7 py-3.5 text-[15px] font-semibold"
               >
-                Click here to be invited
+                Apply for a place
               </a>
               <a
                 href="/know-more"

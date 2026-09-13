@@ -13,8 +13,8 @@ export default function Cta() {
               </h2>
               <p className="mt-5 max-w-[480px] text-[17px] leading-relaxed text-white/90">
                 Say hello, say what's looping, and feel what it's like to have a warm voice
-                on your side. Steady is an invite-only research trial right now — free, no
-                card, adults 18 and over.
+                on your side. The first million places go by application right now — you
+                apply, we choose. Free, no card, adults 18 and over.
               </p>
               <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <a
@@ -24,7 +24,7 @@ export default function Cta() {
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-sage/15">
                     <Sparkle className="h-3 w-3 text-sage" />
                   </span>
-                  Click here to be invited
+                  Apply for a place
                 </a>
                 <a
                   href="/know-more"
