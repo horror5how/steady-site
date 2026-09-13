@@ -81,8 +81,8 @@ function Icon({ name = "wave", size = 20 }: { name?: string; size?: number }) {
 function Wordmark() {
   return (
     <span className={s.wordmark}>
-      <Icon size={27} />
-      Steady
+      <img src="/brand/steady-mark.webp" alt="" width={27} height={27} />
+      steady
     </span>
   );
 }

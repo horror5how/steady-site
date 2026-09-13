@@ -243,7 +243,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           every link here is an exit, and exits are what the ad paid for. */}
       <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-line/70 bg-cream/85 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[560px] items-center justify-between px-4">
-          <span className="text-[15px] font-bold tracking-[0.22em] text-ink">STEADY</span>
+          <span className="wordmark text-[15px] text-ink"><img src="/brand/steady-mark.webp" alt="" width={20} height={20} />steady</span>
           <button
             type="button"
             onClick={() => toForm("header")}

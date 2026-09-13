@@ -1491,13 +1491,27 @@
   isolation: isolate;
   border-radius: 34px;
   overflow: hidden;
-  background: #000;
+  /* A still frame of the shader, painted in its own three colours. The WebGL
+     canvas takes a beat to compile; before this, that beat was a black card. */
+  background:
+    radial-gradient(72% 58% at 74% 24%, #af38ffcc 0%, transparent 62%),
+    radial-gradient(66% 62% at 22% 30%, #910affe6 0%, transparent 66%),
+    radial-gradient(90% 80% at 46% 92%, #809bd6d9 0%, transparent 70%),
+    linear-gradient(158deg, #2b28d6 0%, #3a1fb8 46%, #1d1b6e 100%);
   padding: 72px 36px 52px;
 }
 .talkBackdrop {
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* cross-fade onto the still frame instead of cutting to it */
+  opacity: 0;
+  animation: backdropIn 1.1s 0.25s ease-out forwards;
+}
+@keyframes backdropIn {
+  to {
+    opacity: 1;
+  }
 }
 .talkBackdrop canvas {
   display: block;

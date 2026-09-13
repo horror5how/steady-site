@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     url: "https://beingsteady.com",
     images: [
       {
-        url: "/sky-social.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Steady — A calm voice. For a loud mind.",

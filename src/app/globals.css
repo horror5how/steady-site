@@ -163,9 +163,12 @@ body {
 
 /* ---------- Wordmark ---------- */
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  text-transform: none;
 }
 
 /* ---------- Scroll reveal ---------- */

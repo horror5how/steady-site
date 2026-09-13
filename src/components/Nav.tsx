@@ -50,7 +50,8 @@ export default function Nav() {
         <nav className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-5">
           <div className="flex items-center gap-9">
             <a href="/" className="wordmark text-[15px] text-ink">
-              Steady
+              <img src="/brand/steady-mark.webp" alt="" width={20} height={20} />
+              steady
             </a>
             <div
               className="hidden items-center gap-7 text-[15px] md:flex"

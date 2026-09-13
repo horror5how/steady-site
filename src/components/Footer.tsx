@@ -48,7 +48,7 @@ export default function Footer() {
       <div className="mx-auto max-w-[1200px] px-5 pt-20">
         <div className="grid gap-12 pb-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
-            <span className="wordmark text-[16px]">Steady</span>
+            <span className="wordmark text-[16px]"><img src="/brand/steady-mark.webp" alt="" width={22} height={22} />steady</span>
             <p className="mt-4 max-w-[280px] text-[14px] leading-relaxed text-white/60">
               The warm voice companion for looping thoughts, OCD, Pure O, and rumination.
               Talk it out. Let it pass. Get your life back.
@@ -119,7 +119,7 @@ export default function Footer() {
           className="wordmark whitespace-nowrap text-center font-semibold leading-none text-white/[0.05]"
           style={{ fontSize: "clamp(64px, 18vw, 280px)", letterSpacing: "0.06em" }}
         >
-          Steady
+          steady
         </div>
       </div>
     </footer>

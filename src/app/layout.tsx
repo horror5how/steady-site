@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     title: "Steady: The Warm Voice Companion for Looping Thoughts & OCD",
     description:
       "Talk it out, out loud, with a warm voice on your side. Built on therapist-trusted exposure practice. Free to start, no card.",
-    images: ["/photos/hero-woman-relief.jpg"],
+    images: ["/og-image.png"],
   },
 };
 
