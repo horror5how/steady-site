@@ -321,7 +321,7 @@ export default function SkyHome() {
   }, []);
   const openDemo = () => {
     setTalkLive(true);
-    ph("demo_open", { source: "sky-home" });
+    ph("cta_click", { source: "hero-taster-button" });
     talkRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
