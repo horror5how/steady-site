@@ -15,24 +15,6 @@ const links = [
   { label: "For therapists", href: "/therapists" },
 ];
 
-function Wave() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4" />
-    </svg>
-  );
-}
-
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -57,8 +39,10 @@ export default function Nav() {
             aria-label="Steady home"
             className="inline-flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em] text-ink"
           >
-            <Wave />
-            Steady
+            {/* the same mark the homepage wears (commit 07027e7), not a second brand */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/steady-mark.webp" alt="" width={24} height={24} />
+            steady
           </a>
 
           <div className="hidden items-center gap-7 text-[14px] md:flex">
