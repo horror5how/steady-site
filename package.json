@@ -14,17 +14,20 @@
     "@react-three/fiber": "^9.7.0",
     "@shadergradient/react": "^2.4.20",
     "@vercel/blob": "^2.6.1",
+    "camera-controls": "^3.1.2",
     "next": "16.2.7",
     "posthog-js": "^1.407.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "three": "^0.186.0"
+    "three": "^0.186.0",
+    "three-stdlib": "^2.36.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.186.0",
     "playwright": "^1.61.1",
     "tailwindcss": "^4",
     "typescript": "^5"
