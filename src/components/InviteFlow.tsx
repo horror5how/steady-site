@@ -170,9 +170,32 @@ export default function InviteFlow() {
       title: "Let’s see if Steady is right for you",
       sub: "Nine short questions and one thing to agree to — about two minutes. Answer them and you are in straight away, unless what you tell us means Steady is the wrong place for you right now. There are no wrong answers, and nothing here costs anything.",
       body: (
-        <button type="button" onClick={next} className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
-          Start
-        </button>
+        <>
+          <ul className="mt-8 space-y-3.5">
+            {[
+              "Two minutes of questions. Nobody calls you and there is no email to wait for.",
+              "Answer them and the app opens on the spot — you can be talking to Steady tonight.",
+              "Free, no card, adults 18+. If Steady is the wrong place for you, we say so and point you somewhere better.",
+            ].map((line) => (
+              <li key={line} className="flex items-start gap-3 text-[15px] leading-relaxed text-ink-soft">
+                <svg viewBox="0 0 24 24" className="mt-1 h-4 w-4 shrink-0 text-sage" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+                {line}
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={next} className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
+            Start
+          </button>
+          <p className="mt-4 text-[13px] text-ink-soft">
+            Not ready to answer anything?{" "}
+            <a href="/#talk" className="underline underline-offset-4">
+              Talk to Steady for a minute first
+            </a>
+            .
+          </p>
+        </>
       ),
     },
     {
@@ -595,6 +618,29 @@ export default function InviteFlow() {
         >
           Open Steady
         </a>
+        <div className="mt-10 rounded-3xl border border-line bg-white p-6 sm:p-7">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">
+            Your first minute
+          </p>
+          <ol className="mt-4 space-y-3 text-[15px] leading-relaxed text-ink-soft">
+            <li>
+              <strong className="font-semibold text-ink">1.</strong> Say the thought
+              out loud, exactly as it turns up in your head. Messy is fine.
+            </li>
+            <li>
+              <strong className="font-semibold text-ink">2.</strong> Steady asks what
+              sets it off and what you do next. That is your loop, on paper.
+            </li>
+            <li>
+              <strong className="font-semibold text-ink">3.</strong> Nothing else
+              happens unless you say so. Practice is a step you agree to out loud.
+            </li>
+          </ol>
+          <p className="mt-5 text-[14px] leading-relaxed text-ink-soft">
+            On a phone, use the share menu and add Steady to your home screen — it
+            opens like an app and the microphone works the same.
+          </p>
+        </div>
         <p className="mt-6 text-[15px] leading-relaxed text-ink-soft">
           If things get hard and you need someone today: {CRISIS_LINE}.
         </p>

@@ -40,10 +40,10 @@ taster — the visitor checks the claim themselves in sixty seconds.
 ## Conversion mechanics
 
 21. DONE — Repeated CTAs mid-page, not only top and bottom.
-22. TODO — /invite rebuilt as a landing page, not a bare form.
-23. TODO — The nine questions framed as an assessment, with what happens next.
-24. TODO — Two-step opt-in: the form appears after the click.
-25. TODO — Thank-you page stacks the next step instead of saying thanks.
+22. DONE — /invite rebuilt as a landing page, not a bare form.
+23. DONE — The nine questions framed as an assessment, with what happens next.
+24. DONE — Two-step opt-in: the form appears after the click.
+25. DONE — Thank-you page stacks the next step instead of saying thanks.
 26. TODO — Outbound leaks cut; one goal per page.
 
 ## Design, speed, craft
