@@ -9,6 +9,8 @@ import s from "./SkyHome.module.css";
 const VoiceHero = dynamic(() => import("./VoiceHero"), {
   loading: () => <p className={s.loading}>Getting Steady ready…</p>,
 });
+/* WebGL, so it never renders on the server and never blocks the page */
+const TalkBackdrop = dynamic(() => import("./TalkBackdrop"), { ssr: false });
 
 function Icon({ name = "wave", size = 20 }: { name?: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -406,6 +408,9 @@ export default function SkyHome() {
       <div className={s.belowHero}>
         <section id="talk" className={`${s.section} ${s.talkSection}`} ref={talkRef}>
           <div className={s.talkCard}>
+            <div className={s.talkBackdrop} aria-hidden="true">
+              {talkLive && !paused && <TalkBackdrop />}
+            </div>
             <div className={s.talkHeading}>
               <span className={s.eyebrow}>TALK TO STEADY NOW</span>
               <h2>

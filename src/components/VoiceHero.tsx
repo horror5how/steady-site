@@ -168,8 +168,9 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
       s.phase += 0.035 + s.amp * 0.05;
       const mid = h / 2;
       const maxAmp = h * 0.42 * Math.min(1, s.amp);
-      ribbon(w, mid, maxAmp, s.phase, 6.5, 0, "#2597d0", "rgba(37,151,208,0.45)", 1.7);
-      ribbon(w, mid, maxAmp * 0.65, -s.phase * 0.8, 5.0, 1.7, "rgba(122,168,205,0.6)", "rgba(37,151,208,0.3)", 1.1);
+      // the line sits on the dark shader backdrop — white core, violet bloom
+      ribbon(w, mid, maxAmp, s.phase, 6.5, 0, "#ffffff", "rgba(215,185,255,0.55)", 1.7);
+      ribbon(w, mid, maxAmp * 0.65, -s.phase * 0.8, 5.0, 1.7, "rgba(215,185,255,0.7)", "rgba(145,10,255,0.45)", 1.1);
       if (!reduced) raf = requestAnimationFrame(render);
     };
     render();
