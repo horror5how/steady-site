@@ -505,21 +505,45 @@ export default function SkyHome() {
           </p>
         </section>
 
+        <section className={`${s.section} ${s.nightSection}`}>
+          <figure className={s.nightBand} data-reveal>
+            <Image
+              src="/photos/night-loop.jpg"
+              alt="Sitting awake late at night, the same thought going round"
+              width={1600}
+              height={1200}
+              sizes="(max-width: 900px) 100vw, 1128px"
+              className={s.nightImage}
+            />
+            <figcaption className={s.nightCaption}>
+              <span className={s.nightStamp}>
+                <span className={s.liveDot} />
+                2:14 AM
+              </span>
+              <p>
+                Seventh time round the same thought.
+                <strong>You don&rsquo;t have to argue with it on your own.</strong>
+              </p>
+            </figcaption>
+          </figure>
+        </section>
+
         <section id="features" className={`${s.section}`}>
           <div className={s.sectionHeading} data-reveal>
-            <span className={s.eyebrow}>YOUR MIND HAS A LOT TO SAY</span>
+            <span className={s.eyebrow}>WHAT STEADY ACTUALLY DOES</span>
             <h2>
-              Let’s make some
+              Say it out loud.
               <br />
-              space for{" "}
+              See the loop.{" "}
               <span className={s.inlineWave}>
                 <Icon size={37} />
               </span>{" "}
-              you.
+              Take one step.
             </h2>
             <p>
-              A place to speak freely. A way to understand the loop.
-              <br />A small next step that you choose.
+              Two things, and nothing else. You talk, and the loop gets a shape.
+              <br />
+              Then, only when you say so, one small practice step.
             </p>
           </div>
           <div className={s.featureGrid}>
@@ -605,29 +629,6 @@ export default function SkyHome() {
               </button>
             </article>
           </div>
-        </section>
-
-        <section className={`${s.section} ${s.nightSection}`}>
-          <figure className={s.nightBand} data-reveal>
-            <Image
-              src="/photos/night-loop.jpg"
-              alt="Sitting awake late at night, the same thought going round"
-              width={1600}
-              height={1200}
-              sizes="(max-width: 900px) 100vw, 1128px"
-              className={s.nightImage}
-            />
-            <figcaption className={s.nightCaption}>
-              <span className={s.nightStamp}>
-                <span className={s.liveDot} />
-                2:14 AM
-              </span>
-              <p>
-                Seventh time round the same thought.
-                <strong>You don&rsquo;t have to argue with it on your own.</strong>
-              </p>
-            </figcaption>
-          </figure>
         </section>
 
         <section className={`${s.section} ${s.midCtaSection}`}>

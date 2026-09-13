@@ -1,15 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, ChevronDown, Mic, MapIcon, Shield, Chart, Heart } from "./icons";
+import { ArrowRight } from "./icons";
 
-const products = [
-  { name: "Voice Mapping", desc: "Say the loop out loud, watch it take shape", Icon: MapIcon, href: "/#map" },
-  { name: "Guided Practice", desc: "Gentle 15-minute sessions, by voice", Icon: Mic, href: "/#practice" },
-  { name: "Progress", desc: "Watch the loop lose its grip", Icon: Chart, href: "/#progress" },
-  { name: "Safety & Privacy", desc: "You consent to everything. Your data is yours.", Icon: Shield, href: "/#safety" },
-  { name: "For Therapists", desc: "Steady alongside real therapy", Icon: Heart, href: "/therapists" },
+/* The same nav the homepage wears, so the inner pages stop looking like a
+   different company. One wordmark, four links, log in, one button. The old
+   promo bar ("the first million places are open") is gone: places are applied
+   for and chosen, and nothing on the site says otherwise. */
+
+const links = [
+  { label: "How it works", href: "/know-more" },
+  { label: "Why it works", href: "/evidence" },
+  { label: "FAQ", href: "/faq" },
+  { label: "For therapists", href: "/therapists" },
 ];
+
+function Wave() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4" />
+    </svg>
+  );
+}
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -24,102 +46,68 @@ export default function Nav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      {/* Promo bar */}
-      <div
-        className={`flex items-center justify-center gap-3 border-b border-black/5 bg-white/80 px-4 text-[13px] text-ink-soft backdrop-blur-xl transition-all duration-300 ${
-          scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-12 py-2.5 opacity-100"
-        }`}
-      >
-        <span>Free to use. Answer nine questions and you&rsquo;re in &mdash; the first million places are open.</span>
-        <a
-          href="/invite"
-          className="btn-mint inline-flex items-center gap-1 px-3 py-1 font-medium"
-        >
-          Apply for a place <ArrowRight className="h-3 w-3" />
-        </a>
-      </div>
-
-      {/* Nav bar */}
       <div
         className={`transition-all duration-300 ${
-          scrolled
-            ? "border-b border-black/5 bg-cream/85 backdrop-blur-xl"
-            : "bg-transparent"
+          scrolled ? "border-b border-black/5 bg-white/85 backdrop-blur-xl" : "bg-transparent"
         }`}
       >
         <nav className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-5">
-          <div className="flex items-center gap-9">
-            <a href="/" className="wordmark text-[15px] text-ink">
-              <img src="/brand/steady-mark.webp" alt="" width={20} height={20} />
-              steady
-            </a>
-            <div
-              className="hidden items-center gap-7 text-[15px] md:flex"
-              onMouseLeave={() => setOpen(false)}
-            >
-              <div className="relative" onMouseEnter={() => setOpen(true)}>
-                <button className="flex items-center gap-1 text-ink/80 transition hover:text-ink">
-                  Product <ChevronDown className="h-3.5 w-3.5" />
-                </button>
-                <div
-                  className={`absolute left-1/2 top-full w-[370px] -translate-x-1/2 pt-4 transition-[opacity,transform] duration-[180ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] ${
-                    open
-                      ? "pointer-events-auto scale-100 opacity-100"
-                      : "pointer-events-none scale-[0.96] opacity-0"
-                  }`}
-                  style={{ transformOrigin: "top center" }}
-                >
-                    <div className="glass-light rounded-2xl p-2">
-                      {products.map(({ name, desc, Icon, href }) => (
-                        <a
-                          key={name}
-                          href={href}
-                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-black/5"
-                        >
-                          <span className="grid h-9 w-9 place-items-center rounded-lg bg-sage/10 text-sage">
-                            <Icon className="h-[18px] w-[18px]" />
-                          </span>
-                          <span>
-                            <span className="block text-[14px] font-medium text-ink">{name}</span>
-                            <span className="block text-[12.5px] text-ink-soft">{desc}</span>
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-              </div>
-              {[
-                { label: "How it works", href: "/know-more" },
-                { label: "FAQ", href: "/faq" },
-                { label: "Blog", href: "/blog" },
-                { label: "Therapists", href: "/therapists" },
-              ].map((l) => (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  className="text-ink/80 transition hover:text-ink"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </div>
+          <a
+            href="/"
+            aria-label="Steady home"
+            className="inline-flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em] text-ink"
+          >
+            <Wave />
+            Steady
+          </a>
+
+          <div className="hidden items-center gap-7 text-[14px] md:flex">
+            {links.map((l) => (
+              <a key={l.label} href={l.href} className="text-ink/75 transition hover:text-ink">
+                {l.label}
+              </a>
+            ))}
           </div>
 
-          <div className="flex items-center gap-5 text-[15px]">
-            <a
-              href="/login"
-              className="hidden text-ink/80 transition hover:text-ink sm:inline"
-            >
+          <div className="flex items-center gap-4 text-[14px]">
+            <a href="/login" className="hidden text-ink/75 transition hover:text-ink sm:inline">
               Log in
             </a>
             <a
               href="/invite"
-              className="btn-dark inline-flex items-center rounded-full px-4 py-2 text-[14px] font-semibold"
+              className="btn-dark inline-flex items-center gap-2 rounded-full px-4 py-2 text-[14px] font-semibold"
             >
               Apply
+              <ArrowRight className="h-3.5 w-3.5" />
             </a>
+            <button
+              type="button"
+              className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-ink md:hidden"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="site-menu"
+              onClick={() => setOpen(!open)}
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                {open ? <path d="m6 6 12 12M6 18 18 6" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+              </svg>
+            </button>
           </div>
         </nav>
+        {open && (
+          <nav
+            id="site-menu"
+            aria-label="Mobile navigation"
+            className="border-t border-black/5 bg-white px-5 py-3 md:hidden"
+            onClick={() => setOpen(false)}
+          >
+            {[...links, { label: "Log in", href: "/login" }].map((l) => (
+              <a key={l.label} href={l.href} className="block py-3 text-[15px] text-ink">
+                {l.label}
+              </a>
+            ))}
+          </nav>
+        )}
       </div>
     </header>
   );

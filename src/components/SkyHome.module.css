@@ -1462,7 +1462,7 @@
   width: 100%;
   height: clamp(300px, 38vw, 430px);
   object-fit: cover;
-  object-position: 58% 40%;
+  object-position: 42% 30%;
 }
 .payoffCopy h2 {
   font-weight: 600;
