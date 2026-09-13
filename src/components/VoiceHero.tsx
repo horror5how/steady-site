@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ph as phCapture } from "@/lib/analytics";
 import AUDIO from "@/lib/hero-audio.json";
-import { pickFiller, allFillerClips } from "@/lib/filler-pool";
+import { pickFiller, allFillerClips, scoreFeeling } from "@/lib/filler-pool";
+import { stroke } from "@/lib/stroke";
 
 /* Fixed lines are baked to static mp3 (scripts/gen-hero-audio.mjs) so they start
    instantly. Everything else streams from /api/hero-say as it is generated. The
@@ -260,6 +261,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
     micRef.current = null;
     wave.current.speaking = false;
     wave.current.userSpeaking = false;
+    stroke.state({ userSpeaking: false, steadySpeaking: false });
     if (goodbye) {
       setPhase("done");
       setLines((l) => [...l, { who: "steady", text: GOODBYE }]);
@@ -314,6 +316,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
     say("steady", ""); // empty caption line; words appear as Steady speaks
     introSpeaking.current = true;
     wave.current.speaking = true;
+    stroke.state({ steadySpeaking: true });
     setMic(false); // no echo: the model must not hear and re-transcribe Steady's own voice
     let reveal: ReturnType<typeof setInterval> | null = null;
     try {
@@ -343,6 +346,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
       if (reveal) clearInterval(reveal);
       updateLast("steady", line);
       wave.current.speaking = false;
+      stroke.state({ steadySpeaking: false });
       introSpeaking.current = false;
       setMic(true);
     }
@@ -478,11 +482,14 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
         if (userDraft.current) updateLast("you", text);
         else say("you", text);
         userDraft.current = "";
+        stroke.feel(scoreFeeling(text));
         advanceIntro(text);
       } else if (t === "input_audio_buffer.speech_started") {
         wave.current.userSpeaking = true;
+        stroke.state({ userSpeaking: true });
       } else if (t === "input_audio_buffer.speech_stopped") {
         wave.current.userSpeaking = false;
+        stroke.state({ userSpeaking: false });
       }
     };
 
@@ -505,6 +512,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
       return;
     }
     setPhase("connecting");
+    stroke.state({ connection: "connecting" });
     ph("mic_clicked", { variant: variantRef.current });
     // permission prompt and WebRTC handshake run in parallel: first word ~1s sooner
     const micPromise = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
@@ -522,6 +530,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
     }
     micRef.current = mic;
     setPhase("voice");
+    stroke.state({ connection: "connected" });
     ph("voice_started", { variant: variantRef.current });
     setSecondsLeft(VOICE_SECONDS);
     const startedAt = Date.now();
@@ -560,6 +569,7 @@ export default function VoiceHero({ compact = false }: { compact?: boolean }) {
     if (phaseRef.current === "voice" || phaseRef.current === "connecting") teardown(false);
     if (phaseRef.current !== "text") setPhase("text");
     say("you", text);
+    stroke.feel(scoreFeeling(text));
     ph("text_message", { variant: variantRef.current });
     if (!apiOk) {
       say("steady", "I can't chat right here just now, but the full app is one tap away and free.");

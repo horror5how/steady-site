@@ -122,9 +122,9 @@ const TENDER_MARKERS = [
   /can'?t believe i'?m (telling|saying)/,
 ];
 
-export function classifyFeeling(text: string): string {
+/* VADER-style valence (-1..1) and mean Warriner arousal (0..1) for a line of speech. */
+export function scoreFeeling(text: string): { valence: number; arousal: number } {
   const raw = String(text || "").toLowerCase();
-  if (TENDER_MARKERS.some((m) => m.test(raw))) return "tender";
   const tokens = raw.replace(/[^a-z' !]/g, " ").split(/\s+/).map((t) => t.replace(/'/g, "")).filter(Boolean);
   let sum = 0;
   const arousals: number[] = [];
@@ -148,6 +148,13 @@ export function classifyFeeling(text: string): string {
   const exclaims = Math.min(3, (raw.match(/!/g) || []).length);
   let arousal = arousals.length ? arousals.reduce((a, b) => a + b, 0) / arousals.length : 0.35;
   arousal = Math.max(0, Math.min(1, arousal + exclaims * 0.06));
+  return { valence, arousal };
+}
+
+export function classifyFeeling(text: string): string {
+  const raw = String(text || "").toLowerCase();
+  if (TENDER_MARKERS.some((m) => m.test(raw))) return "tender";
+  const { valence, arousal } = scoreFeeling(text);
   if (valence < -0.15) return arousal >= 0.5 ? "distressed" : "depleted";
   if (valence > 0.15) return arousal >= 0.5 ? "energised" : "calm";
   return "neutral";

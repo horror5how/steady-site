@@ -1596,6 +1596,10 @@
 
 /* The taster ships with its own warm, light styling. These rules re-dress it
    for the shader backdrop without forking the component. */
+.stroke {
+  width: min(38vw, 150px);
+  margin: 10px auto 0;
+}
 .talkStage {
   margin-top: 6px;
 }

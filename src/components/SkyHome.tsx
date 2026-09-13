@@ -11,6 +11,7 @@ const VoiceHero = dynamic(() => import("./VoiceHero"), {
 });
 /* WebGL, so it never renders on the server and never blocks the page */
 const TalkBackdrop = dynamic(() => import("./TalkBackdrop"), { ssr: false });
+const Stroke = dynamic(() => import("./Stroke"), { ssr: false });
 
 function Icon({ name = "wave", size = 20 }: { name?: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -456,6 +457,7 @@ export default function SkyHome() {
                   &mdash; speak to Steady, or type if you&rsquo;d rather.
                 </p>
               </div>
+              {talkLive && <Stroke className={s.stroke} />}
               <div className={s.talkStage}>
                 {talkLive ? (
                   <VoiceHero compact />
@@ -893,10 +895,10 @@ export default function SkyHome() {
           <div className={s.payoff} data-reveal>
             <figure className={s.payoffPhoto}>
               <Image
-                src="/photos/hero-woman-relief.jpg"
-                alt="Laughing on the sofa, hand on her chest, shoulders finally down"
-                width={1376}
-                height={768}
+                src="/photos/evening-back.jpg"
+                alt="Sunk into the sofa in lamplight, eyes closed, a quiet smile"
+                width={2016}
+                height={1344}
                 sizes="(max-width: 900px) 100vw, 620px"
               />
             </figure>
