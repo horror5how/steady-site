@@ -1099,6 +1099,55 @@
   align-items: center;
   color: var(--ink);
 }
+/* ---------- The problem, in their words ---------- */
+.problemSection .sectionHeading {
+  margin-bottom: 44px;
+}
+.problemGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.problemCard {
+  padding: 34px 32px 30px;
+  border-radius: 22px;
+  background: var(--cloud);
+}
+.problemCard h3 {
+  margin: 0 0 14px;
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.22;
+}
+.problemCard p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.problemTurn {
+  margin: 34px auto 0;
+  max-width: 560px;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+@media (max-width: 1000px) {
+  .problemGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .problemCard {
+    padding: 26px 22px;
+  }
+  .problemTurn {
+    font-size: 16px;
+  }
+}
 /* ---------- Mid-page CTA and the honest "not" list ---------- */
 .midCtaSection {
   padding-top: 74px;

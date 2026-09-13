@@ -30,12 +30,12 @@ taster — the visitor checks the claim themselves in sixty seconds.
 
 ## Storytelling (problem → agitate → solve)
 
-15. TODO — Problem section in the visitor's own words, three problems, no more.
-16. TODO — The 2:14 AM band becomes the agitation beat, not decoration.
-17. TODO — A visible before → after arc across the page.
-18. TODO — The loop map shows the mechanism in one glance.
-19. TODO — The payoff section names what they get back, concretely.
-20. TODO — FAQ rewritten as objection killers, in their words.
+15. DONE — Problem section in the visitor's own words, three problems, no more.
+16. DONE — The 2:14 AM band becomes the agitation beat, not decoration.
+17. DONE — A visible before → after arc across the page.
+18. DONE — The loop map shows the mechanism in one glance.
+19. DONE — The payoff section names what they get back, concretely.
+20. DONE — FAQ rewritten as objection killers, in their words.
 
 ## Conversion mechanics
 

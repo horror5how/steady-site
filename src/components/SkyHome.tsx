@@ -230,26 +230,39 @@ function ThoughtCards({ example }: { example: number }) {
 
 const questions = [
   [
-    "What is Steady?",
-    "Steady is an AI voice companion for looping thoughts and self-guided practice. You can talk things through, map the pattern and choose a small practice step. It is not a therapist, a diagnosis or a crisis service.",
+    "Is this just ChatGPT with a voice?",
+    "No. Steady runs one thing: a structured practice built on exposure and response prevention, the approach NICE recommends first for adults with OCD. It will not reassure you, because reassurance is what feeds the loop. A general chatbot will happily tell you the door is locked. Steady will not, and that is the whole point.",
   ],
   [
-    "How do I get a place?",
-    "Apply by answering nine short questions. If your answers meet the current access criteria, you can enter the app immediately. There is no email waiting list. The application explains who the early trial is suitable for.",
+    "I do not want to talk to a robot about this.",
+    "Fair. So do not decide from a description — press the button above and say one sentence to it. Sixty seconds, nothing saved, no sign-up. If it feels wrong, close the tab and you have lost a minute.",
   ],
   [
-    "Do I have to talk out loud?",
-    "The app is built around voice. If you want to get a feel for Steady first, the website taster also gives you the option to type.",
+    "What does it cost?",
+    "Applying is free and the early trial is free. There is no card, and you will not be charged without being asked first.",
   ],
   [
-    "Can I stop a practice?",
-    "Yes. You choose the step and agree to begin. You can pause or stop. Understanding your loop and starting an exposure practice are separate parts of the experience.",
+    "What happens after I apply?",
+    "Nine short questions, about two minutes. If your answers meet the current access criteria you go straight into the app — there is no email waiting list and nobody calls you. The questions also explain who the early trial is not suitable for.",
   ],
   [
-    "Can I use it alongside therapy?",
-    "Steady is a self-guided practice companion and does not replace professional care. If you are working with a therapist, discuss whether it fits with your existing plan.",
+    "Will it push me into something I am not ready for?",
+    "No. Mapping a loop and practising with it are deliberately separate. A practice is a step you agree to out loud first, and you can pause or end it at any point. Nothing starts without your explicit go-ahead.",
+  ],
+  [
+    "Do I have to speak out loud?",
+    "In the app, yes — the whole method works on the channel the loop lives on. On this page you can type instead if you would rather start there.",
+  ],
+  [
+    "I am already seeing a therapist.",
+    "Plenty of people use Steady as the thing between sessions, when the loop turns up at eleven at night and the next appointment is Thursday. It does not replace professional care. Tell your therapist you are using it.",
+  ],
+  [
+    "What happens to what I say?",
+    "The taster on this page is not saved at all. In the app you can see everything Steady remembers about you and make it forget any of it, on the spot.",
   ],
 ];
+
 
 export default function SkyHome() {
   const [example, setExample] = useState(0);
@@ -454,7 +467,43 @@ export default function SkyHome() {
           </div>
         </section>
 
-        <section id="features" className={`${s.section} ${s.firstSection}`}>
+        <section className={`${s.section} ${s.firstSection} ${s.problemSection}`}>
+          <div className={s.sectionHeading} data-reveal>
+            <span className={s.eyebrow}>IF ANY OF THIS IS YOURS</span>
+            <h2>
+              You already know
+              <br />
+              how the night goes.
+            </h2>
+          </div>
+          <div className={s.problemGrid} data-reveal>
+            {[
+              [
+                "“I know it's locked. I go back anyway.”",
+                "The relief lasts about a minute. Then the doubt is back, and it is a little louder than it was.",
+              ],
+              [
+                "“I just need someone to tell me it's fine.”",
+                "They tell you. It helps for an evening. By Tuesday you need to ask again, and you can hear yourself asking.",
+              ],
+              [
+                "“It's 2am and I'm still reading about it.”",
+                "Forty tabs deep, and every answer makes a new question. It feels like research. It is the loop wearing a lab coat.",
+              ],
+            ].map(([quote, body]) => (
+              <article key={quote} className={s.problemCard}>
+                <h3>{quote}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
+          <p className={s.problemTurn} data-reveal>
+            None of that is a character flaw. It is a loop, and loops have a
+            shape you can learn.
+          </p>
+        </section>
+
+        <section id="features" className={`${s.section}`}>
           <div className={s.sectionHeading} data-reveal>
             <span className={s.eyebrow}>YOUR MIND HAS A LOT TO SAY</span>
             <h2>
