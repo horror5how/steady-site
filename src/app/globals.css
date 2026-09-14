@@ -504,3 +504,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .wordmark-lockup img { animation: none; }
 }
+
+/* Keyboard users get a visible ring everywhere on the dark landing page.
+   Pointer users never see it, so it costs the design nothing. */
+.landing-dark :focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+/* The entrance is a nicety, not a requirement. */
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; opacity: 1; transform: none; }
+}

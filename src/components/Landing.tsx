@@ -230,7 +230,7 @@ function AdvertBackdrop() {
  * opacity — blur separates the type from the footage without hiding it. */
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[28px] border border-white/18 bg-[#0e1013]/40 p-6 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)] backdrop-blur-lg sm:p-8">
+    <div className="rounded-[28px] border border-white/18 bg-[#0e1013]/40 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_24px_70px_-30px_rgba(0,0,0,0.9)] backdrop-blur-lg sm:p-8">
       {children}
     </div>
   );
@@ -302,7 +302,7 @@ export default function Landing({ variant }: { variant: Variant }) {
   }, [variant]);
 
   return (
-    <div className="relative min-h-[100dvh] text-white">
+    <div className="landing-dark relative min-h-[100dvh] text-white">
       <AdvertBackdrop />
 
       {/* Header: wordmark and one button. No navigation on a paid landing page —
@@ -345,22 +345,27 @@ export default function Landing({ variant }: { variant: Variant }) {
           />
 
           <div className="relative mx-auto w-full max-w-[560px] pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
-            <p className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
-              {variant.overlay}
+            {/* Was the ad's own overlay line, one per variant. Now one fixed
+                badge: what the method rests on, said in two words. */}
+            <p className="rise inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
+              Science-backed technology
             </p>
 
             {/* The category is the headline now. It is the one sentence that
-                says what this is and what nobody else has. */}
-            <h1 className="mt-5 text-balance text-[clamp(1.75rem,7.2vw,2.3rem)] font-bold leading-[1.1] tracking-[-0.03em] text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.6)]">
-              Steady is the first all-voice bilingual AI companion for people with looping
-              thoughts.
+                says what this is and what nobody else has.
+                "bilingual" is deliberately not in here: it is not built yet, and
+                a first-in-the-world claim is the worst place to get ahead of the
+                product. It goes back in the day the second language ships. */}
+            <h1 className="rise rise-1 mt-6 text-balance text-[clamp(2.05rem,8.4vw,2.75rem)] font-bold leading-[1.08] tracking-[-0.032em] text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.6)]">
+              Steady is the first all-voice AI companion for people with looping thoughts.
             </h1>
 
-            <p className="mt-6 max-w-[34ch] text-[17px] leading-[1.6] text-white/85">
-              Steady is a warm voice. You talk. It talks back. There is nothing to type.
+            <p className="rise rise-2 mt-7 max-w-[32ch] text-[19px] leading-[1.55] text-white/90">
+              Ten minutes a day, out loud. You let the thought come, and you let it go past. Then
+              you are back in the room.
             </p>
 
-            <p className="mt-5 max-w-[34ch] text-[16px] leading-[1.6] text-white/70">
+            <p className="rise rise-3 mt-6 max-w-[34ch] text-[17px] leading-[1.6] text-white/70">
               {variant.sub}
             </p>
 
@@ -379,7 +384,7 @@ export default function Landing({ variant }: { variant: Variant }) {
               </div>
             ) : null}
 
-            <div className="mt-7 rounded-3xl border border-white/18 bg-[#0e1013]/40 p-4 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
+            <div className="rise rise-4 mt-8 rounded-3xl border border-white/18 bg-[#0e1013]/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_24px_70px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
               <LeadForm variant={variant} place="hero" />
               <div className="mt-4 flex flex-col gap-2.5">
                 <Chips />
@@ -397,7 +402,31 @@ export default function Landing({ variant }: { variant: Variant }) {
           </div>
         </section>
 
-        {/* ---------- 2. What a loop is. ---------- */}
+        {/* ---------- 2. What a looping thought actually is. ----------
+            Before any mechanism, any method or any offer: the plain description
+            of the thing. If a reader does not recognise themselves here, nothing
+            further down the page can save it. Written to be read out loud, one
+            short line at a time. */}
+        <section className="mx-auto w-full max-w-[560px] px-4 py-24">
+          <Panel>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
+              What is a looping thought
+            </p>
+
+            <div className="mt-6 flex flex-col gap-5 text-[19px] leading-[1.5] text-white/85">
+              <p>A thought turns up. You did not ask for it.</p>
+              <p>You try to make it go away. Check the door. Ask again. Look it up one more time.</p>
+              <p>It goes quiet for a minute.</p>
+              <p>Then it comes back, louder.</p>
+            </div>
+
+            <p className="mt-8 border-t border-white/12 pt-6 text-[20px] font-semibold leading-[1.35] text-white">
+              That is a loop. And a loop is a thing that happens to you. It is not who you are.
+            </p>
+          </Panel>
+        </section>
+
+        {/* ---------- 3. How the loop gets drawn. ---------- */}
         <section className="mx-auto w-full max-w-[560px] px-4 py-24">
           <Panel>
             <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
@@ -452,7 +481,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           </Panel>
         </section>
 
-        {/* ---------- 3. What actually happens. ---------- */}
+        {/* ---------- 4. What actually happens. ---------- */}
         <section className="mx-auto w-full max-w-[560px] px-4 pb-24">
           <Panel>
             <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
@@ -462,8 +491,8 @@ export default function Landing({ variant }: { variant: Variant }) {
               Ten minutes from now it could be out of your head.
             </h2>
             <p className="mt-4 text-[15.5px] leading-relaxed text-white/70">
-              Ten minutes, out loud, with the first all-voice bilingual AI companion built for
-              looping thoughts. No typing. No forms. No waiting room.
+              Ten minutes, out loud, with the first all-voice AI companion built for looping
+              thoughts. No typing. No forms. No waiting room.
             </p>
 
             <div className="mt-8 flex flex-col gap-6">
@@ -495,7 +524,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           </Panel>
         </section>
 
-        {/* ---------- 4. The three things people ask before they apply. ---------- */}
+        {/* ---------- 5. The three things people ask before they apply. ---------- */}
         <section className="mx-auto w-full max-w-[560px] px-4 pb-24">
           <Panel>
             <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
@@ -522,7 +551,7 @@ export default function Landing({ variant }: { variant: Variant }) {
               ].map((item) => (
                 <details
                   key={item.q}
-                  className="group rounded-2xl border border-white/12 bg-white/[0.05] px-4 open:bg-white/[0.09]"
+                  className="group rounded-2xl border border-white/12 bg-white/[0.05] px-4 transition-colors hover:border-white/20 hover:bg-white/[0.08] open:border-white/20 open:bg-white/[0.09]"
                   onToggle={(e) =>
                     (e.currentTarget as HTMLDetailsElement).open
                       ? ph("landing_faq_open", { variant: variant.key, q: item.q })
@@ -545,7 +574,7 @@ export default function Landing({ variant }: { variant: Variant }) {
           </Panel>
         </section>
 
-        {/* ---------- 5. Close. ---------- */}
+        {/* ---------- 6. Close. ---------- */}
         <section className="mx-auto w-full max-w-[560px] px-4 pb-28">
           <Panel>
             <h2 className="text-balance text-[clamp(1.65rem,7.2vw,2.2rem)] font-bold leading-[1.08] tracking-[-0.028em]">
@@ -606,7 +635,7 @@ export default function Landing({ variant }: { variant: Variant }) {
       {showBar ? (
         <div
           style={{ bottom: "var(--consent-h, 0px)" }}
-          className="fixed inset-x-0 z-50 border-t border-white/15 bg-[#0e1013]/62 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl"
+          className="rise fixed inset-x-0 z-50 border-t border-white/15 bg-[#0e1013]/62 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl"
         >
           <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 py-2.5">
             <div className="min-w-0 flex-1">
