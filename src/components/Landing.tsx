@@ -158,22 +158,23 @@ function AdvertBackdrop() {
   useEffect(() => {
     const video = videoRef.current;
     if (!motionOk || !video) return;
-    let cleanup = () => {};
-    void video.play().catch(() => {
-      const kick = () => {
-        void video.play().catch(() => {});
-        cleanup();
-      };
-      window.addEventListener("touchstart", kick, { once: true, passive: true });
-      window.addEventListener("click", kick, { once: true });
-      window.addEventListener("scroll", kick, { once: true, passive: true });
-      cleanup = () => {
-        window.removeEventListener("touchstart", kick);
-        window.removeEventListener("click", kick);
-        window.removeEventListener("scroll", kick);
-      };
-    });
-    return () => cleanup();
+    const events = ["pointerdown", "touchstart", "click", "keydown", "scroll"] as const;
+    const kick = () => {
+      void video.play().catch(() => {
+        /* still refused — the next gesture gets another go */
+      });
+    };
+    const bind = () => events.forEach((e) => window.addEventListener(e, kick, { passive: true }));
+    const unbind = () => events.forEach((e) => window.removeEventListener(e, kick));
+
+    // Listeners stay bound until the video is genuinely playing, rather than
+    // firing once and giving up: a browser can refuse the first gesture too.
+    video.addEventListener("playing", unbind);
+    void video.play().catch(bind);
+    return () => {
+      unbind();
+      video.removeEventListener("playing", unbind);
+    };
   }, [motionOk]);
 
   return (
@@ -197,7 +198,9 @@ function AdvertBackdrop() {
           loop
           playsInline
           preload="auto"
-          onCanPlay={() => setReady(true)}
+          // Fades in on `playing`, not on `canplay`: if autoplay is refused the
+          // page keeps the soft poster rather than showing a frozen frame.
+          onPlaying={() => setReady(true)}
           // Lifted a touch. The advert was graded for a full-bleed screen with
           // nothing on top of it; under a scrim the mid-tones go to mud.
           style={{ filter: "brightness(1.12) saturate(1.18) contrast(1.04)" }}
