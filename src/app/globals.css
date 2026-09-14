@@ -467,3 +467,40 @@ body {
   .ph-title, .ph-card { animation: none; opacity: 1; }
   .ph-amp, .ph-wavepath { animation: none; }
 }
+
+/* ---------- Glowing mark ---------- */
+/* The mark is a warm crescent on transparent. A drop-shadow in its own
+   colours reads as light coming off it rather than a box behind it, so it
+   survives on the cream page and on the dark hero scrim alike. */
+.wordmark img {
+  filter:
+    drop-shadow(0 0 5px rgba(255, 150, 70, 0.5))
+    drop-shadow(0 0 14px rgba(255, 95, 45, 0.3));
+}
+
+.wordmark-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.wordmark-lockup img {
+  animation: mark-breathe 3.6s var(--ease-standard) infinite;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 150, 70, 0.55))
+    drop-shadow(0 0 22px rgba(255, 95, 45, 0.35));
+}
+
+@keyframes mark-breathe {
+  50% {
+    filter:
+      drop-shadow(0 0 14px rgba(255, 160, 80, 0.8))
+      drop-shadow(0 0 34px rgba(255, 95, 45, 0.5));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-lockup img { animation: none; }
+}

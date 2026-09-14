@@ -243,7 +243,11 @@ export default function Landing({ variant }: { variant: Variant }) {
           every link here is an exit, and exits are what the ad paid for. */}
       <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-line/70 bg-cream/85 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[560px] items-center justify-between px-4">
-          <span className="wordmark text-[15px] text-ink"><img src="/brand/steady-mark.webp" alt="" width={20} height={20} />steady</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <span className="wordmark-lockup text-[17px] text-ink">
+            <img src="/brand/steady-mark.webp" alt="" width={26} height={26} />
+            Steady
+          </span>
           <button
             type="button"
             onClick={() => toForm("header")}
@@ -328,6 +332,21 @@ export default function Landing({ variant }: { variant: Variant }) {
             {variant.headline}
           </h1>
           <p className="mt-3 max-w-[34ch] text-[15.5px] leading-[1.5] text-white/80">{variant.sub}</p>
+
+          {/* Above-the-fold credibility. There are no users, no ratings and no
+              testimonials yet, and inventing them here is not a trade worth
+              making — so the proof is the two things that are actually true and
+              checkable: where the method comes from, and who runs it. */}
+          <ul className="mt-4 flex flex-col gap-1.5 text-[13px] leading-snug text-white/70">
+            <li className="flex gap-2">
+              <span aria-hidden className="text-white/45">—</span>
+              Built on exposure practice, the same method therapists have used for decades.
+            </li>
+            <li className="flex gap-2">
+              <span aria-hidden className="text-white/45">—</span>
+              Run by Beyond Elevation Ltd, registered in England and Wales.
+            </li>
+          </ul>
 
           {variant.forSomeoneElse ? (
             <div className="mt-5">
