@@ -50,7 +50,7 @@ export const VARIANTS: Record<string, Variant> = {
     image: "/landing/checker.jpg",
     imageAlt: "A woman standing in a hallway, hand hovering an inch from the front door lock",
     headline: "Five times before bed. Now once, out loud.",
-    sub: "Steady is a warm voice you talk to when the loop starts. Ten minutes, and the sixth check stops being the plan.",
+    sub: "Ten minutes when the loop starts, and the sixth check stops being the plan.",
     overlay: "Ten minutes out loud",
     cta: "Get my invite",
     loop: [

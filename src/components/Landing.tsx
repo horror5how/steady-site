@@ -100,12 +100,14 @@ function LeadForm({ variant, place }: FormProps) {
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `email-error-${place}` : undefined}
-          className="h-[52px] w-full rounded-2xl border border-ink/12 bg-white px-4 text-[16px] text-ink shadow-[0_1px_2px_rgba(35,40,44,0.04)] outline-none transition placeholder:text-ink-soft/70 focus:border-ink/35 focus:ring-4 focus:ring-ink/8"
+          className="h-[52px] w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-[16px] text-white outline-none backdrop-blur-sm transition placeholder:text-white/45 focus:border-white/60 focus:bg-white/16 focus:ring-4 focus:ring-white/15"
         />
+        {/* The one solid thing on the page. Everything else is see-through, so
+            the button is the only element that cannot be looked past. */}
         <button
           type="submit"
           disabled={sending}
-          className="btn-dark inline-flex h-[52px] w-full items-center justify-center rounded-2xl px-6 text-[16px] font-semibold disabled:opacity-60"
+          className="inline-flex h-[52px] w-full items-center justify-center rounded-2xl bg-white px-6 text-[16px] font-semibold text-ink shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)] transition active:scale-[0.97] disabled:opacity-60"
         >
           {sending ? "One moment…" : variant.formCta ?? variant.cta}
         </button>
@@ -121,9 +123,12 @@ function LeadForm({ variant, place }: FormProps) {
 
 function Chips() {
   return (
-    <ul className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12.5px] font-medium text-ink-soft">
+    <ul className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12.5px] font-medium">
       {["Free", "No card", "About 2 minutes"].map((chip) => (
-        <li key={chip} className="rounded-full bg-mint/70 px-2.5 py-1 text-ink/80">
+        <li
+          key={chip}
+          className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-white/85"
+        >
           {chip}
         </li>
       ))}
@@ -218,10 +223,14 @@ function AdvertBackdrop() {
   );
 }
 
-/** A block of content floating over the film, with air above and below it. */
+/** A block of content floating over the film, with air above and below it.
+ *
+ * Deliberately see-through. The film has to stay visible through every box on
+ * the page, so the panel leans on a light blur for legibility rather than on
+ * opacity — blur separates the type from the footage without hiding it. */
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[28px] border border-white/12 bg-[#0e1013]/72 p-6 backdrop-blur-xl sm:p-8">
+    <div className="rounded-[28px] border border-white/18 bg-[#0e1013]/40 p-6 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)] backdrop-blur-lg sm:p-8">
       {children}
     </div>
   );
@@ -298,7 +307,7 @@ export default function Landing({ variant }: { variant: Variant }) {
 
       {/* Header: wordmark and one button. No navigation on a paid landing page —
           every link here is an exit, and exits are what the ad paid for. */}
-      <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-white/10 bg-[#0e1013]/70 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-white/12 bg-[#0e1013]/45 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[560px] items-center justify-between px-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <span className="wordmark-lockup text-[17px] text-white">
@@ -320,36 +329,43 @@ export default function Landing({ variant }: { variant: Variant }) {
         <section
           ref={heroRef}
           id="apply"
-          className="relative flex min-h-[100dvh] flex-col justify-end px-4 pt-20"
+          className="relative flex min-h-[100dvh] flex-col px-4 pt-14"
         >
+          {/* A clear band of nothing but film at the top of the page, before a
+              single word arrives. This is the hero: the advert, playing, with
+              room to be seen. */}
+          <div aria-hidden className="min-h-[16dvh] flex-1" />
+
           {/* The hero type sits straight on the film, so it gets its own scrim
               from the bottom up. Everything below the hero is on a panel and
               needs none, which is what leaves the film visible down the page. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(10,12,15,0.94)_0%,rgba(10,12,15,0.86)_42%,rgba(10,12,15,0.4)_72%,rgba(10,12,15,0)_100%)]"
+            className="pointer-events-none absolute inset-x-0 bottom-0 top-[18dvh] bg-[linear-gradient(to_top,rgba(10,12,15,0.92)_0%,rgba(10,12,15,0.8)_45%,rgba(10,12,15,0.3)_78%,rgba(10,12,15,0)_100%)]"
           />
-          <div className="relative mx-auto w-full max-w-[560px] pb-[calc(5rem+env(safe-area-inset-bottom))]">
-            <p className="inline-block rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
+
+          <div className="relative mx-auto w-full max-w-[560px] pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+            <p className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
               {variant.overlay}
             </p>
 
-            <h1 className="mt-5 text-balance text-[clamp(2rem,8.6vw,2.7rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.5)]">
-              {variant.headline}
+            {/* The category is the headline now. It is the one sentence that
+                says what this is and what nobody else has. */}
+            <h1 className="mt-5 text-balance text-[clamp(1.75rem,7.2vw,2.3rem)] font-bold leading-[1.1] tracking-[-0.03em] text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.6)]">
+              Steady is the first all-voice bilingual AI companion for people with looping
+              thoughts.
             </h1>
 
-            <p className="mt-4 max-w-[34ch] text-[16px] leading-[1.55] text-white/85">
+            <p className="mt-6 max-w-[34ch] text-[17px] leading-[1.6] text-white/85">
+              Steady is a warm voice. You talk. It talks back. There is nothing to type.
+            </p>
+
+            <p className="mt-5 max-w-[34ch] text-[16px] leading-[1.6] text-white/70">
               {variant.sub}
             </p>
 
-            {/* The category line. Said plainly, and said early. */}
-            <p className="mt-5 max-w-[34ch] text-[15px] leading-[1.55] text-white/70">
-              Steady is the first all-voice AI companion for people with looping thoughts. You
-              talk. It talks back. There is nothing to type.
-            </p>
-
             {variant.forSomeoneElse ? (
-              <div className="mt-7">
+              <div className="mt-8">
                 <button
                   type="button"
                   onClick={share}
@@ -363,18 +379,18 @@ export default function Landing({ variant }: { variant: Variant }) {
               </div>
             ) : null}
 
-            <div className="mt-7 rounded-3xl bg-white/95 p-3.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)] backdrop-blur-sm">
+            <div className="mt-7 rounded-3xl border border-white/18 bg-[#0e1013]/40 p-4 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.9)] backdrop-blur-lg">
               <LeadForm variant={variant} place="hero" />
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-4 flex flex-col gap-2.5">
                 <Chips />
-                <p className="text-[12px] leading-snug text-ink-soft">
+                <p className="text-[12px] leading-snug text-white/60">
                   Your email, and nothing else on this screen. We never sell it. We never pass it
                   on.
                 </p>
               </div>
             </div>
 
-            <p className="mt-4 text-[12px] leading-snug text-white/55">
+            <p className="mt-6 text-[12px] leading-snug text-white/55">
               For adults 18 and over. Nine short questions and you are in. Steady is not therapy,
               not medical care, and not a crisis service.
             </p>
@@ -446,8 +462,8 @@ export default function Landing({ variant }: { variant: Variant }) {
               Ten minutes from now it could be out of your head.
             </h2>
             <p className="mt-4 text-[15.5px] leading-relaxed text-white/70">
-              Ten minutes, out loud, with the first all-voice AI companion built for looping
-              thoughts. No typing. No forms. No waiting room.
+              Ten minutes, out loud, with the first all-voice bilingual AI companion built for
+              looping thoughts. No typing. No forms. No waiting room.
             </p>
 
             <div className="mt-8 flex flex-col gap-6">
@@ -542,7 +558,7 @@ export default function Landing({ variant }: { variant: Variant }) {
               are in.
             </p>
 
-            <div className="mt-7 rounded-3xl bg-white p-3.5">
+            <div className="mt-7 rounded-3xl border border-white/18 bg-white/[0.07] p-4 backdrop-blur-md">
               <LeadForm variant={variant} place="close" />
               <div className="mt-3">
                 <Chips />
@@ -590,7 +606,7 @@ export default function Landing({ variant }: { variant: Variant }) {
       {showBar ? (
         <div
           style={{ bottom: "var(--consent-h, 0px)" }}
-          className="fixed inset-x-0 z-50 border-t border-white/12 bg-[#0e1013]/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+          className="fixed inset-x-0 z-50 border-t border-white/15 bg-[#0e1013]/62 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl"
         >
           <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 py-2.5">
             <div className="min-w-0 flex-1">
