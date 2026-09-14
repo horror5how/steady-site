@@ -16,6 +16,51 @@ import { PREFILL_KEY } from "@/lib/landing";
 const APP = "https://steady-erp-voice-fresh.vercel.app";
 // Branded, same-site door an admitted applicant walks straight through.
 const APP_URL = "https://app.beingsteady.com/";
+
+/** A calendar entry for 10pm tonight, ten minutes long, built in the browser
+ *  so nothing about the person leaves it. */
+function tonightIcs(): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const local = (d: Date) =>
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const start = new Date();
+  start.setHours(22, 0, 0, 0);
+  if (start.getTime() < Date.now()) start.setDate(start.getDate() + 1);
+  const end = new Date(start.getTime() + 10 * 60 * 1000);
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Steady//Tonight//EN",
+    "BEGIN:VEVENT",
+    `UID:steady-${start.getTime()}@beingsteady.com`,
+    `DTSTAMP:${local(new Date())}`,
+    `DTSTART:${local(start)}`,
+    `DTEND:${local(end)}`,
+    "SUMMARY:Steady — ten minutes, out loud",
+    `DESCRIPTION:Say what is going round. ${APP_URL}`,
+    `URL:${APP_URL}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+}
+
+/** The referral. Carries a first name so the landing page can be theirs, and
+ *  so the lead it produces can be tied back to the person who sent it. */
+async function shareInvite(name: string) {
+  const ref = encodeURIComponent(name.trim().split(/\s+/)[0] || "friend");
+  const url = `https://beingsteady.com/landing?ref=${ref}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: "Steady", text: "A warm voice for looping thoughts. Free, tonight.", url });
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    window.alert("Link copied. Send it to them when you’re ready.");
+  } catch {
+    /* dismissed the share sheet — nothing to report */
+  }
+}
 const TERMS = `${APP}/legal/terms.html`;
 const PRIVACY = `${APP}/legal/privacy.html`;
 
@@ -618,7 +663,41 @@ export default function InviteFlow() {
         >
           Open Steady
         </a>
-        <div className="mt-10 rounded-3xl border border-line bg-white p-6 sm:p-7">
+
+        {/* The confirmation is the hottest page in the funnel. Two asks, both
+            small: a reminder for tonight, and a link for the one other person
+            they already have in mind. The referral carries their first name so
+            the landing page can greet the friend, and the lead records it. */}
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          <a
+            href={tonightIcs()}
+            download="steady-tonight.ics"
+            className="flex min-h-[64px] items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 text-left transition hover:bg-cream-2"
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-mint text-ink">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+            </span>
+            <span>
+              <span className="block text-[14.5px] font-semibold text-ink">Remind me tonight</span>
+              <span className="block text-[12.5px] text-ink-soft">10pm, ten minutes, in your calendar</span>
+            </span>
+          </a>
+          <button
+            type="button"
+            onClick={() => shareInvite(name)}
+            className="flex min-h-[64px] items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 text-left transition hover:bg-cream-2"
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-mint text-ink">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M7 8l5-5 5 5" /></svg>
+            </span>
+            <span>
+              <span className="block text-[14.5px] font-semibold text-ink">Know someone up at 1am too?</span>
+              <span className="block text-[12.5px] text-ink-soft">Send them this. They get a place sooner.</span>
+            </span>
+          </button>
+        </div>
+
+        <div className="mt-6 rounded-3xl border border-line bg-white p-6 sm:p-7">
           <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">
             Your first minute
           </p>

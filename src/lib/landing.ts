@@ -28,6 +28,10 @@ export type Variant = {
   imageAlt: string;
   /** Mirrors the ad's static line. */
   headline: string;
+  /** The line the reader could have said themselves. Sits above the headline. */
+  mirror: string;
+  /** Short label for the on-page loop chooser. Absent = not offered as a choice. */
+  chip?: string;
   sub: string;
   /** Sits over the hero image, mirrors the ad's persistent overlay. */
   overlay: string;
@@ -46,6 +50,8 @@ export type Variant = {
 export const VARIANTS: Record<string, Variant> = {
   checker: {
     key: "checker",
+    mirror: "It is 1am. You know the door is locked. You are getting up to check anyway.",
+    chip: "Checking",
     ad: "ad1-checker",
     image: "/landing/checker.jpg",
     imageAlt: "A woman standing in a hallway, hand hovering an inch from the front door lock",
@@ -65,6 +71,8 @@ export const VARIANTS: Record<string, Variant> = {
 
   reassurance: {
     key: "reassurance",
+    mirror: "You asked her an hour ago. It helped for a minute. You are about to ask again.",
+    chip: "Asking",
     ad: "ad2-reassurance",
     image: "/landing/reassurance.jpg",
     imageAlt: "A man at a kitchen table in the evening, catching himself mid-question",
@@ -84,6 +92,8 @@ export const VARIANTS: Record<string, Variant> = {
 
   night: {
     key: "night",
+    mirror: "Forty tabs open at 1am. None of them was ever going to be the last one.",
+    chip: "Searching",
     ad: "ad3-researcher",
     image: "/landing/night.jpg",
     imageAlt: "A woman asleep, phone face down on the bed beside her",
@@ -103,6 +113,8 @@ export const VARIANTS: Record<string, Variant> = {
 
   pureo: {
     key: "pureo",
+    mirror: "Nothing to see from outside. Just you, arguing with your own head all afternoon.",
+    chip: "Thoughts I can’t say",
     ad: "ad4-pureo",
     image: "/landing/pureo.jpg",
     imageAlt: "A man sitting on the edge of a bed in morning light",
@@ -122,6 +134,7 @@ export const VARIANTS: Record<string, Variant> = {
 
   watching: {
     key: "watching",
+    mirror: "You have been answering it wrong for two years. You were trying to help.",
     ad: "ad5-watching",
     image: "/landing/watching.jpg",
     imageAlt: "A mother standing in a doorway, watching her daughter read on the sofa",

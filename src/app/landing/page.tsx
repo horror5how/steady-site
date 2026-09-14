@@ -17,6 +17,17 @@ export const metadata: Metadata = {
   description:
     "Say what’s looping and talk it out with a warm voice, tonight. Free to start, no card. Answer nine questions and you are in straight away. Adults 18 and over.",
   robots: { index: false, follow: false },
+  // Hidden from search, but shared by hand — the preview card is the ad we
+  // did not pay for.
+  openGraph: {
+    title: "Steady — a warm voice for looping thoughts",
+    description: "Ten minutes a day, out loud. Let the thought come, let it go past, and be back in the room. Free, no card, tonight.",
+    url: "https://beingsteady.com/landing",
+    siteName: "Steady",
+    images: [{ url: "https://beingsteady.com/landing/og.jpg", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", images: ["https://beingsteady.com/landing/og.jpg"] },
 };
 
 export default async function LandingPage({
