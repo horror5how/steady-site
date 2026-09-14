@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ph } from "@/lib/analytics";
@@ -11,10 +10,11 @@ import { PREFILL_KEY, type Variant } from "@/lib/landing";
  * Rules this page is built to, all of them deliberate:
  *   one goal, one primary action, no navigation, no exits
  *   the whole offer inside the first screen, form included
- *   a sticky call to action once the hero is behind you
+ *   the advert plays behind the whole page, so it is never "watch this then read that"
+ *   air between every block, so the film is visible and nothing reads as a wall
  *   48px tap targets, everything reachable in the bottom two thirds
  *   email first — the nine-question screen still happens, just after
- *   four screens of scroll, not thirteen
+ *   short words, short sentences, no jargon
  *
  * Nothing here claims a user count, a rating or a testimonial. There aren't
  * any yet, and inventing them on a mental health page is not a trade worth
@@ -131,36 +131,30 @@ function Chips() {
   );
 }
 
-export default function Landing({ variant }: { variant: Variant }) {
-  const [showBar, setShowBar] = useState(false);
-  const [shared, setShared] = useState(false);
-  // Starts false so the server sends no video tag at all: the photo is the
-  // LCP element either way, and a phone on Reduce Motion or Data Saver never
-  // pays for 442KB it did not ask for.
+/* The advert, behind everything.
+ *
+ * It is the 40-second film cut to a phone shape, silent, and re-encoded down
+ * from 21MB to 1.7MB. First paint is a 4KB poster so the page is readable
+ * before a single frame of video arrives; the film fades in afterwards and
+ * never on Reduce Motion or Data Saver. Fixed rather than scrolled, so it
+ * keeps playing behind every section instead of leaving after the hero.
+ */
+function AdvertBackdrop() {
   const [motionOk, setMotionOk] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
+  const [ready, setReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const depth = useRef(0);
 
-  useEffect(() => {
-    ph("landing_view", { variant: variant.key, ad: variant.ad });
-  }, [variant]);
-
-  // Decide about the background loop once the page is interactive, so it never
-  // competes with the hero image for the first paint.
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     if (reduce || conn?.saveData) return;
-    const t = setTimeout(() => setMotionOk(true), 300);
+    const t = setTimeout(() => setMotionOk(true), 250);
     return () => clearTimeout(t);
   }, []);
 
   // The autoplay attribute is not a guarantee. iOS Low Power Mode and a few
-  // desktop policies refuse it outright even for a muted, inline video, and
-  // the poster frame then sits there looking like a still. Ask once, and if
-  // the answer is no, start on the first thing the visitor touches.
+  // desktop policies refuse it outright even for a muted, inline video. Ask
+  // once, and if the answer is no, start on the first thing the visitor does.
   useEffect(() => {
     const video = videoRef.current;
     if (!motionOk || !video) return;
@@ -181,6 +175,64 @@ export default function Landing({ variant }: { variant: Variant }) {
     });
     return () => cleanup();
   }, [motionOk]);
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#14161a]"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/landing/advert-poster.jpg"
+        alt=""
+        className="absolute inset-0 h-full w-full scale-105 object-cover blur-[2px]"
+      />
+      {motionOk ? (
+        <video
+          ref={videoRef}
+          src="/landing/advert-bg.mp4"
+          poster="/landing/advert-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onCanPlay={() => setReady(true)}
+          // Lifted a touch. The advert was graded for a full-bleed screen with
+          // nothing on top of it; under a scrim the mid-tones go to mud.
+          style={{ filter: "brightness(1.12) saturate(1.18) contrast(1.04)" }}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ${
+            ready ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ) : null}
+      {/* One light scrim only. Every block of text carries its own dark panel,
+          so the page behind it does not need to be blacked out — and blacking
+          it out is what hides the film. Just enough to keep the white header
+          and the hero type off raw footage. */}
+      <div className="absolute inset-0 bg-[#0e1013]/38" />
+    </div>
+  );
+}
+
+/** A block of content floating over the film, with air above and below it. */
+function Panel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[28px] border border-white/12 bg-[#0e1013]/72 p-6 backdrop-blur-xl sm:p-8">
+      {children}
+    </div>
+  );
+}
+
+export default function Landing({ variant }: { variant: Variant }) {
+  const [showBar, setShowBar] = useState(false);
+  const [shared, setShared] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const depth = useRef(0);
+
+  useEffect(() => {
+    ph("landing_view", { variant: variant.key, ad: variant.ad });
+  }, [variant]);
 
   // The sticky bar appears once the hero is behind you, so it never covers the
   // form that is already on screen. Driven off scroll position rather than an
@@ -238,361 +290,325 @@ export default function Landing({ variant }: { variant: Variant }) {
   }, [variant]);
 
   return (
-    <div className="min-h-[100dvh] bg-cream text-ink">
+    <div className="relative min-h-[100dvh] text-white">
+      <AdvertBackdrop />
+
       {/* Header: wordmark and one button. No navigation on a paid landing page —
           every link here is an exit, and exits are what the ad paid for. */}
-      <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-line/70 bg-cream/85 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-40 h-14 border-b border-white/10 bg-[#0e1013]/70 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[560px] items-center justify-between px-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <span className="wordmark-lockup text-[17px] text-ink">
+          <span className="wordmark-lockup text-[17px] text-white">
             <img src="/brand/steady-mark.webp" alt="" width={26} height={26} />
             Steady
           </span>
           <button
             type="button"
             onClick={() => toForm("header")}
-            className="h-11 rounded-full border border-ink/15 px-4 text-[13.5px] font-semibold text-ink transition active:scale-[0.97]"
+            className="h-11 rounded-full border border-white/25 px-4 text-[13.5px] font-semibold text-white transition active:scale-[0.97]"
           >
             {variant.forSomeoneElse ? "Have a look" : "Get my invite"}
           </button>
         </div>
       </header>
 
-      {/* ---------- 1. Hero. Offer, proof of who it is for, and the form. ---------- */}
-      <section
-        ref={heroRef}
-        id="apply"
-        className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden pt-14"
-      >
-        {/* The ad creative stays the base layer, so first paint is an image and
-            the page still looks like the ad that was just clicked. The orb loop
-            fades in on top once it can actually play — never before, so a slow
-            connection sees the photo rather than a black hole. */}
-        <Image
-          src={variant.image}
-          alt={variant.imageAlt}
-          fill
-          priority
-          fetchPriority="high"
-          sizes="(max-width: 640px) 100vw, 560px"
-          className="object-cover object-center"
-        />
-        {motionOk ? (
-          // The loop is a square orb. Stretched to cover a 9:16 phone it crops
-          // to an unreadable brown smear, so it sits at its own aspect ratio in
-          // the upper half on a ground sampled from the footage, with its edges
-          // faded out so there is no visible seam.
+      <div className="relative z-10">
+        {/* ---------- 1. Hero. The offer and the form, on the first screen. ---------- */}
+        <section
+          ref={heroRef}
+          id="apply"
+          className="relative flex min-h-[100dvh] flex-col justify-end px-4 pt-20"
+        >
+          {/* The hero type sits straight on the film, so it gets its own scrim
+              from the bottom up. Everything below the hero is on a panel and
+              needs none, which is what leaves the film visible down the page. */}
           <div
             aria-hidden
-            className={`absolute inset-0 transition-opacity duration-[1200ms] ${
-              videoReady ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ background: "linear-gradient(180deg,#bca88a 0%,#b79f7a 45%,#8d7a5e 100%)" }}
-          >
-            <video
-              src="/orb-loop.mp4"
-              poster="/landing/orb-poster.jpg"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              ref={videoRef}
-              onCanPlay={() => setVideoReady(true)}
-              className="absolute left-1/2 top-[6%] aspect-square w-[118%] -translate-x-1/2 object-cover"
-              style={{
-                maskImage: "radial-gradient(circle at 50% 50%, #000 52%, transparent 74%)",
-                WebkitMaskImage: "radial-gradient(circle at 50% 50%, #000 52%, transparent 74%)",
-              }}
-            />
-          </div>
-        ) : null}
-
-        {/* Scrim: the type sits on the bottom half, so the background is
-            darkened from the bottom up rather than flattened everywhere. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(to_top,rgba(18,20,22,0.95)_0%,rgba(18,20,22,0.9)_38%,rgba(18,20,22,0.45)_62%,rgba(18,20,22,0.15)_100%)]"
-        />
-
-        <div className="absolute inset-x-0 top-14 z-10 px-4 pt-4">
-          <div className="mx-auto max-w-[560px]">
-            {/* The ad's persistent overlay line, carried onto the page. It sits
-                on the bright top third, so it needs its own ground. */}
-            <p className="inline-block rounded-full bg-black/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(10,12,15,0.94)_0%,rgba(10,12,15,0.86)_42%,rgba(10,12,15,0.4)_72%,rgba(10,12,15,0)_100%)]"
+          />
+          <div className="relative mx-auto w-full max-w-[560px] pb-[calc(5rem+env(safe-area-inset-bottom))]">
+            <p className="inline-block rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
               {variant.overlay}
             </p>
+
+            <h1 className="mt-5 text-balance text-[clamp(2rem,8.6vw,2.7rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.5)]">
+              {variant.headline}
+            </h1>
+
+            <p className="mt-4 max-w-[34ch] text-[16px] leading-[1.55] text-white/85">
+              {variant.sub}
+            </p>
+
+            {/* The category line. Said plainly, and said early. */}
+            <p className="mt-5 max-w-[34ch] text-[15px] leading-[1.55] text-white/70">
+              Steady is the first all-voice AI companion for people with looping thoughts. You
+              talk. It talks back. There is nothing to type.
+            </p>
+
+            {variant.forSomeoneElse ? (
+              <div className="mt-7">
+                <button
+                  type="button"
+                  onClick={share}
+                  className="inline-flex h-[52px] w-full items-center justify-center rounded-2xl bg-white px-6 text-[16px] font-semibold text-ink transition active:scale-[0.99]"
+                >
+                  {shared ? "Link copied — send it when you’re ready" : "Send it to them"}
+                </button>
+                <p className="mt-2.5 text-[13.5px] text-white/65">
+                  Or look yourself first. Put your email in and you will see what they would.
+                </p>
+              </div>
+            ) : null}
+
+            <div className="mt-7 rounded-3xl bg-white/95 p-3.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.75)] backdrop-blur-sm">
+              <LeadForm variant={variant} place="hero" />
+              <div className="mt-3 flex flex-col gap-2">
+                <Chips />
+                <p className="text-[12px] leading-snug text-ink-soft">
+                  Your email, and nothing else on this screen. We never sell it. We never pass it
+                  on.
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-[12px] leading-snug text-white/55">
+              For adults 18 and over. Nine short questions and you are in. Steady is not therapy,
+              not medical care, and not a crisis service.
+            </p>
           </div>
-        </div>
+        </section>
 
-        {/* Bottom padding clears the consent strip, so the age and safety line
-            is never the thing hidden underneath it. */}
-        <div className="relative z-10 mx-auto w-full max-w-[560px] px-4 pb-[calc(4.75rem+env(safe-area-inset-bottom))]">
-          <h1 className="text-balance text-[clamp(1.9rem,8.2vw,2.6rem)] font-bold leading-[1.06] tracking-[-0.03em] text-white">
-            {variant.headline}
-          </h1>
-          <p className="mt-3 max-w-[34ch] text-[15.5px] leading-[1.5] text-white/80">{variant.sub}</p>
+        {/* ---------- 2. What a loop is. ---------- */}
+        <section className="mx-auto w-full max-w-[560px] px-4 py-24">
+          <Panel>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
+              How it works
+            </p>
+            <h2 className="mt-3 text-balance text-[clamp(1.55rem,6.6vw,2rem)] font-bold leading-[1.12] tracking-[-0.025em]">
+              It is not you. It is a loop. And a loop can be drawn.
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/70">
+              You say it out loud. Steady draws the loop with you. What set it off. The thought.
+              The thing you do to make the thought stop. Once it is drawn, it stops feeling like
+              it is you.
+            </p>
+          </Panel>
+        </section>
 
-          {/* Above-the-fold credibility. There are no users, no ratings and no
-              testimonials yet, and inventing them here is not a trade worth
-              making — so the proof is the two things that are actually true and
-              checkable: where the method comes from, and who runs it. */}
-          <ul className="mt-4 flex flex-col gap-1.5 text-[13px] leading-snug text-white/70">
-            <li className="flex gap-2">
-              <span aria-hidden className="text-white/45">—</span>
-              Built on exposure practice, the same method therapists have used for decades.
-            </li>
-            <li className="flex gap-2">
-              <span aria-hidden className="text-white/45">—</span>
-              Run by Beyond Elevation Ltd, registered in England and Wales.
-            </li>
-          </ul>
+        {/* The loop itself gets its own screen, with nothing but film around it. */}
+        <section className="mx-auto w-full max-w-[560px] px-4 pb-24">
+          <Panel>
+            <ol className="flex flex-col">
+              {variant.loop.map((step, index) => {
+                const last = index === variant.loop.length - 1;
+                return (
+                  <li key={step.label} className="relative flex gap-4 pb-6 last:pb-0">
+                    <div className="flex flex-col items-center">
+                      <span
+                        className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
+                          last ? "bg-white text-ink" : "bg-white/15 text-white"
+                        }`}
+                      >
+                        {last ? "✓" : index + 1}
+                      </span>
+                      {last ? null : <span aria-hidden className="mt-1 w-px flex-1 bg-white/20" />}
+                    </div>
+                    <div className="pb-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+                        {step.label}
+                      </p>
+                      <p className="mt-1 text-[16.5px] font-semibold leading-snug text-white">
+                        {step.text}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
 
-          {variant.forSomeoneElse ? (
-            <div className="mt-5">
+            <p className="mt-2 border-t border-white/12 pt-5 text-[15px] leading-relaxed text-white/65">
+              Therapists have used this practice for forty years. Steady did not invent it. It
+              gives you somewhere to do it at 3am, out loud, at your own speed.
+            </p>
+          </Panel>
+        </section>
+
+        {/* ---------- 3. What actually happens. ---------- */}
+        <section className="mx-auto w-full max-w-[560px] px-4 pb-24">
+          <Panel>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
+              What happens
+            </p>
+            <h2 className="mt-3 text-balance text-[clamp(1.55rem,6.6vw,2rem)] font-bold leading-[1.12] tracking-[-0.025em]">
+              Ten minutes from now it could be out of your head.
+            </h2>
+            <p className="mt-4 text-[15.5px] leading-relaxed text-white/70">
+              Ten minutes, out loud, with the first all-voice AI companion built for looping
+              thoughts. No typing. No forms. No waiting room.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-6">
+              {[
+                {
+                  t: "You talk. It listens.",
+                  d: "No typing. No blank box staring back. You say what is going round and a warm voice answers.",
+                },
+                {
+                  t: "The loop gets drawn.",
+                  d: "What set it off. The thought. The thing you do about it. Said out loud, so you can see the shape of it instead of living inside it.",
+                },
+                {
+                  t: "You practise letting it pass.",
+                  d: "Short, gentle sessions. You sit with the thought and do nothing about it. Therapists call that exposure. Always your speed. Never a push.",
+                },
+              ].map((item) => (
+                <div key={item.t} className="border-l-2 border-white/30 pl-4">
+                  <p className="text-[17px] font-semibold leading-snug">{item.t}</p>
+                  <p className="mt-1.5 text-[15.5px] leading-relaxed text-white/70">{item.d}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-8 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-[15px] leading-relaxed text-white/80">
+              <span className="font-semibold text-white">Who this is not for. </span>
+              {variant.exclusion}
+            </p>
+          </Panel>
+        </section>
+
+        {/* ---------- 4. The three things people ask before they apply. ---------- */}
+        <section className="mx-auto w-full max-w-[560px] px-4 pb-24">
+          <Panel>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
+              Before you put your email in
+            </p>
+            <h2 className="mt-3 text-balance text-[clamp(1.55rem,6.6vw,2rem)] font-bold leading-[1.12] tracking-[-0.025em]">
+              The three questions everybody has.
+            </h2>
+
+            <div className="mt-7 flex flex-col gap-3">
+              {[
+                {
+                  q: "Is this therapy?",
+                  a: "No. Steady is a practice companion you use on your own. It is not a therapist, not a diagnosis, and not a crisis service. It uses the same practice therapists use, and it sits well next to real therapy. It does not replace it.",
+                },
+                {
+                  q: "What happens to my voice?",
+                  a: "Your voice goes to OpenAI so the conversation can work. The one-minute taster is not saved. Nothing you say is sold or passed on, ever. The full detail is on our privacy page, in plain English.",
+                },
+                {
+                  q: "What does it cost?",
+                  a: "Nothing. No card, no trial that turns into a bill, no queue you can pay to skip. Answer the nine questions and you are in. If your answers show Steady is the wrong place for you right now, we will say so and point you somewhere better.",
+                },
+              ].map((item) => (
+                <details
+                  key={item.q}
+                  className="group rounded-2xl border border-white/12 bg-white/[0.05] px-4 open:bg-white/[0.09]"
+                  onToggle={(e) =>
+                    (e.currentTarget as HTMLDetailsElement).open
+                      ? ph("landing_faq_open", { variant: variant.key, q: item.q })
+                      : undefined
+                  }
+                >
+                  <summary className="flex min-h-[54px] cursor-pointer list-none items-center justify-between gap-3 text-[15.5px] font-semibold marker:hidden">
+                    {item.q}
+                    <span
+                      aria-hidden
+                      className="shrink-0 text-[20px] font-normal leading-none text-white/50 transition group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="pb-4 pr-6 text-[15px] leading-relaxed text-white/70">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </Panel>
+        </section>
+
+        {/* ---------- 5. Close. ---------- */}
+        <section className="mx-auto w-full max-w-[560px] px-4 pb-28">
+          <Panel>
+            <h2 className="text-balance text-[clamp(1.65rem,7.2vw,2.2rem)] font-bold leading-[1.08] tracking-[-0.028em]">
+              {variant.forSomeoneElse
+                ? "You cannot do this one for her. You can put it in front of her."
+                : "Say hello. Say what is going round. See what it is like."}
+            </h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-white/70">
+              Free. No card. Adults 18 and over. Nine short questions, about two minutes, and you
+              are in.
+            </p>
+
+            <div className="mt-7 rounded-3xl bg-white p-3.5">
+              <LeadForm variant={variant} place="close" />
+              <div className="mt-3">
+                <Chips />
+              </div>
+            </div>
+
+            {variant.forSomeoneElse ? (
               <button
                 type="button"
                 onClick={share}
-                className="inline-flex h-[52px] w-full items-center justify-center rounded-2xl bg-white px-6 text-[16px] font-semibold text-ink transition active:scale-[0.99]"
+                className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-2xl border border-white/25 px-6 text-[15.5px] font-semibold text-white transition active:scale-[0.99]"
               >
-                {shared ? "Link copied — send it when you’re ready" : "Send it to them"}
+                {shared ? "Link copied" : "Send them the link instead"}
               </button>
-              <p className="mt-2.5 text-[13px] text-white/65">
-                Or have a look yourself first. Put your email in and you’ll see exactly what they
-                would.
-              </p>
-            </div>
-          ) : null}
+            ) : null}
 
-          <div className="mt-4 rounded-3xl bg-white/95 p-3.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-sm">
-            <LeadForm variant={variant} place="hero" />
-            <div className="mt-3 flex flex-col gap-2">
-              <Chips />
-              <p className="text-[12px] leading-snug text-ink-soft">
-                Your email, and nothing else on this screen. We never sell it and we never pass it
-                on.
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-3 text-[11.5px] leading-snug text-white/55">
-            Open to adults 18 and over — nine questions and you are in. Steady is not therapy,
-            not medical care and not a crisis service.
-          </p>
-        </div>
-      </section>
-
-      {/* ---------- 2. The mechanism, named and shown. ---------- */}
-      <section className="mx-auto w-full max-w-[560px] px-4 py-14">
-        <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-sage">
-          The mechanism
-        </p>
-        <h2 className="mt-2 text-balance text-[clamp(1.5rem,6.4vw,1.95rem)] font-bold leading-[1.12] tracking-[-0.025em]">
-          It isn’t you. It’s a loop, and a loop can be drawn.
-        </h2>
-        <p className="mt-3 text-[15.5px] leading-relaxed text-ink-soft">
-          You say it out loud. Steady draws the Loop Map with you: the trigger, the thought, and the
-          habit that keeps it alive. Once it is on paper it stops feeling like it is you.
-        </p>
-
-        <ol className="mt-7 flex flex-col">
-          {variant.loop.map((step, index) => {
-            const last = index === variant.loop.length - 1;
-            return (
-              <li key={step.label} className="relative flex gap-3.5 pb-5 last:pb-0">
-                <div className="flex flex-col items-center">
-                  <span
-                    className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
-                      last ? "bg-ink text-white" : "bg-mint text-ink"
-                    }`}
-                  >
-                    {last ? "✓" : index + 1}
-                  </span>
-                  {last ? null : <span aria-hidden className="mt-1 w-px flex-1 bg-line" />}
-                </div>
-                <div className="pb-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                    {step.label}
-                  </p>
-                  <p className="mt-0.5 text-[16px] font-semibold leading-snug text-ink">
-                    {step.text}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-
-        <p className="mt-6 rounded-2xl bg-cream-2 p-4 text-[14.5px] leading-relaxed text-ink-soft">
-          The practice underneath is the one therapists have used for forty years. Steady does not
-          invent a method. It gives you somewhere to do it at 3am, out loud, at your own pace.
-        </p>
-      </section>
-
-      {/* ---------- 3. What actually happens, and who it is not for. ---------- */}
-      <section className="border-y border-line bg-white/60">
-        <div className="mx-auto w-full max-w-[560px] px-4 py-14">
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-sage">
-            What happens
-          </p>
-          <h2 className="mt-2 text-balance text-[clamp(1.5rem,6.4vw,1.95rem)] font-bold leading-[1.12] tracking-[-0.025em]">
-            Ten minutes from now, it could be out of your head.
-          </h2>
-
-          <div className="mt-7 flex flex-col gap-5">
-            {[
-              {
-                t: "You talk. It listens.",
-                d: "No forms, no typing, no blank box. You say what is looping and a warm voice answers.",
-              },
-              {
-                t: "The loop gets drawn.",
-                d: "Trigger, thought, habit. Named out loud, so you can see the shape of it instead of living inside it.",
-              },
-              {
-                t: "You practise letting it pass.",
-                d: "Short, gentle sessions built on exposure practice. Always your pace, always your consent, never a push.",
-              },
-            ].map((item) => (
-              <div key={item.t} className="border-l-2 border-mint pl-4">
-                <p className="text-[16.5px] font-semibold leading-snug">{item.t}</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-ink-soft">{item.d}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 rounded-2xl border border-line bg-cream p-4 text-[14.5px] leading-relaxed text-ink">
-            <span className="font-semibold">Who this is not for. </span>
-            {variant.exclusion}
-          </p>
-        </div>
-      </section>
-
-      {/* ---------- 4. The three things people actually ask before they apply. ---------- */}
-      <section className="mx-auto w-full max-w-[560px] px-4 py-14">
-        <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-sage">
-          Before you put your email in
-        </p>
-        <h2 className="mt-2 text-balance text-[clamp(1.5rem,6.4vw,1.95rem)] font-bold leading-[1.12] tracking-[-0.025em]">
-          The three questions everybody has.
-        </h2>
-
-        <div className="mt-6 flex flex-col gap-2.5">
-          {[
-            {
-              q: "Is this therapy?",
-              a: "No. Steady is a self-guided practice companion, not a therapist, not a diagnosis and not a crisis service. It uses the same exposure practice therapists use, and it works well alongside real therapy. It does not replace it.",
-            },
-            {
-              q: "What happens to my voice?",
-              a: "Your voice is processed by OpenAI to power the conversation, and the one-minute taster is not saved. Nothing you say is sold or passed on, ever. The full detail is on our privacy page, in plain English.",
-            },
-            {
-              q: "What does it cost?",
-              a: "Nothing. There is no card, no trial that turns into a bill, and no queue to pay your way past. Answer the nine questions and you are in straight away — unless what you tell us means Steady is the wrong place for you right now, and we will say so honestly and point you somewhere better.",
-            },
-          ].map((item) => (
-            <details
-              key={item.q}
-              className="group rounded-2xl border border-line bg-white/70 px-4 open:bg-white"
-              onToggle={(e) =>
-                (e.currentTarget as HTMLDetailsElement).open
-                  ? ph("landing_faq_open", { variant: variant.key, q: item.q })
-                  : undefined
-              }
-            >
-              <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 text-[15.5px] font-semibold marker:hidden">
-                {item.q}
-                <span
-                  aria-hidden
-                  className="shrink-0 text-[20px] font-normal leading-none text-ink-soft transition group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p className="pb-4 pr-6 text-[14.5px] leading-relaxed text-ink-soft">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      {/* ---------- 5. Close. ---------- */}
-      <section className="bg-ink px-4 py-14 text-white">
-        <div className="mx-auto w-full max-w-[560px]">
-          <h2 className="text-balance text-[clamp(1.6rem,7vw,2.1rem)] font-bold leading-[1.08] tracking-[-0.028em]">
-            {variant.forSomeoneElse
-              ? "You can’t do this one for her. You can put it in front of her."
-              : "Say hello, say what’s looping, and see what it’s like."}
-          </h2>
-          <p className="mt-3 text-[15.5px] leading-relaxed text-white/70">
-            Free, no card, adults 18 and over. Nine short questions, about two minutes, and you are
-            in straight away.
-          </p>
-
-          <div className="mt-6 rounded-3xl bg-white p-3.5">
-            <LeadForm variant={variant} place="close" />
-            <div className="mt-3">
-              <Chips />
-            </div>
-          </div>
-
-          {variant.forSomeoneElse ? (
-            <button
-              type="button"
-              onClick={share}
-              className="mt-3 inline-flex h-[52px] w-full items-center justify-center rounded-2xl border border-white/25 px-6 text-[15.5px] font-semibold text-white transition active:scale-[0.99]"
-            >
-              {shared ? "Link copied" : "Send them the link instead"}
-            </button>
-          ) : null}
-
-          <p className="mt-8 border-t border-white/15 pt-5 text-[12.5px] leading-relaxed text-white/50">
-            Steady is a self-guided practice companion. It is not a medical device, a therapist, a
-            diagnosis or a crisis service. If you are in crisis or thinking about harming yourself,
-            please reach real help now: call or text <strong className="text-white/75">988</strong>{" "}
-            in the US, <strong className="text-white/75">999</strong> in the UK, or your local
-            emergency number.
-          </p>
-          <p className="mt-4 text-[12px] text-white/40">
-            Operated by Beyond Elevation Ltd, registered in England and Wales.{" "}
-            <a href="/privacy" className="underline underline-offset-2">
-              Privacy
-            </a>{" "}
-            ·{" "}
-            <a href="/terms" className="underline underline-offset-2">
-              Terms
-            </a>
-          </p>
-        </div>
-      </section>
+            <p className="mt-9 border-t border-white/15 pt-6 text-[13px] leading-relaxed text-white/55">
+              Steady is a practice companion you use on your own. It is not a medical device, a
+              therapist, a diagnosis or a crisis service. If you are in crisis or thinking about
+              hurting yourself, get real help now: call or text{" "}
+              <strong className="text-white/80">988</strong> in the US,{" "}
+              <strong className="text-white/80">999</strong> in the UK, or your local emergency
+              number.
+            </p>
+            {/* Company identification. Kept small and kept last: it is a legal
+                disclosure, not a selling point. */}
+            <p className="mt-4 text-[12px] text-white/40">
+              Beyond Elevation Ltd, registered in England and Wales.{" "}
+              <a href="/privacy" className="underline underline-offset-2">
+                Privacy
+              </a>{" "}
+              ·{" "}
+              <a href="/terms" className="underline underline-offset-2">
+                Terms
+              </a>
+            </p>
+          </Panel>
+        </section>
+      </div>
 
       {/* ---------- Sticky action, once the hero is gone. ----------
           Unmounted rather than translated off-screen. A transform only hides
           it if it is flush to the bottom, and it is not — it sits on top of
           the consent strip. Hidden means gone. */}
       {showBar ? (
-      <div
-        style={{ bottom: "var(--consent-h, 0px)" }}
-        className="fixed inset-x-0 z-50 border-t border-line bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
-      >
-        <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 py-2.5">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13.5px] font-semibold leading-tight">
-              {variant.forSomeoneElse ? "Put it in front of her" : "Free. No card. About 2 minutes."}
-            </p>
-            <p className="truncate text-[12px] leading-tight text-ink-soft">
-              Nine questions and you’re in
-            </p>
+        <div
+          style={{ bottom: "var(--consent-h, 0px)" }}
+          className="fixed inset-x-0 z-50 border-t border-white/12 bg-[#0e1013]/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+        >
+          <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 py-2.5">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13.5px] font-semibold leading-tight text-white">
+                {variant.forSomeoneElse
+                  ? "Put it in front of her"
+                  : "Free. No card. About 2 minutes."}
+              </p>
+              <p className="truncate text-[12px] leading-tight text-white/60">
+                Nine questions and you’re in
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => (variant.forSomeoneElse ? share() : toForm("sticky_bar"))}
+              className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-white px-5 text-[15px] font-semibold text-ink transition active:scale-[0.97]"
+            >
+              {variant.forSomeoneElse && shared ? "Link copied" : variant.cta}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => (variant.forSomeoneElse ? share() : toForm("sticky_bar"))}
-            className="btn-dark inline-flex h-12 shrink-0 items-center justify-center rounded-2xl px-5 text-[15px] font-semibold"
-          >
-            {variant.forSomeoneElse && shared ? "Link copied" : variant.cta}
-          </button>
         </div>
-      </div>
       ) : null}
     </div>
   );
