@@ -50,14 +50,14 @@ export const VARIANTS: Record<string, Variant> = {
     image: "/landing/checker.jpg",
     imageAlt: "A woman standing in a hallway, hand hovering an inch from the front door lock",
     headline: "Five times before bed. Now once, out loud.",
-    sub: "The sixth check stops being the plan.",
+    sub: "One conversation instead of one more check.",
     overlay: "Ten minutes out loud",
     cta: "Get my invite",
     loop: [
       { label: "Trigger", text: "The front door, on the way to bed" },
       { label: "Thought", text: "“What if I left it open?”" },
-      { label: "Habit", text: "Checking it a sixth time" },
-      { label: "Back to now", text: "One conversation instead of the sixth check" },
+      { label: "Habit", text: "Going back to check it again" },
+      { label: "Back to now", text: "One conversation instead of one more check" },
     ],
     exclusion:
       "It is not a therapist and it is not for a crisis. It is for the ordinary Tuesday night when the loop starts and nobody is awake.",
