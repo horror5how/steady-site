@@ -365,10 +365,6 @@ export default function Landing({ variant }: { variant: Variant }) {
               you are back in the room.
             </p>
 
-            <p className="rise rise-3 mt-6 max-w-[34ch] text-[17px] leading-[1.6] text-white/70">
-              {variant.sub}
-            </p>
-
             {variant.forSomeoneElse ? (
               <div className="mt-8">
                 <button
