@@ -15,6 +15,16 @@ export function analyticsAllowed(): boolean {
   }
 }
 
+/* Cookieless counting is on unless they said No. Unset counts anonymously
+   (no cookies, no storage, no recordings); "rejected" sends nothing at all. */
+export function countingAllowed(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) !== "rejected";
+  } catch {
+    return true;
+  }
+}
+
 export default function CookieBanner() {
   const [show, setShow] = useState(false);
   const strip = useRef<HTMLDivElement>(null);
@@ -80,7 +90,7 @@ export default function CookieBanner() {
     >
       <div className="mx-auto flex max-w-[1200px] items-center gap-3 px-4 py-2.5">
         <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-ink-soft">
-          We measure which buttons get used, only if you say yes.{" "}
+          We count visits without cookies. Yes adds cookies and session recordings.{" "}
           <a href="/privacy" className="underline underline-offset-2">
             How we handle it
           </a>

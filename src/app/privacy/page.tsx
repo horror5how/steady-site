@@ -83,12 +83,14 @@ export default function PrivacyPage() {
 
             <Reveal>
               <div className="mt-10 rounded-2xl border border-line bg-white p-6 text-[14.5px] leading-relaxed text-ink-soft">
-                <strong className="text-ink">What we measure, and only if you say yes.</strong>{" "}
-                If you accept cookies, we use PostHog to see which pages and buttons people
+                <strong className="text-ink">What we measure.</strong>{" "}
+                Until you answer the cookie question, PostHog counts page views and button
+                taps without cookies or anything stored on your device: no recordings, and
+                no way to recognise you on your next visit. If you accept cookies, we use PostHog to see which pages and buttons people
                 use, and to replay how the site was navigated, so we can fix what&rsquo;s
                 confusing. Anything you type is masked before it leaves your browser, and in
                 the app itself the on-screen words are masked too, so a replay shows the
-                shape of a visit, never its content. Reject cookies and none of this runs.
+                shape of a visit, never its content. Reject cookies and nothing is measured at all, not even the anonymous count.
               </div>
             </Reveal>
 

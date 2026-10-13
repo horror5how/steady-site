@@ -1,7 +1,7 @@
 "use client";
 
 import posthog from "posthog-js";
-import { analyticsAllowed } from "@/components/CookieBanner";
+import { analyticsAllowed, countingAllowed } from "@/components/CookieBanner";
 import { isInternal, markNotTracked } from "@/lib/notrack";
 import { metaMirror, startMeta, stopMeta } from "@/lib/meta";
 
@@ -39,12 +39,17 @@ let replayBlocked = false;
 export function startAnalytics(): void {
   if (started || typeof window === "undefined") return;
   if (isInternal()) return;
-  if (!analyticsAllowed()) return;
+  if (!countingAllowed()) return;
+  // No answer yet: count anonymously. PostHog hashes the visitor server side,
+  // nothing is stored in the browser, and replay is off. Full mode (cookies,
+  // replay, Meta) only after Yes, from the next page load.
+  const full = analyticsAllowed();
   started = true;
   try {
     posthog.init(KEY, {
       api_host: HOST,
-      persistence: "localStorage+cookie",
+      ...(full ? {} : { cookieless_mode: "always" as const }),
+      persistence: full ? "localStorage+cookie" : "memory",
       capture_pageview: true,
       capture_pageleave: true,
       autocapture: true,
@@ -53,13 +58,13 @@ export function startAnalytics(): void {
       capture_exceptions: true,
       // Replay is the point of this — but never record what someone typed, and
       // never record a page that called stopReplay() (see below).
-      disable_session_recording: replayBlocked,
+      disable_session_recording: replayBlocked || !full,
       session_recording: { maskAllInputs: true },
       // Reuse the id the hand-rolled beacon already created, so returning
       // visitors don't split into two people mid-funnel.
-      bootstrap: { distinctID: legacyId() || undefined },
+      bootstrap: full ? { distinctID: legacyId() || undefined } : undefined,
     });
-    posthog.register({ app: "marketing" });
+    posthog.register({ app: "marketing", consent: full ? "yes" : "none" });
   } catch {
     /* analytics must never break the page */
   }
