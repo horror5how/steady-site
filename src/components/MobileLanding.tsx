@@ -81,12 +81,18 @@ function DemoVideo({ onPlaySound }: { onPlaySound: () => void }) {
     const el = v.current;
     if (!el) return;
     el.muted = true; // React leaves the muted attribute unset, which blocks autoplay
+    let inView = false;
+    const go = () => { if (inView && el.paused) el.play().catch(() => {}); };
+    // First play can land before the file is ready; retry once it can play.
+    el.addEventListener("canplay", go);
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { el.preload = "auto"; el.play().catch(() => {}); }
+      inView = e.isIntersecting;
+      if (inView) { el.preload = "auto"; go(); }
       else el.pause();
     }, { rootMargin: "200px" });
     io.observe(el);
-    return () => io.disconnect();
+    const retry = setInterval(go, 1000);
+    return () => { io.disconnect(); clearInterval(retry); el.removeEventListener("canplay", go); };
   }, []);
   const sound = () => {
     const el = v.current;
