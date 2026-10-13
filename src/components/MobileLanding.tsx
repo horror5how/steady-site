@@ -73,6 +73,52 @@ function Wave({ light = false }: { light?: boolean }) {
   );
 }
 
+function DemoVideo({ onPlaySound }: { onPlaySound: () => void }) {
+  const v = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+  // Only load and play once it's near the screen: the hero must paint first.
+  useEffect(() => {
+    const el = v.current;
+    if (!el) return;
+    el.muted = true; // React leaves the muted attribute unset, which blocks autoplay
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { el.preload = "auto"; el.play().catch(() => {}); }
+      else el.pause();
+    }, { rootMargin: "200px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  const sound = () => {
+    const el = v.current;
+    if (!el) return;
+    el.muted = !el.muted;
+    if (!el.muted) { el.currentTime = 0; el.play().catch(() => {}); onPlaySound(); }
+    setMuted(el.muted);
+  };
+  return (
+    <div className="ml-phone relative mx-auto mt-8 w-[240px]" data-in>
+      <video
+        ref={v}
+        src="/landing/demo-no-reassurance.mp4"
+        poster="/landing/demo-no-reassurance.jpg"
+        muted
+        loop
+        playsInline
+        preload="none"
+        className="block aspect-[9/16] w-full rounded-[30px] bg-white object-cover"
+      />
+      <button
+        type="button"
+        onClick={sound}
+        className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-lg"
+      >
+        {muted ? <Wave light /> : null}
+        {muted ? "Tap to hear Steady" : "Mute"}
+      </button>
+    </div>
+  );
+}
+
 export default function MobileLanding({ variant }: { variant: Variant }) {
   const heroCta = useRef<HTMLAnchorElement>(null);
   const [showBar, setShowBar] = useState(false);
@@ -239,16 +285,8 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
         <h2 className="mt-3 text-[34px] font-semibold leading-[1.04] tracking-[-0.03em]" data-in>
           It won&rsquo;t reassure you. That&rsquo;s the point.
         </h2>
-        <div className="mt-8 space-y-3 text-[15.5px] leading-relaxed">
-          <p className="ml-auto max-w-[86%] rounded-3xl rounded-br-lg bg-[#f2f2f3] px-4 py-3" data-in>
-            I keep thinking I upset her. Can you just tell me I didn&rsquo;t?
-          </p>
-          <div className="max-w-[90%] rounded-3xl rounded-bl-lg bg-gradient-to-br from-[#ff4d12] to-[#b23fd6] px-4 py-3 text-white" data-in style={{ transitionDelay: "180ms" }}>
-            <Wave light />
-            <p className="mt-1">I could, and it would help for a minute. Let&rsquo;s try something that lasts: let the doubt sit there, and notice you&rsquo;re okay.</p>
-          </div>
-        </div>
-        <p className="mt-4 text-[13px] text-ink-soft" data-in>An example exchange.</p>
+        <DemoVideo onPlaySound={() => ph("mobile_demo_sound", { variant: variant.key })} />
+        <p className="mt-4 text-center text-[13px] text-ink-soft">Steady, answering someone who asks for reassurance.</p>
       </section>
 
       {/* ---------- who + founder ---------- */}
@@ -373,6 +411,8 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
         .ml-close { background: radial-gradient(120% 80% at 50% 0%, #3a1a5c 0%, #23282c 62%); }
         .ml-close-ring { position:absolute; left:50%; top:-140px; width:440px; height:440px; margin-left:-220px; border-radius:50%;
           background: conic-gradient(from 0deg, #ff3d00, #ff8a00, #ffc400, #c86bff, #ff3d00); filter: blur(60px); opacity:.4; animation: mlSpin 18s linear infinite; }
+
+        .ml-phone { padding:8px; border-radius:38px; background:#111; box-shadow: 0 40px 70px -30px rgba(255,61,0,.55), 0 0 0 1px rgba(0,0,0,.08); }
 
         @media (prefers-reduced-motion: reduce) {
           .ml *, .ml *::before, .ml *::after { animation: none !important; }
