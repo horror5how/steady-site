@@ -131,6 +131,15 @@ const IOCDF = (
 
 export default function InviteFlow() {
   const [step, setStep] = useState(0);
+  // From /mobile the visitor already read the pitch and tapped "Start my
+  // 2-minute check": skip the welcome screen and open on question 1.
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("from") === "mobile") setStep(1);
+    } catch {
+      /* ignore */
+    }
+  }, []);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [exit, setExit] = useState<Exit>(null);
   const [done, setDone] = useState(false);

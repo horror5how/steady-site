@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ph } from "@/lib/analytics";
 import type { Variant } from "@/lib/landing";
 
-const INVITE = "/invite";
+const INVITE = "/invite?from=mobile";
 
 const STEPS = [
   { t: "Say it out loud", d: "The thought that keeps coming back. No typing." },
