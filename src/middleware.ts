@@ -12,6 +12,15 @@ const INTERNAL_IPS = (process.env.INTERNAL_IPS ?? "")
   .filter(Boolean);
 
 export function middleware(req: NextRequest) {
+  // Phone keyboards capitalise the first letter: /Mobile, /Invite. Send those
+  // to the real lowercase page instead of a 404.
+  const { pathname } = req.nextUrl;
+  if (pathname !== pathname.toLowerCase() && !pathname.startsWith("/api")) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   const res = NextResponse.next();
   if (INTERNAL_IPS.length === 0) return res;
 
