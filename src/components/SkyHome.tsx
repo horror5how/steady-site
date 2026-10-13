@@ -473,9 +473,9 @@ export default function SkyHome() {
           <div className={s.sectionHeading} data-reveal>
             <span className={s.eyebrow}>IF ANY OF THIS IS YOURS</span>
             <h2>
-              You already know
+              Don&rsquo;t let the
               <br />
-              how the night goes.
+              intrusive thought win.
             </h2>
           </div>
           <div className={s.problemGrid} data-reveal>
