@@ -65,12 +65,15 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
         </div>
 
         <div className="-mt-10 relative px-5">
-          <p className="text-[14px] leading-snug text-ink-soft">{variant.mirror}</p>
+          {/* ponytail: skip the mirror when it just repeats the headline (night ad) */}
+          {!variant.mirror.toLowerCase().includes(variant.headline.toLowerCase().split(" ").slice(-4).join(" ")) && (
+            <p className="text-[14px] leading-snug text-ink-soft">{variant.mirror}</p>
+          )}
           <h1 className="mt-3 text-balance text-[30px] font-semibold leading-[1.1] tracking-[-0.025em]">
             {variant.headline}
           </h1>
           <p className="mt-3 text-[16px] leading-relaxed text-ink-soft">
-            A warm voice you talk to when a thought won&rsquo;t stop looping. Ten minutes, out loud, tonight.
+            Nine questions, two minutes, free. If it fits, you&rsquo;re talking to Steady tonight.
           </p>
 
           <a
@@ -79,17 +82,28 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
             onClick={() => tap("hero")}
             className="btn-dark mt-6 flex min-h-[56px] w-full items-center justify-center rounded-full text-[17px] font-semibold"
           >
-            Apply for a place, free
+            Start my 2-minute check
           </a>
-          <p className="mt-3 text-center text-[13px] text-ink-soft">
-            9 questions · 2 minutes · no card · adults 18+
+          <ul className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[13px] text-ink-soft">
+            {["Free", "No card", "Adults 18+", "Not therapy"].map((t) => (
+              <li key={t} className="flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-ink" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 12 4 4L19 6" /></svg>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 border-l-2 border-ink pl-3 text-[15px] leading-relaxed">
+            A chatbot will tell you it&rsquo;s fine. <strong className="font-semibold">Steady won&rsquo;t</strong>, because reassurance is what keeps the loop going.
+          </p>
+          <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+            Built on exposure practice, what NICE recommends first for adults with OCD.
           </p>
         </div>
       </section>
 
       {/* how it works */}
       <section className="mt-14 px-5">
-        <h2 className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink-soft/80">How it works</h2>
+        <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.02em]">Say the thought out loud. Watch it lose its grip.</h2>
         <ol className="mt-5 space-y-5">
           {STEPS.map((s, i) => (
             <li key={s.t} className="flex gap-4">
@@ -107,7 +121,7 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
 
       {/* what a minute sounds like */}
       <section className="mt-14 px-5">
-        <h2 className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink-soft/80">What it sounds like</h2>
+        <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.02em]">It talks you back to the room, not out of the thought.</h2>
         <div className="mt-5 space-y-3 text-[15px] leading-relaxed">
           <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-cream-2 px-4 py-3">
             It&rsquo;s the door again. I know I locked it. I can feel myself getting up.
@@ -137,7 +151,7 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
 
       {/* objections */}
       <section className="mt-14 px-5">
-        <h2 className="text-[13px] font-medium uppercase tracking-[0.16em] text-ink-soft/80">Questions</h2>
+        <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.02em]">Before you start</h2>
         <div className="mt-3 divide-y divide-line border-y border-line">
           {FAQ.map((f) => (
             <details
@@ -155,6 +169,21 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
         </div>
       </section>
 
+      {/* founder */}
+      <section className="mt-14 px-5">
+        <figure className="flex items-start gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/landing/hayat.jpg" alt="Hayat Amin" className="h-12 w-12 shrink-0 rounded-full object-cover" loading="lazy" />
+          <blockquote>
+            <p className="text-[15px] leading-relaxed">
+              &ldquo;I built Steady because the loop does not keep office hours, and the people who have it
+              should not have to wait for one.&rdquo;
+            </p>
+            <figcaption className="mt-2 text-[13px] text-ink-soft">Hayat Amin, founder</figcaption>
+          </blockquote>
+        </figure>
+      </section>
+
       {/* close */}
       <section className="mt-14 px-5 pb-32 text-center">
         <h2 className="text-balance text-[26px] font-semibold leading-tight tracking-[-0.02em]">
@@ -165,7 +194,7 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
           onClick={() => tap("bottom")}
           className="btn-dark mt-6 flex min-h-[56px] w-full items-center justify-center rounded-full text-[17px] font-semibold"
         >
-          Apply for a place, free
+          Start my 2-minute check
         </a>
         <p className="mt-8 text-[12.5px] leading-relaxed text-ink-soft">
           If tonight is worse than a loop, call someone now: 988 in the US, 999 in the UK, or your local
@@ -189,7 +218,7 @@ export default function MobileLanding({ variant }: { variant: Variant }) {
           onClick={() => tap("sticky")}
           className="btn-dark mx-auto flex min-h-[52px] max-w-[440px] items-center justify-center rounded-full text-[16px] font-semibold"
         >
-          Apply for a place, free
+          Start my 2-minute check
         </a>
       </div>
     </main>
