@@ -211,34 +211,31 @@ export default function InviteFlow() {
   const screens = useMemo(() => [
     {
       key: "welcome",
-      kicker: "Answer these and you are in",
-      title: "Let’s see if Steady is right for you",
-      sub: "Nine short questions and one thing to agree to — about two minutes. Answer them and you are in straight away, unless what you tell us means Steady is the wrong place for you right now. There are no wrong answers, and nothing here costs anything.",
+      kicker: "Two minutes",
+      title: "Let’s see if Steady fits you",
+      sub: "Nine short questions. No wrong answers. Answer them and you’re in straight away.",
       body: (
         <>
-          <ul className="mt-8 space-y-3.5">
+          <ul className="mt-8 space-y-2.5">
             {[
-              "Two minutes of questions. Nobody calls you and there is no email to wait for.",
-              "Answer them and the app opens on the spot — you can be talking to Steady tonight.",
-              "Free, no card, adults 18+. If Steady is the wrong place for you, we say so and point you somewhere better.",
+              "No call, no email to wait for",
+              "Talk to Steady tonight",
+              "Free, no card, adults 18+",
             ].map((line) => (
-              <li key={line} className="flex items-start gap-3 text-[15px] leading-relaxed text-ink-soft">
-                <svg viewBox="0 0 24 24" className="mt-1 h-4 w-4 shrink-0 text-sage" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m5 12 4 4L19 6" />
-                </svg>
+              <li key={line} className="flex items-center gap-3 text-[15px] text-ink-soft">
+                <span className="h-1 w-1 shrink-0 rounded-full bg-sage" aria-hidden />
                 {line}
               </li>
             ))}
           </ul>
-          <button type="button" onClick={next} className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
+          <button type="button" onClick={next} className="btn-dark mt-10 inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold">
             Start
           </button>
-          <p className="mt-4 text-[13px] text-ink-soft">
-            Not ready to answer anything?{" "}
+          <p className="mt-5 text-[13px] text-ink-soft">
+            Not ready?{" "}
             <a href="/#talk" className="underline underline-offset-4">
-              Talk to Steady for a minute first
+              Try a one-minute talk first
             </a>
-            .
           </p>
         </>
       ),
@@ -379,7 +376,7 @@ export default function InviteFlow() {
                   });
                 }
               }}
-              className="w-full rounded-2xl border border-line bg-white px-5 py-4 text-[16px] text-ink outline-none transition focus:border-ink/30"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3.5 text-[16px] text-ink outline-none transition focus:border-ink/30"
             >
               <option value="">Choose your state</option>
               {STATES.map(([code, label]) => (
@@ -391,7 +388,7 @@ export default function InviteFlow() {
               onChange={(event) => setCity(event.target.value)}
               placeholder="City (optional)"
               autoComplete="address-level2"
-              className="w-full rounded-2xl border border-line bg-white px-5 py-4 text-[16px] text-ink outline-none transition focus:border-ink/30"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3.5 text-[16px] text-ink outline-none transition focus:border-ink/30"
             />
           </div>
           <Continue onClick={next} disabled={!state} />
@@ -446,7 +443,7 @@ export default function InviteFlow() {
               }
               next();
             }}
-            className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold"
+            className="btn-dark mt-10 inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold"
           >
             {RISK_OPTIONS.some((option) => risk[option.key]) ? "Continue" : "None of these apply"}
           </button>
@@ -465,11 +462,11 @@ export default function InviteFlow() {
             onChange={(event) => setAbout(event.target.value)}
             rows={4}
             maxLength={1200}
-            className="mt-8 w-full rounded-2xl border border-line bg-white px-5 py-4 text-[16px] leading-relaxed text-ink outline-none transition focus:border-ink/30"
+            className="mt-8 w-full rounded-xl border border-line bg-white px-4 py-3.5 text-[16px] leading-relaxed text-ink outline-none transition focus:border-ink/30"
           />
           <p className="mt-2 text-[12.5px] text-ink-soft">Stored encrypted. Read only by us.</p>
           <div className="mt-7 flex flex-wrap items-center gap-4">
-            <button type="button" onClick={next} className="btn-dark inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold">
+            <button type="button" onClick={next} className="btn-dark inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold">
               Continue
             </button>
             <button type="button" onClick={next} className="text-[14.5px] font-medium text-ink-soft underline underline-offset-2 hover:text-ink">
@@ -534,7 +531,7 @@ export default function InviteFlow() {
             type="button"
             onClick={submit}
             disabled={!agreed || sending}
-            className="btn-dark mt-7 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-dark mt-7 inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           >
             {sending ? "Letting you in…" : "Agree and start"}
           </button>
@@ -633,8 +630,8 @@ export default function InviteFlow() {
   if (exit) {
     return (
       <Shell>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">A straight answer</p>
-        <h1 className="mt-4 text-balance text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink md:text-[42px]">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.16em] text-ink-soft/70">A straight answer</p>
+        <h1 className="mt-4 text-balance text-[28px] font-semibold leading-[1.12] tracking-[-0.025em] text-ink md:text-[38px]">
           {exit.title}
         </h1>
         <div className="mt-6 text-[16px] leading-relaxed text-ink-soft">{exit.body}</div>
@@ -648,8 +645,8 @@ export default function InviteFlow() {
   if (done) {
     return (
       <Shell>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">You’re in</p>
-        <h1 className="mt-4 text-balance text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink md:text-[42px]">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.16em] text-ink-soft/70">You’re in</p>
+        <h1 className="mt-4 text-balance text-[28px] font-semibold leading-[1.12] tracking-[-0.025em] text-ink md:text-[38px]">
           You have a place, {name.trim() || "friend"} — start now if you want to
         </h1>
         <p className="mt-6 text-[16px] leading-relaxed text-ink-soft">
@@ -659,7 +656,7 @@ export default function InviteFlow() {
         </p>
         <a
           href={APP_URL}
-          className="btn-dark mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold"
+          className="btn-dark mt-8 inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold"
         >
           Open Steady
         </a>
@@ -698,7 +695,7 @@ export default function InviteFlow() {
         </div>
 
         <div className="mt-6 rounded-3xl border border-line bg-white p-6 sm:p-7">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">
+          <p className="text-[11.5px] font-medium uppercase tracking-[0.16em] text-ink-soft/70">
             Your first minute
           </p>
           <ol className="mt-4 space-y-3 text-[15px] leading-relaxed text-ink-soft">
@@ -738,36 +735,35 @@ export default function InviteFlow() {
             type="button"
             onClick={back}
             aria-label="Previous question"
-            className="grid h-9 w-9 place-items-center rounded-full border border-line bg-white text-ink transition hover:bg-cream-2"
+            className="-ml-2 grid h-9 w-9 place-items-center rounded-full text-ink-soft transition hover:bg-cream-2 hover:text-ink"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
         )}
-        <div className="flex flex-1 items-center gap-1.5" aria-hidden>
-          {screens.map((screen, index) => (
-            <span
-              key={screen.key}
-              className={`h-1 rounded-full transition-all duration-500 ${
-                index === step ? "w-7 bg-sage" : index < step ? "w-4 bg-sage/40" : "w-4 bg-line"
-              }`}
-            />
-          ))}
+        <div className="h-[2px] flex-1 overflow-hidden rounded-full bg-line" aria-hidden>
+          <div
+            className="h-full rounded-full bg-ink transition-all duration-500"
+            style={{ width: `${((step + 1) / screens.length) * 100}%` }}
+          />
         </div>
+        <span className="text-[12px] tabular-nums text-ink-soft/70" aria-hidden>
+          {step + 1}/{screens.length}
+        </span>
       </div>
 
       <div
         key={current.key}
         ref={liveRef}
         tabIndex={-1}
-        className={`mt-12 outline-none ${direction === 1 ? "step-in" : "step-in-back"}`}
+        className={`mt-10 outline-none md:mt-14 ${direction === 1 ? "step-in" : "step-in-back"}`}
       >
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sage">{current.kicker}</p>
-        <h1 className="mt-4 text-balance text-[32px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink md:text-[42px]">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.16em] text-ink-soft/70">{current.kicker}</p>
+        <h1 className="mt-3 text-balance text-[28px] font-semibold leading-[1.12] tracking-[-0.025em] text-ink md:text-[38px]">
           {current.title}
         </h1>
-        {current.sub && <p className="mt-4 max-w-[520px] text-[16px] leading-relaxed text-ink-soft">{current.sub}</p>}
+        {current.sub && <p className="mt-3 max-w-[480px] text-[15.5px] leading-relaxed text-ink-soft">{current.sub}</p>}
         {current.body}
       </div>
 
@@ -788,7 +784,7 @@ export default function InviteFlow() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="mx-auto min-h-[78vh] max-w-[680px] px-5 pb-28 pt-32 md:pt-40">{children}</main>
+    <main className="mx-auto min-h-[78vh] max-w-[560px] px-5 pb-20 pt-24 md:pb-28 md:pt-36">{children}</main>
   );
 }
 
@@ -804,7 +800,7 @@ function Options({
   multi?: boolean;
 }) {
   return (
-    <div className="mt-8 space-y-3" role={multi ? "group" : "radiogroup"}>
+    <div className="mt-7 space-y-2" role={multi ? "group" : "radiogroup"}>
       {options.map((option) => {
         const active = selected.includes(option);
         return (
@@ -814,16 +810,16 @@ function Options({
             role={multi ? "checkbox" : "radio"}
             aria-checked={active}
             onClick={() => onPick(option)}
-            className={`flex w-full items-center justify-between gap-4 rounded-2xl border px-6 py-4 text-left text-[16px] transition duration-200 ${
+            className={`flex min-h-[52px] w-full items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left text-[15.5px] transition duration-200 sm:px-5 ${
               active
-                ? "border-sage bg-sage/10 font-semibold text-ink shadow-[0_10px_30px_-18px_rgba(62,122,94,.6)]"
-                : "border-line bg-white text-ink hover:border-ink/20 hover:bg-cream-2"
+                ? "border-ink bg-white font-medium text-ink"
+                : "border-line bg-white text-ink hover:border-ink/25"
             }`}
           >
             <span>{option}</span>
             <span
               className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border transition ${
-                active ? "border-sage bg-sage text-white" : "border-line"
+                active ? "border-ink bg-ink text-white" : "border-line"
               }`}
             >
               {active && (
@@ -845,7 +841,7 @@ function Continue({ onClick, disabled }: { onClick: () => void; disabled?: boole
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="btn-dark mt-9 inline-flex items-center rounded-full px-7 py-3.5 text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+      className="btn-dark mt-10 inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 sm:w-auto text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
     >
       Continue
     </button>
@@ -877,7 +873,7 @@ function TextStep({
         onKeyDown={(event) => {
           if (event.key === "Enter" && valid) { event.preventDefault(); onEnter(); }
         }}
-        className="mt-8 w-full border-0 border-b border-line bg-transparent px-1 pb-3 text-[26px] text-ink outline-none transition placeholder:text-ink-soft/40 focus:border-sage md:text-[32px]"
+        className="mt-8 w-full border-0 border-b border-line bg-transparent px-1 pb-3 text-[22px] text-ink outline-none transition placeholder:text-ink-soft/40 focus:border-ink md:text-[28px]"
       />
       <Continue onClick={onEnter} disabled={!valid} />
     </>
